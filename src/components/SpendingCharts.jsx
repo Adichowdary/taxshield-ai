@@ -267,7 +267,7 @@ export function VisionPro3DDonutWidget({ onExplore }) {
       {onExplore && (
         <button
           onClick={onExplore}
-          className="mt-2 w-full py-2 px-3 bg-gradient-to-r from-[#D4AF37] to-[#FDE68A] hover:brightness-110 text-slate-950 font-extrabold text-xs rounded-xl shadow-lg shadow-[#D4AF37]/30 transition-all transform hover:scale-[1.02] flex items-center justify-center gap-1.5"
+          className="mt-2 w-full py-2 px-3 bg-gradient-to-r from-sky-500 to-sky-400 dark:from-[#D4AF37] dark:to-[#FDE68A] hover:brightness-110 text-white dark:text-slate-950 font-extrabold text-xs rounded-xl shadow-lg shadow-sky-500/25 dark:shadow-[#D4AF37]/30 transition-all transform hover:scale-[1.02] flex items-center justify-center gap-1.5 cursor-pointer"
         >
           Explore Tree details →
         </button>

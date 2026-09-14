@@ -87,8 +87,8 @@ html.theme-light {
   --input: rgba(2, 132, 199, 0.16);
   --ring: #0284C7;
 
-  --bg-main: #F0F9FF;
-  --bg-card: rgba(255, 255, 255, 0.96);
+  --bg-main: #FFFFFF;
+  --bg-card: #FFFFFF;
 
   --text-primary: #0B192C;
   --text-secondary: #1E293B;
@@ -109,7 +109,7 @@ html.theme-light {
   --chart-4: #6366F1;
   --success: #059669;
   --success-light: #D1FAE5;
-  --bg-footer: #F8FAFC;
+  --bg-footer: #FFFFFF;
 }
 
 /* Executive Imperial Obsidian & Champagne Gold (Luxury Dark Mode) */
@@ -361,12 +361,9 @@ html.theme-dark .vision-pro-bg {
 
 html.light .vision-pro-bg,
 html.theme-light .vision-pro-bg {
-  background-color: transparent !important;
-  background-image:
-    radial-gradient(circle at 50% -10%, rgba(2, 132, 199, 0.08), transparent 60%),
-    radial-gradient(circle at 85% 25%, rgba(56, 189, 248, 0.06), transparent 50%),
-    radial-gradient(circle at 15% 65%, rgba(2, 132, 199, 0.05), transparent 50%);
-  background-attachment: fixed;
+  background: #FFFFFF !important;
+  background-color: #FFFFFF !important;
+  background-image: none !important;
 }
 
 /* Executive calm ambient orbs — understated, never noisy or muddy */
@@ -380,8 +377,11 @@ html.theme-light .vision-pro-bg {
 .bg-orb-emerald { background: rgba(16, 185, 129, 0.05); }
 .bg-orb-brand { background: rgba(56, 189, 248, 0.06); }
 
-html.light .bg-orb-gold { background: rgba(2, 132, 199, 0.10); }
-html.light .bg-orb-brand { background: rgba(56, 189, 248, 0.08); }
+html.light .bg-orb,
+html.theme-light .bg-orb {
+  display: none !important;
+  opacity: 0 !important;
+}
 
 .bg-vignette::before {
   content: '';
@@ -393,7 +393,7 @@ html.light .bg-orb-brand { background: rgba(56, 189, 248, 0.08); }
 }
 html.light .bg-vignette::before,
 html.theme-light .bg-vignette::before {
-  background: radial-gradient(ellipse at 50% 35%, transparent 70%, rgba(224, 242, 254, 0.35) 100%);
+  display: none !important;
 }
 
 .vision-pro-grid {
@@ -409,9 +409,7 @@ html.theme-dark .vision-pro-grid {
 
 html.light .vision-pro-grid,
 html.theme-light .vision-pro-grid {
-  background-image:
-    linear-gradient(to right, rgba(15, 23, 42, 0.035) 1px, transparent 1px),
-    linear-gradient(to bottom, rgba(15, 23, 42, 0.035) 1px, transparent 1px);
+  background-image: none !important;
 }
 
 /* Translucent Executive Card system (Refined Obsidian Titanium & Platinum Pearl) */
@@ -637,18 +635,6 @@ html.light .auth-input-glow {
   transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
-html.light .auth-cta,
-html.theme-light .auth-cta {
-  background: linear-gradient(135deg, #38BDF8 0%, #0284C7 60%, #0369A1 100%);
-  color: #FFFFFF !important;
-  box-shadow: 0 10px 25px -5px rgba(2, 132, 199, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.35);
-}
-
-html.light .auth-cta:hover,
-html.theme-light .auth-cta:hover {
-  box-shadow: 0 16px 35px -5px rgba(2, 132, 199, 0.55), 0 0 25px rgba(56, 189, 248, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.5);
-}
-
 .auth-cta::before {
   content: '';
   position: absolute;
@@ -669,6 +655,21 @@ html.theme-light .auth-cta:hover {
 
 .auth-cta:active {
   transform: translateY(0) scale(0.98);
+}
+
+html.light .auth-cta,
+html.theme-light .auth-cta {
+  background: linear-gradient(135deg, #38BDF8 0%, #0284C7 60%, #0369A1 100%) !important;
+  color: #FFFFFF !important;
+  box-shadow: 0 10px 25px -5px rgba(2, 132, 199, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.35) !important;
+}
+
+html.light .auth-cta:hover,
+html.theme-light .auth-cta:hover {
+  transform: translateY(-2px);
+  background: linear-gradient(135deg, #0284C7 0%, #0369A1 100%) !important;
+  color: #FFFFFF !important;
+  box-shadow: 0 16px 35px -5px rgba(2, 132, 199, 0.55), 0 0 25px rgba(56, 189, 248, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.5) !important;
 }
 
 /* ===================================================================== */
@@ -875,54 +876,132 @@ html.light .text-slate-300 {
   color: #334155 !important;
 }
 
-html.light .text-\[\#FDE68A\] {
+/* All gold arbitrary Tailwind values in light mode */
+html.light [class*="text-[#FDE68A]"],
+html.theme-light [class*="text-[#FDE68A]"] {
+  color: #0369A1 !important;
+}
+
+html.light [class*="text-[#D4AF37]"],
+html.theme-light [class*="text-[#D4AF37]"],
+html.light [class*="text-[#B45309]"],
+html.theme-light [class*="text-[#B45309]"] {
   color: #0284C7 !important;
 }
 
-html.light .text-\[\#D4AF37\] {
-  color: #0284C7 !important;
+html.light [class*="bg-[#D4AF37]"]:not([class*="/"]),
+html.theme-light [class*="bg-[#D4AF37]"]:not([class*="/"]),
+html.light [class*="bg-[#B45309]"]:not([class*="/"]),
+html.theme-light [class*="bg-[#B45309]"]:not([class*="/"]) {
+  background-color: #0284C7 !important;
+  color: #FFFFFF !important;
+}
+
+html.light [class*="from-[#D4AF37]"],
+html.theme-light [class*="from-[#D4AF37]"] {
+  --tw-gradient-from: #0284C7 var(--tw-gradient-from-position, ) !important;
+  --tw-gradient-to: rgba(2, 132, 199, 0) var(--tw-gradient-to-position, ) !important;
+  --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to) !important;
+}
+
+html.light [class*="to-[#FDE68A]"],
+html.theme-light [class*="to-[#FDE68A]"] {
+  --tw-gradient-to: #38BDF8 var(--tw-gradient-to-position, ) !important;
+}
+
+html.light [class*="via-[#D4AF37]"],
+html.theme-light [class*="via-[#D4AF37]"] {
+  --tw-gradient-stops: var(--tw-gradient-from), #0284C7 var(--tw-gradient-via-position, ), var(--tw-gradient-to) !important;
+}
+
+html.light [class*="border-[#D4AF37]"],
+html.theme-light [class*="border-[#D4AF37]"],
+html.light [class*="border-[#B45309]"],
+html.theme-light [class*="border-[#B45309]"] {
+  border-color: rgba(2, 132, 199, 0.35) !important;
+}
+
+html.light [class*="hover:border-[#D4AF37]"]:hover,
+html.theme-light [class*="hover:border-[#D4AF37]"]:hover {
+  border-color: #0284C7 !important;
+}
+
+html.light [class*="hover:text-[#B45309]"]:hover,
+html.theme-light [class*="hover:text-[#B45309]"]:hover,
+html.light [class*="hover:text-[#D4AF37]"]:hover,
+html.theme-light [class*="hover:text-[#D4AF37]"]:hover,
+html.light [class*="hover:text-[#FDE68A]"]:hover,
+html.theme-light [class*="hover:text-[#FDE68A]"]:hover {
+  color: #0369A1 !important;
 }
 
 html.light .border-white\/10,
 html.light .border-white\/15,
-html.light .border-white\/\[0\.08\] {
+html.light .border-white\/20,
+html.light .border-white\/\[0\.08\],
+html.light .border-white\/\[0\.06\],
+html.light .border-white\/\[0\.04\] {
   border-color: rgba(2, 132, 199, 0.12) !important;
 }
 
-html.light .border-\[\#D4AF37\]\/30,
-html.light .border-\[\#D4AF37\]\/35,
-html.light .border-\[\#D4AF37\]\/40 {
-  border-color: rgba(2, 132, 199, 0.32) !important;
-}
-
-html.light .border-\[\#38BDF8\]\/40,
-html.light .border-\[\#38BDF8\]\/30 {
-  border-color: rgba(2, 132, 199, 0.35) !important;
-}
-
-html.light .bg-\[\#0D1322\]\/80,
+html.light .bg-\[\#0D1322\],
 html.light .bg-\[\#0A0F1D\],
-html.light .bg-\[\#050811\] {
+html.light .bg-\[\#050811\],
+html.light .bg-\[\#060912\],
+html.light .bg-\[\#070A12\] {
   background-color: var(--bg-card) !important;
 }
 
-/* D4AF37 transparent gold backgrounds → sky blue tinted in light */
-html.light .bg-\[\#D4AF37\]\/5,
-html.light .bg-\[\#D4AF37\]\/10,
-html.light .bg-\[\#D4AF37\]\/15 {
-  background-color: rgba(2, 132, 199, 0.06) !important;
+html.light [class*="bg-[#D4AF37]/"],
+html.theme-light [class*="bg-[#D4AF37]/"],
+html.light [class*="bg-[#B45309]/"],
+html.theme-light [class*="bg-[#B45309]/"] {
+  background-color: rgba(2, 132, 199, 0.08) !important;
+}
+
+/* Feature & CTA Card custom background utility */
+.feature-showcase-bg {
+  background: linear-gradient(135deg, rgba(15, 10, 2, 0.97) 0%, rgba(20, 14, 5, 0.9) 40%, rgba(10, 14, 25, 0.97) 100%);
+  border: 1px solid rgba(212, 175, 55, 0.3);
+}
+html.light .feature-showcase-bg,
+html.theme-light .feature-showcase-bg {
+  background: linear-gradient(135deg, #FFFFFF 0%, #F0F9FF 50%, #E0F2FE 100%) !important;
+  border: 1px solid rgba(2, 132, 199, 0.25) !important;
+  box-shadow: 0 20px 40px -15px rgba(2, 132, 199, 0.1) !important;
+}
+
+.cta-card-bg {
+  background: linear-gradient(145deg, rgba(18, 12, 3, 0.96) 0%, rgba(8, 5, 1, 0.98) 50%, rgba(12, 18, 32, 0.96) 100%);
+  border: 1px solid rgba(212, 175, 55, 0.35);
+}
+html.light .cta-card-bg,
+html.theme-light .cta-card-bg {
+  background: linear-gradient(145deg, #FFFFFF 0%, #F0F9FF 50%, #E0F2FE 100%) !important;
+  border: 1px solid rgba(2, 132, 199, 0.25) !important;
+  box-shadow: 0 25px 50px -15px rgba(2, 132, 199, 0.12) !important;
 }
 
 /* Executive orb calming in light — faint glow, not neon wash */
 html.light .animate-spatial-float { opacity: 0.65; }
 
-/* In light mode, text-white MUST become dark (otherwise invisible on white bg) */
-html.light .text-white {
+/* In light mode, regular paragraph and heading text-white becomes dark, EXCEPT on colored buttons/badges */
+html.light .text-white:not(.auth-cta):not(button):not([class*="bg-rose"]):not([class*="bg-sky"]):not([class*="bg-blue"]):not([class*="bg-emerald"]):not([class*="bg-slate-900"]):not(.badge) {
   color: var(--text-primary) !important;
 }
 
-html.light [class*="text-white"] {
-  color: var(--text-primary) !important;
+/* Always ensure buttons and badges retain crisp text */
+html.light .auth-cta,
+html.light .auth-cta *,
+html.light .btn-primary,
+html.light button.bg-rose-600,
+html.light button.bg-emerald-600,
+html.light button.bg-sky-500,
+html.light button.bg-sky-600,
+html.light .bg-sky-500.text-white,
+html.light .bg-sky-600.text-white,
+html.light .bg-rose-600.text-white {
+  color: #FFFFFF !important;
 }
 
 /* ===================================================================== */
@@ -1929,10 +2008,23 @@ html.light .vision-pro-card-glow-amber {
   color: var(--text-primary) !important;
 }
 
-/* bg-vision-pro-bg background fix for auth page */
-html.light .vision-pro-bg {
-  background-color: var(--bg-main) !important;
+/* Universal pure white background guarantee for light mode */
+html.light,
+html.theme-light,
+html.light body,
+html.theme-light body,
+html.light main,
+html.theme-light main,
+html.light .vision-pro-bg,
+html.theme-light .vision-pro-bg {
+  background-color: #FFFFFF !important;
 }
+
+html.light .min-h-screen,
+html.theme-light .min-h-screen {
+  background-color: #FFFFFF !important;
+}
+
 
 /* Auth page complaint generator textarea fix */
 html.light textarea[class*="bg-slate-950"],

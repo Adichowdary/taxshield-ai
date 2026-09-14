@@ -49,18 +49,18 @@ export default function FAQSection() {
               <div
                 key={idx}
                 className={`vault-glass rounded-2xl overflow-hidden transition-all duration-300 border ${
-                  isOpen ? 'border-[#D4AF37]/50 shadow-xl shadow-[#D4AF37]/10' : 'border-white/10 hover:border-white/20'
+                  isOpen ? 'border-sky-500/50 dark:border-[#D4AF37]/50 shadow-xl shadow-sky-500/10 dark:shadow-[#D4AF37]/10' : 'border-slate-200 dark:border-white/10 hover:border-slate-300 dark:hover:border-white/20'
                 }`}
               >
                 <button
                   onClick={() => setOpenIdx(isOpen ? null : idx)}
                   className="w-full p-5 text-left flex items-center justify-between gap-4 font-poppins font-bold text-base transition-colors cursor-pointer"
                 >
-                  <span className={isOpen ? 'text-[#FDE68A]' : 'text-white'}>{item.q}</span>
+                  <span className={isOpen ? 'text-sky-600 dark:text-[#FDE68A]' : 'text-slate-900 dark:text-white'}>{item.q}</span>
                   <ChevronDown
                     size={20}
                     className={`shrink-0 transition-transform duration-300 ${
-                      isOpen ? 'transform rotate-180 text-[#D4AF37]' : 'text-slate-400'
+                      isOpen ? 'transform rotate-180 text-sky-600 dark:text-[#D4AF37]' : 'text-slate-400'
                     }`}
                   />
                 </button>
@@ -72,7 +72,7 @@ export default function FAQSection() {
                   }`}
                 >
                   <div className="overflow-hidden">
-                    <div className="px-5 pb-5 pt-0 text-sm font-sans leading-relaxed text-slate-300 border-t border-white/[0.08]">
+                    <div className="px-5 pb-5 pt-0 text-sm font-sans leading-relaxed text-slate-600 dark:text-slate-300 border-t border-slate-200 dark:border-white/[0.08]">
                       <div className="pt-3.5">
                         {item.a}
                       </div>

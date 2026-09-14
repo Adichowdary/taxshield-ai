@@ -443,14 +443,14 @@ Consumer / TaxShield Audit Terminal`
 
   return (
     <div id="scanner-section" className="vault-glass rounded-3xl p-6 sm:p-8 border border-slate-200/70 dark:border-white/10 shadow-2xl relative overflow-hidden transition-all duration-300">
-      {/* Top Hairline Specular Gold Accent */}
-      <div className="absolute top-0 inset-x-0 h-[2px] bg-gradient-to-r from-transparent via-[#D4AF37] to-transparent" />
+      {/* Top Hairline Specular Accent */}
+      <div className="absolute top-0 inset-x-0 h-[2px] bg-gradient-to-r from-transparent via-sky-500 dark:via-[#D4AF37] to-transparent" />
 
       {/* Header Bar */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-5 border-b border-slate-200/50 dark:border-white/10">
         <div>
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#D4AF37]/15 border border-[#D4AF37]/35 text-[#B45309] dark:text-[#FDE68A] text-xs font-mono font-bold tracking-wider uppercase mb-1.5 shadow-sm">
-            <Scan size={14} className="text-[#D4AF37]" />
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-sky-500/10 dark:bg-[#D4AF37]/15 border border-sky-500/30 dark:border-[#D4AF37]/35 text-sky-700 dark:text-[#FDE68A] text-xs font-mono font-bold tracking-wider uppercase mb-1.5 shadow-sm">
+            <Scan size={14} className="text-sky-600 dark:text-[#D4AF37]" />
             Photorealistic 3D Optical Audit Terminal
           </div>
           <h2 className="text-xl sm:text-2xl font-bold font-poppins text-slate-900 dark:text-white tracking-tight">
@@ -469,11 +469,11 @@ Consumer / TaxShield Audit Terminal`
               onClick={() => handleSwitchPreset(idx)}
               className={`px-3.5 py-1.5 rounded-xl text-xs font-semibold font-poppins transition-all cursor-pointer flex items-center gap-1.5 ${
                 currentPresetIndex === idx
-                  ? 'bg-white dark:bg-[#141C2E] text-slate-950 dark:text-white shadow-md font-bold border border-slate-200/80 dark:border-white/15'
+                  ? 'bg-white dark:bg-[#141C2E] text-sky-600 dark:text-white shadow-md font-bold border border-sky-200 dark:border-white/15'
                   : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
               }`}
             >
-              <FileText size={13} className={currentPresetIndex === idx ? 'text-[#D4AF37]' : ''} />
+              <FileText size={13} className={currentPresetIndex === idx ? 'text-sky-600 dark:text-[#D4AF37]' : ''} />
               <span>{preset.type.split(' ')[0]} Receipt</span>
             </button>
           ))}
@@ -517,7 +517,7 @@ Consumer / TaxShield Audit Terminal`
 
             {/* Active Hotspot Callout Modal */}
             {activeHotspot && (
-              <div className="absolute bottom-4 inset-x-4 z-30 p-3.5 rounded-2xl bg-slate-950/95 dark:bg-[#0D1322]/95 border border-[#D4AF37]/40 text-white shadow-2xl backdrop-blur-xl animate-fade-in flex items-center justify-between gap-3">
+              <div className="absolute bottom-4 inset-x-4 z-30 p-3.5 rounded-2xl bg-slate-950/95 dark:bg-[#0D1322]/95 border border-sky-500/40 dark:border-[#D4AF37]/40 text-white shadow-2xl backdrop-blur-xl animate-fade-in flex items-center justify-between gap-3">
                 <div className="flex items-center gap-3">
                   <div className={`w-9 h-9 rounded-xl flex items-center justify-center shrink-0 ${
                     activeHotspot.status === 'flagged' ? 'bg-rose-500/20 text-rose-400' : 'bg-emerald-500/20 text-emerald-400'
@@ -525,7 +525,7 @@ Consumer / TaxShield Audit Terminal`
                     {activeHotspot.status === 'flagged' ? <AlertTriangle size={18} /> : <CheckCircle2 size={18} />}
                   </div>
                   <div>
-                    <h4 className="font-bold text-xs">{activeHotspot.label}: <span className="font-mono text-[#FDE68A]">{activeHotspot.value}</span></h4>
+                    <h4 className="font-bold text-xs">{activeHotspot.label}: <span className="font-mono text-sky-400 dark:text-[#FDE68A]">{activeHotspot.value}</span></h4>
                     <p className="text-[11px] text-slate-300 font-sans">
                       {activeHotspot.status === 'flagged' 
                         ? 'Flagged statutory discrepancy. Non-mandatory fee violates CCPA 2022 guidelines.'
@@ -562,8 +562,8 @@ Consumer / TaxShield Audit Terminal`
             }}
             className={`p-5 rounded-2xl border-2 border-dashed transition-all duration-300 relative overflow-hidden ${
               isDragOver 
-                ? 'border-[#D4AF37] bg-[#D4AF37]/10 shadow-[0_0_25px_rgba(212,175,55,0.25)] scale-[1.01]' 
-                : 'border-slate-300/80 dark:border-white/15 bg-white/70 dark:bg-white/[0.02] hover:border-[#D4AF37]/50'
+                ? 'border-sky-500 dark:border-[#D4AF37] bg-sky-500/10 dark:bg-[#D4AF37]/10 shadow-[0_0_25px_rgba(2,132,199,0.25)] dark:shadow-[0_0_25px_rgba(212,175,55,0.25)] scale-[1.01]' 
+                : 'border-slate-300/80 dark:border-white/15 bg-white/70 dark:bg-white/[0.02] hover:border-sky-500/50 dark:hover:border-[#D4AF37]/50'
             }`}
           >
             {/* Hidden Inputs */}
@@ -586,14 +586,14 @@ Consumer / TaxShield Audit Terminal`
             {uploadProgress !== null ? (
               <div className="py-2 space-y-3">
                 <div className="flex items-center justify-between text-xs font-mono">
-                  <span className="text-[#B45309] dark:text-[#D4AF37] font-bold flex items-center gap-2">
+                  <span className="text-sky-700 dark:text-[#D4AF37] font-bold flex items-center gap-2">
                     <RefreshCw size={14} className="animate-spin" /> {uploadStepText}
                   </span>
                   <span className="font-bold text-slate-900 dark:text-white">{uploadProgress}%</span>
                 </div>
                 <div className="w-full h-2 bg-slate-200 dark:bg-white/10 rounded-full overflow-hidden">
                   <div 
-                    className="h-full bg-gradient-to-r from-[#D4AF37] to-amber-500 transition-all duration-300"
+                    className="h-full bg-gradient-to-r from-sky-500 to-sky-400 dark:from-[#D4AF37] dark:to-amber-500 transition-all duration-300"
                     style={{ width: `${uploadProgress}%` }}
                   />
                 </div>
@@ -601,7 +601,7 @@ Consumer / TaxShield Audit Terminal`
             ) : (
               <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
                 <div className="flex items-center gap-3.5 text-center sm:text-left">
-                  <div className="w-12 h-12 rounded-xl bg-[#D4AF37]/10 border border-[#D4AF37]/30 text-[#D4AF37] flex items-center justify-center shrink-0 shadow-sm">
+                  <div className="w-12 h-12 rounded-xl bg-sky-500/10 dark:bg-[#D4AF37]/10 border border-sky-500/30 dark:border-[#D4AF37]/30 text-sky-600 dark:text-[#D4AF37] flex items-center justify-center shrink-0 shadow-sm">
                     <Upload size={22} />
                   </div>
                   <div>
@@ -625,7 +625,7 @@ Consumer / TaxShield Audit Terminal`
                     onClick={() => cameraInputRef.current?.click()}
                     className="px-3.5 py-2 rounded-xl bg-slate-100 dark:bg-white/10 text-slate-800 dark:text-slate-200 border border-slate-300 dark:border-white/15 font-semibold text-xs hover:bg-slate-200 dark:hover:bg-white/15 transition-colors cursor-pointer flex items-center gap-1.5"
                   >
-                    <Camera size={14} className="text-[#D4AF37]" /> Camera
+                    <Camera size={14} className="text-sky-600 dark:text-[#D4AF37]" /> Camera
                   </button>
                 </div>
               </div>
@@ -652,7 +652,7 @@ Consumer / TaxShield Audit Terminal`
           {/* Riotters Financial Balance Banner */}
           <div className="p-5 rounded-2xl bg-gradient-to-br from-white to-slate-50 dark:from-[#0D1322] dark:to-[#050811] border border-slate-200/80 dark:border-white/10 shadow-lg space-y-3">
             <div className="flex items-center justify-between text-xs">
-              <span className="font-mono text-[11px] font-bold text-[#B45309] dark:text-[#D4AF37] uppercase tracking-wider">
+              <span className="font-mono text-[11px] font-bold text-sky-700 dark:text-[#D4AF37] uppercase tracking-wider">
                 {currentBill.merchant}
               </span>
               <span className="font-mono text-[11px] px-2 py-0.5 rounded bg-slate-100 dark:bg-white/10 text-slate-700 dark:text-slate-300">
@@ -790,7 +790,7 @@ Consumer / TaxShield Audit Terminal`
               size="md"
               onClick={triggerScan}
               disabled={isScanning}
-              className="w-full sm:flex-1 font-bold shadow-lg shadow-[#D4AF37]/25 text-xs sm:text-sm cursor-pointer"
+              className="w-full sm:flex-1 font-bold shadow-lg shadow-sky-500/20 dark:shadow-[#D4AF37]/25 text-xs sm:text-sm cursor-pointer"
             >
               {isScanning ? (
                 <>
@@ -820,11 +820,11 @@ Consumer / TaxShield Audit Terminal`
       {/* Legal Dispute Modal (CCPA 2022) */}
       {showDisputeModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-md animate-fade-in">
-          <div className="max-w-xl w-full rounded-3xl bg-white dark:bg-[#0D1322] border border-[#D4AF37]/40 shadow-2xl p-6 md:p-8 space-y-5 text-slate-900 dark:text-white relative">
+          <div className="max-w-xl w-full rounded-3xl bg-white dark:bg-[#0D1322] border border-sky-500/30 dark:border-[#D4AF37]/40 shadow-2xl p-6 md:p-8 space-y-5 text-slate-900 dark:text-white relative">
             
             <div className="flex items-center justify-between pb-3 border-b border-slate-200 dark:border-white/10">
               <div className="flex items-center gap-2.5">
-                <div className="w-10 h-10 rounded-xl bg-[#D4AF37]/15 border border-[#D4AF37]/35 text-[#D4AF37] flex items-center justify-center">
+                <div className="w-10 h-10 rounded-xl bg-sky-500/10 dark:bg-[#D4AF37]/15 border border-sky-500/30 dark:border-[#D4AF37]/35 text-sky-600 dark:text-[#D4AF37] flex items-center justify-center">
                   <Scale size={20} />
                 </div>
                 <div>
@@ -859,7 +859,7 @@ Consumer / TaxShield Audit Terminal`
               <div className="flex items-center gap-2">
                 <button
                   onClick={handleCopyNotice}
-                  className="px-4 py-2.5 rounded-xl bg-[#D4AF37] hover:bg-[#B45309] text-slate-950 hover:text-white font-bold text-xs shadow-md transition-all flex items-center gap-1.5 cursor-pointer"
+                  className="px-4 py-2.5 rounded-xl bg-sky-500 hover:bg-sky-600 text-white dark:bg-[#D4AF37] dark:hover:bg-[#B45309] dark:text-slate-950 font-bold text-xs shadow-md transition-all flex items-center gap-1.5 cursor-pointer"
                 >
                   {copiedNotice ? <Check size={15} /> : <Copy size={15} />}
                   {copiedNotice ? 'Copied to Clipboard!' : 'Copy Formal Notice'}

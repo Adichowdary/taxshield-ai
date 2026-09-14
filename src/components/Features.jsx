@@ -80,16 +80,11 @@ export default function Features() {
 
         {/* Primary Feature Showcase */}
         <div className="mb-12 auth-stagger gradient-border" style={{ animationDelay: '100ms' }}>
-          <div
-            className="p-8 md:p-12 rounded-3xl relative overflow-hidden"
-            style={{
-              background: 'linear-gradient(135deg, rgba(15, 10, 2, 0.97) 0%, rgba(20, 14, 5, 0.9) 40%, rgba(10, 14, 25, 0.97) 100%)',
-            }}
-          >
+          <div className="p-8 md:p-12 rounded-3xl relative overflow-hidden feature-showcase-bg">
             {/* Top accent line */}
-            <div className="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-[#D4AF37] to-transparent" />
+            <div className="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-sky-500 dark:via-[#D4AF37] to-transparent" />
             {/* Ambient glow blobs */}
-            <div className="absolute -top-20 -right-20 w-64 h-64 rounded-full bg-[#D4AF37]/8 blur-[80px] pointer-events-none" />
+            <div className="absolute -top-20 -right-20 w-64 h-64 rounded-full bg-sky-500/10 dark:bg-[#D4AF37]/8 blur-[80px] pointer-events-none" />
             <div className="absolute -bottom-20 -left-20 w-64 h-64 rounded-full bg-[#38BDF8]/6 blur-[80px] pointer-events-none" />
 
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-center relative z-10">
@@ -102,7 +97,7 @@ export default function Features() {
                 <h3 className="text-2xl sm:text-4xl font-poppins font-extrabold leading-tight tracking-tight text-shimmer">
                   TaxShield AI Optical Bill Scanning
                 </h3>
-                <p className="text-sm sm:text-base leading-relaxed font-sans" style={{ color: 'var(--text-secondary, #CBD5E1)' }}>
+                <p className="text-sm sm:text-base leading-relaxed font-sans text-slate-700 dark:text-slate-300">
                   Upload or capture any dining invoice. Our deterministic OCR engine extracts every line item, validates merchant GSTIN legality, and runs real-time bracket math in milliseconds.
                 </p>
                 <div className="pt-2">
@@ -113,7 +108,7 @@ export default function Features() {
                 </div>
               </div>
 
-              <div className="lg:col-span-6 terminal-block">
+              <div className="lg:col-span-6 terminal-block bg-slate-900/90 dark:bg-[#050811]/90 p-5 rounded-2xl border border-slate-700/50 dark:border-white/10 text-white shadow-xl">
                 <div className="flex justify-between font-bold pb-2.5 border-b border-white/10">
                   <span className="text-white text-xs font-mono">OCR Extracted Invoice Stream</span>
                   <span className="text-emerald-400 text-xs font-bold font-mono">99.8% FIDELITY</span>

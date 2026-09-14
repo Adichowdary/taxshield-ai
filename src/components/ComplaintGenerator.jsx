@@ -186,23 +186,23 @@ Timestamp: ${timestamp}`
   }
 
   return (
-    <div className="vault-glass border border-[#D4AF37]/30 rounded-3xl p-6 md:p-8 space-y-6 shadow-2xl">
+    <div className="vault-glass border border-sky-500/25 dark:border-[#D4AF37]/30 rounded-3xl p-6 md:p-8 space-y-6 shadow-2xl">
       
       {/* Header */}
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 pb-4 border-b border-white/10">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 pb-4 border-b border-slate-200 dark:border-white/10">
         <div>
           <div className="flex items-center gap-2 mb-2">
-            <span className="bg-rose-500/15 text-rose-300 text-xs font-bold px-3 py-0.5 rounded-full border border-rose-400/40 inline-flex items-center gap-1">
+            <span className="bg-rose-500/15 text-rose-700 dark:text-rose-300 text-xs font-bold px-3 py-0.5 rounded-full border border-rose-500/30 inline-flex items-center gap-1">
               <ShieldAlert size={13} /> CCPA / Consumer Forum Assistant
             </span>
-            <span className="bg-[#D4AF37]/15 text-[#FDE68A] text-[11px] font-mono font-bold px-2 py-0.5 rounded-full border border-[#D4AF37]/30 inline-flex items-center gap-1">
+            <span className="bg-sky-500/10 dark:bg-[#D4AF37]/15 text-sky-700 dark:text-[#FDE68A] text-[11px] font-mono font-bold px-2 py-0.5 rounded-full border border-sky-500/30 dark:border-[#D4AF37]/30 inline-flex items-center gap-1">
               <Scale size={12} /> CPA 2019 Cited
             </span>
           </div>
-          <h3 className="font-poppins font-bold text-xl text-white tracking-tight">
+          <h3 className="font-poppins font-bold text-xl text-slate-900 dark:text-white tracking-tight">
             Legal Consumer Dispute Draft Generator
           </h3>
-          <p className="text-xs font-sans mt-0.5 text-slate-400">
+          <p className="text-xs font-sans mt-0.5 text-slate-600 dark:text-slate-400">
             Statutory notice drafted with precise legal clauses for restaurant management, NCH 1915, and National Consumer Forum.
           </p>
         </div>
@@ -212,7 +212,7 @@ Timestamp: ${timestamp}`
             variant="outline"
             size="sm"
             onClick={() => setIsEditing(!isEditing)}
-            className="border-white/20 bg-white/5 text-slate-200 hover:bg-white/10 hover:text-white"
+            className="border-slate-300 dark:border-white/20 bg-slate-100/60 dark:bg-white/5 text-slate-800 dark:text-slate-200 hover:bg-slate-200/80 dark:hover:bg-white/10 hover:text-slate-900 dark:hover:text-white"
           >
             <Edit3 size={14} /> {isEditing ? 'Save Edit' : 'Edit Text'}
           </Button>
@@ -221,7 +221,7 @@ Timestamp: ${timestamp}`
             variant="secondary"
             size="sm"
             onClick={handleCopy}
-            className="border border-[#D4AF37]/30 bg-[#D4AF37]/10 text-[#FDE68A] hover:bg-[#D4AF37]/20"
+            className="border border-sky-500/30 dark:border-[#D4AF37]/30 bg-sky-500/10 dark:bg-[#D4AF37]/10 text-sky-700 dark:text-[#FDE68A] hover:bg-sky-500/20 dark:hover:bg-[#D4AF37]/20"
           >
             {copied ? <Check size={14} className="text-[#10B981]" /> : <Copy size={14} />}
             {copied ? 'Copied to Clipboard!' : 'Copy Notice'}
@@ -232,7 +232,7 @@ Timestamp: ${timestamp}`
             size="sm"
             onClick={handleSaveComplaint}
             disabled={saving}
-            className="border-white/20 bg-white/5 text-slate-200 hover:bg-white/10 hover:text-white"
+            className="border-slate-300 dark:border-white/20 bg-slate-100/60 dark:bg-white/5 text-slate-800 dark:text-slate-200 hover:bg-slate-200/80 dark:hover:bg-white/10 hover:text-slate-900 dark:hover:text-white"
           >
             {saved ? <Check size={14} className="text-[#10B981]" /> : <BookmarkCheck size={14} />}
             {saving ? 'Saving...' : saved ? 'Saved to DB!' : 'Save Grievance'}
@@ -242,7 +242,7 @@ Timestamp: ${timestamp}`
             variant="primary"
             size="sm"
             onClick={handleDownload}
-            className="shadow-[0_0_15px_rgba(212,175,55,0.3)]"
+            className="shadow-md shadow-sky-500/25 dark:shadow-[0_0_15px_rgba(212,175,55,0.3)]"
           >
             <Download size={14} /> Download Notice (.txt)
           </Button>
@@ -256,8 +256,8 @@ Timestamp: ${timestamp}`
           aria-pressed={disputeType === 'SERVICE_CHARGE'}
           className={`px-3 py-1.5 rounded-xl text-xs font-semibold transition-all duration-200 flex items-center gap-1.5 cursor-pointer focus-visible:outline-none ${
             disputeType === 'SERVICE_CHARGE'
-              ? 'bg-gradient-to-r from-[#D4AF37] to-[#FDE68A] text-slate-950 shadow-md font-bold'
-              : 'bg-white/5 border border-white/10 text-slate-300 hover:border-[#D4AF37]/40 hover:text-white'
+              ? 'bg-sky-600 text-white shadow-md font-bold dark:from-[#D4AF37] dark:to-[#FDE68A] dark:text-slate-950 dark:bg-gradient-to-r'
+              : 'bg-slate-100 dark:bg-white/5 border border-slate-200 dark:border-white/10 text-slate-700 dark:text-slate-300 hover:border-sky-500/40 dark:hover:border-[#D4AF37]/40 hover:text-slate-900 dark:hover:text-white'
           }`}
         >
           <FileCheck size={13} /> Mandatory Service Charge (CCPA 2022)
@@ -267,8 +267,8 @@ Timestamp: ${timestamp}`
           aria-pressed={disputeType === 'MATH_DISCREPANCY'}
           className={`px-3 py-1.5 rounded-xl text-xs font-semibold transition-all duration-200 flex items-center gap-1.5 cursor-pointer focus-visible:outline-none ${
             disputeType === 'MATH_DISCREPANCY'
-              ? 'bg-gradient-to-r from-[#D4AF37] to-[#FDE68A] text-slate-950 shadow-md font-bold'
-              : 'bg-white/5 border border-white/10 text-slate-300 hover:border-[#D4AF37]/40 hover:text-white'
+              ? 'bg-sky-600 text-white shadow-md font-bold dark:from-[#D4AF37] dark:to-[#FDE68A] dark:text-slate-950 dark:bg-gradient-to-r'
+              : 'bg-slate-100 dark:bg-white/5 border border-slate-200 dark:border-white/10 text-slate-700 dark:text-slate-300 hover:border-sky-500/40 dark:hover:border-[#D4AF37]/40 hover:text-slate-900 dark:hover:text-white'
           }`}
         >
           <Scale size={13} /> Total Calculation Error / Hidden Charge
@@ -278,8 +278,8 @@ Timestamp: ${timestamp}`
           aria-pressed={disputeType === 'GST_OVERCHARGE'}
           className={`px-3 py-1.5 rounded-xl text-xs font-semibold transition-all duration-200 flex items-center gap-1.5 cursor-pointer focus-visible:outline-none ${
             disputeType === 'GST_OVERCHARGE'
-              ? 'bg-gradient-to-r from-[#D4AF37] to-[#FDE68A] text-slate-950 shadow-md font-bold'
-              : 'bg-white/5 border border-white/10 text-slate-300 hover:border-[#D4AF37]/40 hover:text-white'
+              ? 'bg-sky-600 text-white shadow-md font-bold dark:from-[#D4AF37] dark:to-[#FDE68A] dark:text-slate-950 dark:bg-gradient-to-r'
+              : 'bg-slate-100 dark:bg-white/5 border border-slate-200 dark:border-white/10 text-slate-700 dark:text-slate-300 hover:border-sky-500/40 dark:hover:border-[#D4AF37]/40 hover:text-slate-900 dark:hover:text-white'
           }`}
         >
           <Sparkles size={13} /> GST Rate Overcharge (5% Cap)
@@ -292,23 +292,23 @@ Timestamp: ${timestamp}`
           value={complaintText}
           onChange={(e) => setComplaintText(e.target.value)}
           rows={16}
-          className="w-full font-mono text-xs p-4 rounded-2xl bg-slate-950/80 border border-white/20 text-slate-100 focus:outline-none focus:border-[#D4AF37] leading-relaxed"
+          className="w-full font-mono text-xs p-4 rounded-2xl bg-slate-50 dark:bg-slate-950/80 border border-slate-300 dark:border-white/20 text-slate-900 dark:text-slate-100 focus:outline-none focus:border-sky-500 dark:focus:border-[#D4AF37] leading-relaxed"
         />
       ) : (
-        <div className="bg-[#050811]/90 border border-white/10 rounded-2xl p-6 font-mono text-xs text-slate-200 leading-relaxed whitespace-pre-wrap shadow-inner overflow-x-auto max-h-[420px] overflow-y-auto">
+        <div className="bg-slate-50 dark:bg-[#050811]/90 border border-slate-200 dark:border-white/10 rounded-2xl p-6 font-mono text-xs text-slate-800 dark:text-slate-200 leading-relaxed whitespace-pre-wrap shadow-inner overflow-x-auto max-h-[420px] overflow-y-auto">
           {complaintText}
         </div>
       )}
 
       {/* Action Guidance */}
-      <div className="border border-[#D4AF37]/30 bg-[#D4AF37]/5 rounded-2xl p-5 text-xs space-y-1.5 text-slate-300">
-        <p className="font-bold text-[#D4AF37] flex items-center gap-1.5">
+      <div className="border border-sky-500/30 dark:border-[#D4AF37]/30 bg-sky-500/5 dark:bg-[#D4AF37]/5 rounded-2xl p-5 text-xs space-y-1.5 text-slate-700 dark:text-slate-300">
+        <p className="font-bold text-sky-700 dark:text-[#D4AF37] flex items-center gap-1.5">
           <ShieldAlert size={14} /> Recommended Submission Channels:
         </p>
         <p className="leading-relaxed">
           1. <strong>Direct Management:</strong> Present this drafted notice to the restaurant billing supervisor before payment.<br />
           2. <strong>National Consumer Helpline:</strong> Call <strong>1915</strong> or WhatsApp <strong>+91-8800001915</strong> with this notice.<br />
-          3. <strong>Online Consumer Commission:</strong> Submit grievance at <span className="text-[#FDE68A] font-mono">consumerhelpline.gov.in</span> or <span className="text-[#FDE68A] font-mono">edaakhil.nic.in</span>.
+          3. <strong>Online Consumer Commission:</strong> Submit grievance at <span className="text-sky-600 dark:text-[#FDE68A] font-mono">consumerhelpline.gov.in</span> or <span className="text-sky-600 dark:text-[#FDE68A] font-mono">edaakhil.nic.in</span>.
         </p>
       </div>
     </div>

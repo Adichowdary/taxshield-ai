@@ -48,7 +48,7 @@ export default function LegalPrecedentsExplorer() {
   const activePrecedent = PRECEDENTS.find(p => p.id === activeTab) || PRECEDENTS[0]
 
   return (
-    <section id="legal-framework" className="py-20 md:py-28 relative border-t border-white/[0.08] bg-[#060912]/80 backdrop-blur-xl">
+    <section id="legal-framework" className="py-20 md:py-28 relative border-t border-slate-200/80 dark:border-white/[0.08] bg-slate-50/70 dark:bg-[#060912]/80 backdrop-blur-xl">
       <Container>
         <SectionHeader
           eyebrow="STATUTORY LEGAL BENCHMARKS"
@@ -69,27 +69,27 @@ export default function LegalPrecedentsExplorer() {
                   onClick={() => setActiveTab(p.id)}
                   className={`p-4 rounded-xl border transition-all cursor-pointer ${
                     isSelected
-                      ? 'vault-glass border-[#D4AF37]/50 shadow-xl shadow-[#D4AF37]/10'
-                      : 'bg-black/30 border-white/[0.06] hover:bg-white/5 hover:border-white/15'
+                      ? 'vault-glass border-sky-500/50 dark:border-[#D4AF37]/50 shadow-xl shadow-sky-500/10 dark:shadow-[#D4AF37]/10'
+                      : 'bg-white/80 dark:bg-black/30 border-slate-200 dark:border-white/[0.06] hover:bg-slate-100 dark:hover:bg-white/5 hover:border-slate-300 dark:hover:border-white/15'
                   }`}
                 >
                   <div className="flex items-start justify-between gap-3">
                     <div className="flex items-center gap-3">
                       <div className={`w-9 h-9 rounded-lg flex items-center justify-center shrink-0 ${
                         isSelected 
-                          ? 'bg-[#D4AF37]/20 text-[#FDE68A] border border-[#D4AF37]/40' 
-                          : 'bg-white/5 text-slate-400'
+                          ? 'bg-sky-500/15 dark:bg-[#D4AF37]/20 text-sky-600 dark:text-[#FDE68A] border border-sky-500/30 dark:border-[#D4AF37]/40' 
+                          : 'bg-slate-100 dark:bg-white/5 text-slate-500 dark:text-slate-400'
                       }`}>
                         <Icon size={18} />
                       </div>
                       <div>
-                        <h4 className={`text-xs font-bold font-poppins ${isSelected ? 'text-white' : 'text-slate-300'}`}>
+                        <h4 className={`text-xs font-bold font-poppins ${isSelected ? 'text-slate-900 dark:text-white' : 'text-slate-700 dark:text-slate-300'}`}>
                           {p.title}
                         </h4>
-                        <p className="text-[10px] text-slate-400 font-mono mt-0.5">{p.citation}</p>
+                        <p className="text-[10px] text-slate-500 dark:text-slate-400 font-mono mt-0.5">{p.citation}</p>
                       </div>
                     </div>
-                    <ChevronRight size={14} className={`mt-2 shrink-0 ${isSelected ? 'text-[#D4AF37]' : 'text-slate-600'}`} />
+                    <ChevronRight size={14} className={`mt-2 shrink-0 ${isSelected ? 'text-sky-600 dark:text-[#D4AF37]' : 'text-slate-400 dark:text-slate-600'}`} />
                   </div>
                 </div>
               )
@@ -97,39 +97,39 @@ export default function LegalPrecedentsExplorer() {
           </div>
 
           {/* Right: Detailed Legal Summary Box */}
-          <div className="lg:col-span-7 vault-glass border border-white/10 rounded-2xl p-6 sm:p-8 shadow-2xl relative overflow-hidden">
-            <div className="absolute top-0 inset-x-0 h-0.5 bg-gradient-to-r from-transparent via-[#D4AF37] to-transparent" />
+          <div className="lg:col-span-7 vault-glass border border-slate-200 dark:border-white/10 rounded-2xl p-6 sm:p-8 shadow-2xl relative overflow-hidden">
+            <div className="absolute top-0 inset-x-0 h-0.5 bg-gradient-to-r from-transparent via-sky-500 dark:via-[#D4AF37] to-transparent" />
             
             <div className="space-y-5">
-              <div className="border-b border-white/[0.08] pb-4">
-                <span className="text-[10px] uppercase font-mono tracking-wider text-[#D4AF37] font-bold block">
+              <div className="border-b border-slate-200 dark:border-white/[0.08] pb-4">
+                <span className="text-[10px] uppercase font-mono tracking-wider text-sky-700 dark:text-[#D4AF37] font-bold block">
                   STATUTORY JURISPRUDENCE SUMMARY
                 </span>
-                <h3 className="text-xl font-bold text-white font-poppins mt-1">{activePrecedent.title}</h3>
-                <p className="text-xs text-slate-400 font-mono mt-0.5">{activePrecedent.citation}</p>
+                <h3 className="text-xl font-bold text-slate-900 dark:text-white font-poppins mt-1">{activePrecedent.title}</h3>
+                <p className="text-xs text-slate-500 dark:text-slate-400 font-mono mt-0.5">{activePrecedent.citation}</p>
               </div>
 
-              <p className="text-sm text-slate-300 leading-relaxed font-sans">
+              <p className="text-sm text-slate-700 dark:text-slate-300 leading-relaxed font-sans">
                 {activePrecedent.summary}
               </p>
 
               <div className="space-y-3 pt-2">
-                <span className="text-[10px] uppercase font-mono tracking-wider text-[#FDE68A] font-semibold block">
+                <span className="text-[10px] uppercase font-mono tracking-wider text-sky-700 dark:text-[#FDE68A] font-semibold block">
                   Core Legal Mandates:
                 </span>
                 <ul className="space-y-2.5">
                   {activePrecedent.keyPoints.map((point, index) => (
-                    <li key={index} className="flex items-start gap-2.5 text-xs sm:text-sm text-slate-300 leading-relaxed">
-                      <CheckCircle2 size={16} className="text-[#D4AF37] shrink-0 mt-0.5" />
+                    <li key={index} className="flex items-start gap-2.5 text-xs sm:text-sm text-slate-700 dark:text-slate-300 leading-relaxed">
+                      <CheckCircle2 size={16} className="text-sky-600 dark:text-[#D4AF37] shrink-0 mt-0.5" />
                       <span>{point}</span>
                     </li>
                   ))}
                 </ul>
               </div>
 
-              <div className="pt-4 border-t border-white/[0.08] flex items-center justify-between text-[11px] text-slate-400 font-mono">
+              <div className="pt-4 border-t border-slate-200 dark:border-white/[0.08] flex items-center justify-between text-[11px] text-slate-500 dark:text-slate-400 font-mono">
                 <span>Verified against official gazette</span>
-                <span className="text-emerald-400 font-semibold flex items-center gap-1.5">
+                <span className="text-emerald-500 dark:text-emerald-400 font-semibold flex items-center gap-1.5">
                   <Shield size={13} /> Active CCPA Authority
                 </span>
               </div>

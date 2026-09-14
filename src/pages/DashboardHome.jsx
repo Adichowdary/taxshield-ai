@@ -196,13 +196,13 @@ export default function DashboardHome() {
                     return (
                       <div key={bill.id} className="py-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 rounded-2xl px-3 transition-colors hover:bg-black/[0.03] dark:hover:bg-white/[0.04] group">
                         <div className="flex items-center gap-3.5">
-                          <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-slate-100 to-slate-200 dark:from-[#050811] dark:to-[#0D1322] border border-[#D4AF37]/30 text-[#B45309] dark:text-[#D4AF37] flex items-center justify-center font-bold shrink-0 shadow-md group-hover:border-[#D4AF37]/50 transition-colors">
+                          <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-slate-100 to-slate-200 dark:from-[#050811] dark:to-[#0D1322] border border-sky-500/20 dark:border-[#D4AF37]/30 text-sky-700 dark:text-[#D4AF37] flex items-center justify-center font-bold shrink-0 shadow-md group-hover:border-sky-500/40 dark:group-hover:border-[#D4AF37]/50 transition-colors">
                             <FileText size={18} />
                           </div>
                           <div>
-                            <h4 className="font-semibold text-sm text-slate-900 dark:text-white group-hover:text-[#B45309] dark:group-hover:text-[#FDE68A] transition-colors">{merchantName}</h4>
+                            <h4 className="font-semibold text-sm text-slate-900 dark:text-white group-hover:text-sky-600 dark:group-hover:text-[#FDE68A] transition-colors">{merchantName}</h4>
                             <p className="text-[11px] font-mono flex items-center gap-2 text-slate-600 dark:text-slate-300 mt-0.5">
-                              <span><Calendar size={12} className="inline mr-1 text-[#D4AF37]" />{bill.date || "2026-08-15"}</span>
+                              <span><Calendar size={12} className="inline mr-1 text-sky-600 dark:text-[#D4AF37]" />{bill.date || "2026-08-15"}</span>
                               <span>#{invoiceNo}</span>
                             </p>
                           </div>
@@ -214,7 +214,7 @@ export default function DashboardHome() {
                             <span className="font-mono font-bold text-sm text-slate-900 dark:text-white block">
                               ₹{totalVal.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                             </span>
-                            <Link to={`/analysis/${bill.id}`} className="text-xs text-[#0284C7] dark:text-[#38BDF8] font-semibold hover:underline transition-colors">
+                            <Link to={`/analysis/${bill.id}`} className="text-xs text-sky-600 hover:text-sky-700 dark:text-sky-400 font-semibold hover:underline transition-colors">
                               Inspect Audit →
                             </Link>
                           </div>
@@ -249,7 +249,7 @@ export default function DashboardHome() {
                             <span className="font-mono text-amber-700 dark:text-amber-400 font-bold">₹{scAmount.toFixed(2)}</span>
                           </div>
                           <p className="text-[11px] text-slate-700 dark:text-slate-300">{statusText}</p>
-                          <Link to={`/analysis/${bill.id}`} className="text-xs font-semibold text-[#B45309] dark:text-[#D4AF37] hover:text-[#D97706] dark:hover:text-[#FDE68A] transition-colors block pt-1">
+                          <Link to={`/analysis/${bill.id}`} className="text-xs font-semibold text-amber-700 hover:text-amber-800 dark:text-amber-300 dark:hover:text-amber-200 transition-colors block pt-1">
                             Inspect Full Audit →
                           </Link>
                         </div>
@@ -268,7 +268,7 @@ export default function DashboardHome() {
             </div>
           ) : (
             <div className="vault-glass border border-slate-200/50 dark:border-white/10 rounded-3xl p-12 text-center space-y-4 max-w-xl mx-auto shadow-2xl">
-              <div className="w-16 h-16 rounded-2xl bg-[#D4AF37]/10 border border-[#D4AF37]/30 text-[#D4AF37] flex items-center justify-center mx-auto shadow-[0_0_20px_rgba(212,175,55,0.2)]">
+              <div className="w-16 h-16 rounded-2xl bg-sky-500/10 dark:bg-[#D4AF37]/10 border border-sky-500/30 dark:border-[#D4AF37]/30 text-sky-600 dark:text-[#D4AF37] flex items-center justify-center mx-auto shadow-[0_0_20px_rgba(2,132,199,0.15)] dark:shadow-[0_0_20px_rgba(212,175,55,0.2)]">
                 <FileText size={32} />
               </div>
               <div className="space-y-1">

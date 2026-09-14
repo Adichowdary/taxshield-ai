@@ -368,40 +368,40 @@ export default function SmartSpendingDashboard() {
         <Container className="space-y-8">
           
           {/* Header Card */}
-          <div className="vault-glass border border-[#D4AF37]/30 rounded-3xl p-6 md:p-8 flex flex-col lg:flex-row lg:items-center justify-between gap-6 relative overflow-hidden shadow-[0_20px_50px_rgba(0,0,0,0.6)]">
-            <div className="absolute top-0 inset-x-0 h-[1.5px] bg-gradient-to-r from-transparent via-[#D4AF37] to-transparent" />
+          <div className="vault-glass border border-sky-500/25 dark:border-[#D4AF37]/30 rounded-3xl p-6 md:p-8 flex flex-col lg:flex-row lg:items-center justify-between gap-6 relative overflow-hidden shadow-[0_20px_50px_rgba(2,132,199,0.08)] dark:shadow-[0_20px_50px_rgba(0,0,0,0.6)]">
+            <div className="absolute top-0 inset-x-0 h-[1.5px] bg-gradient-to-r from-transparent via-sky-500 dark:via-[#D4AF37] to-transparent" />
 
             <div className="space-y-2 relative z-10">
               <div className="flex flex-wrap items-center gap-2">
-                <span className="bg-[#D4AF37]/10 border border-[#D4AF37]/30 text-[#D4AF37] text-[11px] font-bold px-3 py-1 rounded-full uppercase tracking-wider inline-flex items-center gap-1.5 shadow-sm font-mono">
+                <span className="bg-sky-500/10 dark:bg-[#D4AF37]/10 border border-sky-500/30 dark:border-[#D4AF37]/30 text-sky-700 dark:text-[#D4AF37] text-[11px] font-bold px-3 py-1 rounded-full uppercase tracking-wider inline-flex items-center gap-1.5 shadow-sm font-mono">
                   <Sparkles size={13} /> Multi-Category Spending Intelligence
                 </span>
                 <span className="text-[11px] font-mono text-[#10B981] bg-[#10B981]/10 border border-[#10B981]/30 px-2.5 py-0.5 rounded-full font-bold flex items-center gap-1">
                   <Activity size={12} className="text-[#10B981]" /> Synced Live
                 </span>
-                <span className="text-[11px] font-mono text-slate-300 bg-white/5 border border-white/10 px-2.5 py-0.5 rounded-full font-bold">
+                <span className="text-[11px] font-mono text-slate-600 dark:text-slate-300 bg-black/5 dark:bg-white/5 border border-slate-200 dark:border-white/10 px-2.5 py-0.5 rounded-full font-bold">
                   {bills.length} Receipts Tracked
                 </span>
               </div>
 
-              <h1 className="text-3xl sm:text-4xl font-poppins font-bold tracking-tight text-white">
+              <h1 className="text-3xl sm:text-4xl font-poppins font-bold tracking-tight text-slate-900 dark:text-white">
                 Shopping & Spending <span className="gold-gradient-text">Tax Intelligence</span>
               </h1>
-              <p className="text-xs sm:text-sm max-w-3xl font-medium text-slate-300">
+              <p className="text-xs sm:text-sm max-w-3xl font-medium text-slate-600 dark:text-slate-300">
                 Live expense auditing across Restaurants, Supermarkets, Fashion & Lifestyle, Electronics, and Pharmacy with deterministic GST compliance checks.
               </p>
             </div>
 
             {/* Time Horizon Filter Pills */}
-            <div className="vault-glass p-1.5 rounded-2xl flex items-center gap-1.5 self-start lg:self-auto border border-white/10 shadow-lg">
+            <div className="vault-glass p-1.5 rounded-2xl flex items-center gap-1.5 self-start lg:self-auto border border-slate-200 dark:border-white/10 shadow-lg">
               {['1M', '3M', '6M', 'ALL'].map((tab) => (
                 <button
                   key={tab}
                   onClick={() => setTimeHorizon(tab)}
                   className={`px-4 py-2 rounded-xl text-xs font-bold transition-all duration-300 cursor-pointer ${
                     timeHorizon === tab 
-                      ? 'bg-gradient-to-r from-[#D4AF37] to-[#FDE68A] text-slate-950 shadow-[0_0_15px_rgba(212,175,55,0.4)] scale-105' 
-                      : 'text-slate-300 hover:text-white hover:bg-white/10'
+                      ? 'bg-sky-600 text-white shadow-md shadow-sky-500/30 scale-105 dark:from-[#D4AF37] dark:to-[#FDE68A] dark:text-slate-950 dark:shadow-[0_0_15px_rgba(212,175,55,0.4)] dark:bg-gradient-to-r' 
+                      : 'text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-black/5 dark:hover:bg-white/10'
                   }`}
                 >
                   {tab === '1M' ? 'This Month' : tab === '3M' ? '3 Months' : tab === '6M' ? '6 Months' : 'All Time'}
@@ -416,8 +416,8 @@ export default function SmartSpendingDashboard() {
               onClick={() => setSelectedCategory('ALL')}
               className={`px-4 py-2 rounded-2xl text-xs font-bold whitespace-nowrap transition-all cursor-pointer flex items-center gap-2 border ${
                 selectedCategory === 'ALL'
-                  ? 'bg-gradient-to-r from-[#D4AF37] to-[#FDE68A] text-slate-950 border-[#D4AF37] shadow-[0_0_15px_rgba(212,175,55,0.4)] scale-105'
-                  : 'vault-glass border-white/10 text-slate-300 hover:text-white hover:bg-white/10'
+                  ? 'bg-sky-600 text-white border-sky-600 shadow-md shadow-sky-500/30 scale-105 dark:from-[#D4AF37] dark:to-[#FDE68A] dark:text-slate-950 dark:border-[#D4AF37] dark:shadow-[0_0_15px_rgba(212,175,55,0.4)] dark:bg-gradient-to-r'
+                  : 'vault-glass border-slate-200 dark:border-white/10 text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-black/5 dark:hover:bg-white/10'
               }`}
             >
               <Filter size={13} />
@@ -434,12 +434,12 @@ export default function SmartSpendingDashboard() {
                   className={`px-3.5 py-2 rounded-2xl text-xs font-bold whitespace-nowrap transition-all cursor-pointer flex items-center gap-2 border ${
                     isSel 
                       ? cat.activeStyle 
-                      : 'vault-glass border-white/10 text-slate-300 hover:text-white hover:bg-white/10'
+                      : 'vault-glass border-slate-200 dark:border-white/10 text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-black/5 dark:hover:bg-white/10'
                   }`}
                 >
                   <span>{cat.emoji}</span>
                   <span>{cat.shortLabel}</span>
-                  <span className="text-[10px] font-mono px-1.5 py-0.5 rounded-full bg-white/10">
+                  <span className="text-[10px] font-mono px-1.5 py-0.5 rounded-full bg-slate-200 dark:bg-white/10 text-slate-800 dark:text-slate-200">
                     {count}
                   </span>
                 </button>
@@ -480,8 +480,8 @@ export default function SmartSpendingDashboard() {
                     onClick={() => setSelectedCategory(isSelected ? 'ALL' : cat.id)}
                     className={`vault-glass rounded-3xl p-5 border transition-all cursor-pointer relative overflow-hidden group hover:scale-[1.01] ${
                       isSelected
-                        ? `${cat.activeStyle} ring-2 ring-white/20`
-                        : `border-white/10 ${cat.accentBorder}`
+                        ? `${cat.activeStyle} ring-2 ring-sky-500/20 dark:ring-white/20`
+                        : `border-slate-200 dark:border-white/10 ${cat.accentBorder}`
                     }`}
                   >
                     {/* Top gradient glow bar */}
@@ -493,16 +493,16 @@ export default function SmartSpendingDashboard() {
                     <div className="flex items-start justify-between gap-3">
                       <div className="flex items-center gap-2.5">
                         <div 
-                          className="w-10 h-10 rounded-2xl flex items-center justify-center text-lg border border-white/10"
+                          className="w-10 h-10 rounded-2xl flex items-center justify-center text-lg border border-slate-200 dark:border-white/10"
                           style={{ backgroundColor: `${cat.themeColor}20` }}
                         >
                           {cat.emoji}
                         </div>
                         <div>
-                          <h4 className="font-poppins font-bold text-sm text-white group-hover:text-[#FDE68A] transition-colors line-clamp-1">
+                          <h4 className="font-poppins font-bold text-sm text-slate-900 dark:text-white group-hover:text-sky-600 dark:group-hover:text-[#FDE68A] transition-colors line-clamp-1">
                             {cat.label}
                           </h4>
-                          <p className="text-[11px] text-slate-400 truncate max-w-[190px]">
+                          <p className="text-[11px] text-slate-600 dark:text-slate-400 truncate max-w-[190px]">
                             {cat.retailers}
                           </p>
                         </div>
@@ -514,24 +514,24 @@ export default function SmartSpendingDashboard() {
                     </div>
 
                     {/* Numerical Stats */}
-                    <div className="mt-4 pt-3 border-t border-white/10 grid grid-cols-2 gap-2">
+                    <div className="mt-4 pt-3 border-t border-slate-200 dark:border-white/10 grid grid-cols-2 gap-2">
                       <div>
-                        <span className="text-[10px] uppercase font-bold text-slate-400 block">Total Spend</span>
-                        <span className="text-xl font-bold font-mono text-white">
+                        <span className="text-[10px] uppercase font-bold text-slate-500 dark:text-slate-400 block">Total Spend</span>
+                        <span className="text-xl font-bold font-mono text-slate-900 dark:text-white">
                           ₹{stats.spend.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                         </span>
                       </div>
                       <div className="text-right">
-                        <span className="text-[10px] uppercase font-bold text-slate-400 block">GST / Tax Paid</span>
-                        <span className="text-xl font-bold font-mono text-[#38BDF8]">
+                        <span className="text-[10px] uppercase font-bold text-slate-500 dark:text-slate-400 block">GST / Tax Paid</span>
+                        <span className="text-xl font-bold font-mono text-sky-600 dark:text-[#38BDF8]">
                           ₹{stats.tax.toFixed(2)}
                         </span>
                       </div>
                     </div>
 
                     {/* Rule Tip & Count */}
-                    <div className="mt-3 pt-2.5 border-t border-white/5 flex items-center justify-between text-[11px]">
-                      <span className="text-slate-400 font-mono">
+                    <div className="mt-3 pt-2.5 border-t border-slate-200 dark:border-white/5 flex items-center justify-between text-[11px]">
+                      <span className="text-slate-600 dark:text-slate-400 font-mono">
                         {stats.count} {stats.count === 1 ? 'Receipt' : 'Receipts'}
                       </span>
                       <span className="text-[10px] font-semibold text-[#10B981] flex items-center gap-1">
@@ -540,7 +540,7 @@ export default function SmartSpendingDashboard() {
                     </div>
 
                     {/* Statutory GST Rule Preview */}
-                    <div className="mt-2 text-[10px] text-slate-400/90 leading-tight italic line-clamp-1">
+                    <div className="mt-2 text-[10px] text-slate-600 dark:text-slate-400/90 leading-tight italic line-clamp-1">
                       ⚖️ {cat.statutoryRule}
                     </div>
                   </div>
@@ -550,17 +550,17 @@ export default function SmartSpendingDashboard() {
           </div>
 
           {/* Monthly Spending Target Control Bar */}
-          <div className="vault-glass border border-white/10 rounded-3xl p-6 space-y-4 shadow-xl">
+          <div className="vault-glass border border-slate-200 dark:border-white/10 rounded-3xl p-6 space-y-4 shadow-xl">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
               <div className="flex items-center gap-3">
-                <div className="w-11 h-11 rounded-2xl bg-gradient-to-br from-[#D4AF37] to-[#FDE68A] text-slate-950 flex items-center justify-center font-bold shadow-[0_0_20px_rgba(212,175,55,0.35)]">
+                <div className="w-11 h-11 rounded-2xl bg-gradient-to-br from-sky-500 to-sky-400 text-white shadow-md shadow-sky-500/25 dark:from-[#D4AF37] dark:to-[#FDE68A] dark:text-slate-950 flex items-center justify-center font-bold dark:shadow-[0_0_20px_rgba(212,175,55,0.35)]">
                   <Wallet size={22} />
                 </div>
                 <div>
-                  <h3 className="font-poppins font-bold text-base flex items-center gap-2 text-white">
-                    Monthly Shopping Spending Cap <span className="text-[10px] bg-[#D4AF37]/15 text-[#FDE68A] px-2 py-0.5 rounded-full border border-[#D4AF37]/30 font-mono font-bold">LIVE GAUGE</span>
+                  <h3 className="font-poppins font-bold text-base flex items-center gap-2 text-slate-900 dark:text-white">
+                    Monthly Shopping Spending Cap <span className="text-[10px] bg-sky-500/10 dark:bg-[#D4AF37]/15 text-sky-700 dark:text-[#FDE68A] px-2 py-0.5 rounded-full border border-sky-500/30 dark:border-[#D4AF37]/30 font-mono font-bold">LIVE GAUGE</span>
                   </h3>
-                  <p className="text-xs font-medium text-slate-300">
+                  <p className="text-xs font-medium text-slate-600 dark:text-slate-300">
                     Budget velocity monitor across all 6 shopping categories
                   </p>
                 </div>
@@ -571,7 +571,7 @@ export default function SmartSpendingDashboard() {
                   variant="outline" 
                   size="sm" 
                   onClick={() => setShowBudgetForm(!showBudgetForm)}
-                  className="rounded-xl border-white/20 bg-white/5 text-slate-200 hover:bg-white/10 hover:text-white font-semibold"
+                  className="rounded-xl border-slate-300 dark:border-white/20 bg-slate-100/60 dark:bg-white/5 text-slate-800 dark:text-slate-200 hover:bg-slate-200/80 dark:hover:bg-white/10 hover:text-slate-900 dark:hover:text-white font-semibold"
                 >
                   <Sliders size={14} /> {showBudgetForm ? 'Close Controls' : 'Edit Target'}
                 </Button>
@@ -579,7 +579,7 @@ export default function SmartSpendingDashboard() {
                   variant="primary" 
                   size="sm" 
                   onClick={() => setShowRefundModal(true)}
-                  className="rounded-xl font-bold shadow-[0_0_20px_rgba(212,175,55,0.3)]"
+                  className="rounded-xl font-bold shadow-md shadow-sky-500/25 dark:shadow-[0_0_20px_rgba(212,175,55,0.3)]"
                 >
                   <FileText size={14} /> CCPA Waiver Notice (₹{snapshot.totalFees.toFixed(0)})
                 </Button>
@@ -587,15 +587,15 @@ export default function SmartSpendingDashboard() {
             </div>
 
             {showBudgetForm && (
-              <form onSubmit={handleSetBudget} className="border border-[#D4AF37]/30 rounded-2xl p-4 space-y-3 bg-[#050811]/90 backdrop-blur-xl animate-fade-in shadow-2xl">
-                <h4 className="font-poppins font-bold text-xs text-[#D4AF37]">Set Monthly Spending Target (₹)</h4>
+              <form onSubmit={handleSetBudget} className="border border-sky-500/30 dark:border-[#D4AF37]/30 rounded-2xl p-4 space-y-3 bg-slate-50/90 dark:bg-[#050811]/90 backdrop-blur-xl animate-fade-in shadow-2xl">
+                <h4 className="font-poppins font-bold text-xs text-sky-700 dark:text-[#D4AF37]">Set Monthly Spending Target (₹)</h4>
                 <div className="flex gap-2">
                   <input
                     type="number"
                     placeholder="e.g. 25000"
                     value={newBudgetInput}
                     onChange={(e) => setNewBudgetInput(e.target.value)}
-                    className="flex-1 p-2.5 border border-white/20 rounded-xl text-xs font-mono font-semibold bg-slate-950 text-white placeholder-slate-500 focus:outline-none focus:border-[#D4AF37]"
+                    className="flex-1 p-2.5 border border-slate-300 dark:border-white/20 rounded-xl text-xs font-mono font-semibold bg-white dark:bg-slate-950 text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:border-sky-500 dark:focus:border-[#D4AF37]"
                     required
                   />
                   <Button variant="primary" size="sm" type="submit" className="font-bold">
@@ -640,15 +640,15 @@ export default function SmartSpendingDashboard() {
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             
             {/* Spending & Tax Trend Chart */}
-            <div className="vault-glass border border-white/10 rounded-3xl p-6 space-y-4 shadow-xl">
-              <div className="flex justify-between items-center border-b border-white/10 pb-3">
+            <div className="vault-glass border border-slate-200 dark:border-white/10 rounded-3xl p-6 space-y-4 shadow-xl">
+              <div className="flex justify-between items-center border-b border-slate-200 dark:border-white/10 pb-3">
                 <div>
-                  <h3 className="font-poppins font-bold text-base flex items-center gap-2 text-white">
-                    <TrendingUp size={18} className="text-[#D4AF37]" /> Spending & Tax Velocity Trend
+                  <h3 className="font-poppins font-bold text-base flex items-center gap-2 text-slate-900 dark:text-white">
+                    <TrendingUp size={18} className="text-sky-600 dark:text-[#D4AF37]" /> Spending & Tax Velocity Trend
                   </h3>
-                  <p className="text-xs font-medium text-slate-300">Monthly spend vs verified GST tax vs service fees</p>
+                  <p className="text-xs font-medium text-slate-600 dark:text-slate-300">Monthly spend vs verified GST tax vs service fees</p>
                 </div>
-                <span className="text-xs font-mono font-bold text-[#FDE68A] bg-[#D4AF37]/15 border border-[#D4AF37]/30 px-2.5 py-1 rounded-xl">
+                <span className="text-xs font-mono font-bold text-sky-700 dark:text-[#FDE68A] bg-sky-500/15 dark:bg-[#D4AF37]/15 border border-sky-500/30 dark:border-[#D4AF37]/30 px-2.5 py-1 rounded-xl">
                   INR (₹)
                 </span>
               </div>
@@ -656,13 +656,13 @@ export default function SmartSpendingDashboard() {
             </div>
 
             {/* Retailer Spend Breakdown Bar Chart (D-Mart, Zudio, Croma, Indian Oil, Swiggy) */}
-            <div className="vault-glass border border-white/10 rounded-3xl p-6 space-y-4 shadow-xl">
-              <div className="flex justify-between items-center border-b border-white/10 pb-3">
+            <div className="vault-glass border border-slate-200 dark:border-white/10 rounded-3xl p-6 space-y-4 shadow-xl">
+              <div className="flex justify-between items-center border-b border-slate-200 dark:border-white/10 pb-3">
                 <div>
-                  <h3 className="font-poppins font-bold text-base flex items-center gap-2 text-white">
+                  <h3 className="font-poppins font-bold text-base flex items-center gap-2 text-slate-900 dark:text-white">
                     <BarChart3 size={18} className="text-[#38BDF8]" /> Retailer & Merchant Intelligence
                   </h3>
-                  <p className="text-xs font-medium text-slate-300">D-Mart vs Zudio vs Croma vs Apollo vs Restaurants</p>
+                  <p className="text-xs font-medium text-slate-600 dark:text-slate-300">D-Mart vs Zudio vs Croma vs Apollo vs Restaurants</p>
                 </div>
                 <span className="text-xs font-mono font-bold text-[#38BDF8] bg-[#38BDF8]/15 border border-[#38BDF8]/30 px-2.5 py-1 rounded-xl">
                   Top Retailers
@@ -677,26 +677,26 @@ export default function SmartSpendingDashboard() {
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             
             {/* Category Donut Chart */}
-            <div className="lg:col-span-1 vault-glass border border-white/10 rounded-3xl p-6 space-y-4 shadow-xl">
-              <div className="border-b border-white/10 pb-3">
-                <h3 className="font-poppins font-bold text-base flex items-center gap-2 text-white">
-                  <PieIcon size={18} className="text-[#D4AF37]" /> Shopping & Retail Categories Mix
+            <div className="lg:col-span-1 vault-glass border border-slate-200 dark:border-white/10 rounded-3xl p-6 space-y-4 shadow-xl">
+              <div className="border-b border-slate-200 dark:border-white/10 pb-3">
+                <h3 className="font-poppins font-bold text-base flex items-center gap-2 text-slate-900 dark:text-white">
+                  <PieIcon size={18} className="text-sky-600 dark:text-[#D4AF37]" /> Shopping & Retail Categories Mix
                 </h3>
-                <p className="text-xs font-medium text-slate-300">Distribution across statutory categories</p>
+                <p className="text-xs font-medium text-slate-600 dark:text-slate-300">Distribution across statutory categories</p>
               </div>
               <CategoryDonutChart data={categoryDonutData} />
             </div>
 
             {/* AI Tax Recommendations across categories */}
-            <div className="lg:col-span-2 vault-glass border border-white/10 rounded-3xl p-6 space-y-4 shadow-xl">
-              <div className="border-b border-white/10 pb-3 flex items-center justify-between">
+            <div className="lg:col-span-2 vault-glass border border-slate-200 dark:border-white/10 rounded-3xl p-6 space-y-4 shadow-xl">
+              <div className="border-b border-slate-200 dark:border-white/10 pb-3 flex items-center justify-between">
                 <div>
-                  <h3 className="font-poppins font-bold text-base flex items-center gap-2 text-white">
-                    <Sparkles size={18} className="text-[#D4AF37]" /> TaxShield Multi-Category Statutory Audit Insights
+                  <h3 className="font-poppins font-bold text-base flex items-center gap-2 text-slate-900 dark:text-white">
+                    <Sparkles size={18} className="text-sky-600 dark:text-[#D4AF37]" /> TaxShield Multi-Category Statutory Audit Insights
                   </h3>
-                  <p className="text-xs font-medium text-slate-300">AI tax engine rules applied to your active receipts</p>
+                  <p className="text-xs font-medium text-slate-600 dark:text-slate-300">AI tax engine rules applied to your active receipts</p>
                 </div>
-                <span className="text-[10px] font-mono text-[#D4AF37] bg-[#D4AF37]/15 px-2.5 py-1 rounded-full border border-[#D4AF37]/30 font-bold">
+                <span className="text-[10px] font-mono text-sky-700 dark:text-[#D4AF37] bg-sky-500/15 dark:bg-[#D4AF37]/15 px-2.5 py-1 rounded-full border border-sky-500/30 dark:border-[#D4AF37]/30 font-bold">
                   AUTOPILOT AUDIT
                 </span>
               </div>
@@ -706,10 +706,10 @@ export default function SmartSpendingDashboard() {
                 {/* Supermarket Insight */}
                 <div className="p-3.5 border border-emerald-500/30 rounded-2xl space-y-1.5 bg-emerald-500/10 backdrop-blur-xl">
                   <div className="flex items-center gap-2">
-                    <ShoppingCart size={15} className="text-emerald-400" />
-                    <span className="font-bold text-emerald-200">🛒 Supermarkets & Groceries (D-Mart)</span>
+                    <ShoppingCart size={15} className="text-emerald-500 dark:text-emerald-400" />
+                    <span className="font-bold text-emerald-800 dark:text-emerald-200">🛒 Supermarkets & Groceries (D-Mart)</span>
                   </div>
-                  <p className="text-[11px] text-emerald-200/90 leading-relaxed">
+                  <p className="text-[11px] text-emerald-900 dark:text-emerald-200/90 leading-relaxed">
                     Unpackaged rice, flour, pulses, and salt verified at 0% GST. Packaged food at 5% and detergents at 18% match Central GST schedules.
                   </p>
                 </div>
@@ -717,33 +717,33 @@ export default function SmartSpendingDashboard() {
                 {/* Fashion Insight */}
                 <div className="p-3.5 border border-pink-500/30 rounded-2xl space-y-1.5 bg-pink-500/10 backdrop-blur-xl">
                   <div className="flex items-center gap-2">
-                    <ShoppingBag size={15} className="text-pink-400" />
-                    <span className="font-bold text-pink-200">👗 Fashion & Lifestyle (Zudio)</span>
+                    <ShoppingBag size={15} className="text-pink-500 dark:text-pink-400" />
+                    <span className="font-bold text-pink-800 dark:text-pink-200">👗 Fashion & Apparel (Zudio/Trends)</span>
                   </div>
-                  <p className="text-[11px] text-pink-200/90 leading-relaxed">
-                    Garments and footwear priced ≤ ₹1,000 correctly capped at 5% GST under Notification No. 14/2021 rather than the higher 12% tier.
+                  <p className="text-[11px] text-pink-900 dark:text-pink-200/90 leading-relaxed">
+                    Statutory Rule 14/2021 audited: items under ₹1,000 correctly levied 5% GST. No illegal luxury surcharges found.
                   </p>
                 </div>
 
                 {/* Electronics Insight */}
                 <div className="p-3.5 border border-sky-500/30 rounded-2xl space-y-1.5 bg-sky-500/10 backdrop-blur-xl">
                   <div className="flex items-center gap-2">
-                    <Smartphone size={15} className="text-sky-400" />
-                    <span className="font-bold text-sky-200">📱 Electronics (Croma)</span>
+                    <Smartphone size={15} className="text-sky-500 dark:text-sky-400" />
+                    <span className="font-bold text-sky-800 dark:text-sky-200">📱 Consumer Electronics (Croma/Reliance)</span>
                   </div>
-                  <p className="text-[11px] text-sky-200/90 leading-relaxed">
-                    Headphones and chargers verified at 18% standard GST under HSN 8518. Bills formatted with complete GSTIN for business ITC claim readiness.
+                  <p className="text-[11px] text-sky-900 dark:text-sky-200/90 leading-relaxed">
+                    18% GST verified on hardware accessories. B2B Corporate ITC claimed accurately across capital expenditure items.
                   </p>
                 </div>
 
                 {/* Pharmacy Insight */}
                 <div className="p-3.5 border border-purple-500/30 rounded-2xl space-y-1.5 bg-purple-500/10 backdrop-blur-xl">
                   <div className="flex items-center gap-2">
-                    <Pill size={15} className="text-purple-400" />
-                    <span className="font-bold text-purple-200">💊 Pharmacy & Health (Apollo)</span>
+                    <Pill size={15} className="text-purple-500 dark:text-purple-400" />
+                    <span className="font-bold text-purple-800 dark:text-purple-200">💊 Pharmacy & Healthcare (Apollo)</span>
                   </div>
-                  <p className="text-[11px] text-purple-200/90 leading-relaxed">
-                    Prescription medicines verified under Chapter 30 at 12% statutory rate. Retain itemized GST invoices for medical insurance reimbursement.
+                  <p className="text-[11px] text-purple-900 dark:text-purple-200/90 leading-relaxed">
+                    Essential life-saving medicines validated at 5% / 12% statutory caps. Diagnostic services verified exempt under GST Sec 11.
                   </p>
                 </div>
 
@@ -753,20 +753,20 @@ export default function SmartSpendingDashboard() {
           </div>
 
           {/* Filtered Receipts Drilldown Table */}
-          <div className="vault-glass border border-white/10 rounded-3xl p-6 space-y-4 shadow-xl">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-white/10 pb-4">
+          <div className="vault-glass border border-slate-200 dark:border-white/10 rounded-3xl p-6 space-y-4 shadow-xl">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-200 dark:border-white/10 pb-4">
               <div>
-                <h3 className="font-poppins font-bold text-base flex items-center gap-2 text-white">
-                  <Receipt className="text-[#D4AF37]" size={20} />
+                <h3 className="font-poppins font-bold text-base flex items-center gap-2 text-slate-900 dark:text-white">
+                  <Receipt className="text-sky-600 dark:text-[#D4AF37]" size={20} />
                   Receipts Log {selectedCategory !== 'ALL' && `— ${selectedCategory}`} ({activeBills.length})
                 </h3>
-                <p className="text-xs text-slate-300">Click any bill to view itemized HSN breakdown and statutory tax verdict</p>
+                <p className="text-xs text-slate-600 dark:text-slate-300">Click any bill to view itemized HSN breakdown and statutory tax verdict</p>
               </div>
               <Button
                 variant="primary"
                 size="sm"
                 onClick={() => navigate('/scan')}
-                className="font-bold shrink-0 shadow-[0_0_15px_rgba(212,175,55,0.3)]"
+                className="font-bold shrink-0 shadow-[0_0_15px_rgba(2,132,199,0.3)] dark:shadow-[0_0_15px_rgba(212,175,55,0.3)]"
               >
                 <Receipt size={14} /> Scan New Bill
               </Button>
@@ -785,7 +785,7 @@ export default function SmartSpendingDashboard() {
                   <div
                     key={b.id}
                     onClick={() => navigate(`/analysis/${b.id}`)}
-                    className="p-4 rounded-2xl border border-white/10 hover:border-[#D4AF37]/60 bg-white/[0.02] hover:bg-white/[0.06] transition-all cursor-pointer flex flex-col justify-between space-y-3 group shadow-md"
+                    className="p-4 rounded-2xl border border-slate-200 dark:border-white/10 hover:border-sky-500/60 dark:hover:border-[#D4AF37]/60 bg-slate-50/60 hover:bg-slate-100/80 dark:bg-white/[0.02] dark:hover:bg-white/[0.06] transition-all cursor-pointer flex flex-col justify-between space-y-3 group shadow-md"
                   >
                     <div className="space-y-1.5">
                       <div className="flex items-center justify-between">
@@ -793,27 +793,27 @@ export default function SmartSpendingDashboard() {
                               style={{ backgroundColor: `${catConfig.themeColor}20`, color: catConfig.themeColor, borderColor: `${catConfig.themeColor}40` }}>
                           <span>{catConfig.emoji}</span> {catConfig.shortLabel}
                         </span>
-                        <span className="text-[10px] font-mono text-slate-400">
+                        <span className="text-[10px] font-mono text-slate-500 dark:text-slate-400">
                           {b.date || 'Recent'}
                         </span>
                       </div>
 
-                      <h4 className="font-bold text-sm text-white group-hover:text-[#FDE68A] transition-colors truncate">
+                      <h4 className="font-bold text-sm text-slate-900 dark:text-white group-hover:text-sky-600 dark:group-hover:text-[#FDE68A] transition-colors truncate">
                         {name}
                       </h4>
-                      <p className="text-[11px] text-slate-400 font-mono truncate">
+                      <p className="text-[11px] text-slate-600 dark:text-slate-400 font-mono truncate">
                         Inv: {b.invoiceNo || 'N/A'} | Tax: ₹{tax.toFixed(2)}
                       </p>
                     </div>
 
-                    <div className="pt-2 border-t border-white/10 flex items-center justify-between">
+                    <div className="pt-2 border-t border-slate-200 dark:border-white/10 flex items-center justify-between">
                       <div>
-                        <span className="text-[10px] text-slate-400 uppercase font-bold block">Total Billed</span>
+                        <span className="text-[10px] text-slate-500 dark:text-slate-400 uppercase font-bold block">Total Billed</span>
                         <span className="text-base font-bold font-mono text-[#10B981]">
                           ₹{total.toFixed(2)}
                         </span>
                       </div>
-                      <span className="text-xs text-[#D4AF37] font-semibold flex items-center gap-0.5 group-hover:translate-x-0.5 transition-transform">
+                      <span className="text-xs text-sky-600 dark:text-[#D4AF37] font-semibold flex items-center gap-0.5 group-hover:translate-x-0.5 transition-transform">
                         Audit Verdict <ArrowUpRight size={14} />
                       </span>
                     </div>
@@ -828,30 +828,30 @@ export default function SmartSpendingDashboard() {
 
       {/* Demand for Refund / CCPA Waiver Notice Modal */}
       {showRefundModal && (
-        <div className="fixed inset-0 z-50 bg-[#050811]/90 backdrop-blur-2xl flex items-center justify-center p-4">
-          <div className="max-w-xl w-full p-6 md:p-8 space-y-5 rounded-3xl border border-[#D4AF37]/30 bg-[#0D1322]/95 text-white shadow-[0_20px_60px_rgba(0,0,0,0.9)] animate-fade-in relative">
-            <div className="flex justify-between items-center border-b border-white/10 pb-4">
+        <div className="fixed inset-0 z-50 bg-slate-900/60 dark:bg-[#050811]/90 backdrop-blur-2xl flex items-center justify-center p-4">
+          <div className="max-w-xl w-full p-6 md:p-8 space-y-5 rounded-3xl border border-sky-500/30 dark:border-[#D4AF37]/30 bg-white dark:bg-[#0D1322]/95 text-slate-900 dark:text-white shadow-[0_20px_60px_rgba(2,132,199,0.15)] dark:shadow-[0_20px_60px_rgba(0,0,0,0.9)] animate-fade-in relative">
+            <div className="flex justify-between items-center border-b border-slate-200 dark:border-white/10 pb-4">
               <div>
-                <h3 className="text-lg font-poppins font-bold flex items-center gap-2 text-white">
-                  <FileText className="text-[#D4AF37]" size={20} /> CCPA Service Fee Waiver Demand Notice
+                <h3 className="text-lg font-poppins font-bold flex items-center gap-2 text-slate-900 dark:text-white">
+                  <FileText className="text-sky-600 dark:text-[#D4AF37]" size={20} /> CCPA Service Fee Waiver Demand Notice
                 </h3>
-                <p className="text-xs text-slate-400">Formal legal letter under CCPA Guidelines 2022 to claim back ₹{snapshot.totalFees.toFixed(2)}</p>
+                <p className="text-xs text-slate-600 dark:text-slate-400">Formal legal letter under CCPA Guidelines 2022 to claim back ₹{snapshot.totalFees.toFixed(2)}</p>
               </div>
               <button 
                 onClick={() => setShowRefundModal(false)}
-                className="w-8 h-8 rounded-full flex items-center justify-center text-slate-400 hover:text-white hover:bg-white/10 transition-colors cursor-pointer"
+                className="w-8 h-8 rounded-full flex items-center justify-center text-slate-400 hover:text-slate-700 dark:hover:text-white hover:bg-black/5 dark:hover:bg-white/10 transition-colors cursor-pointer"
               >
                 <X size={18} />
               </button>
             </div>
 
             <div className="space-y-2">
-              <label className="text-xs font-bold block text-slate-300">Drafted Notice to Management:</label>
+              <label className="text-xs font-bold block text-slate-700 dark:text-slate-300">Drafted Notice to Management:</label>
               <textarea
                 readOnly
                 rows={9}
                 value={`Subject: Formal Demand for Refund / Waiver of Non-Mandatory Service Charge\n\nTo Management,\n\nI am writing regarding bills containing an accumulated Service Charge of ₹${snapshot.totalFees.toFixed(2)}.\n\nAs per CCPA (Central Consumer Protection Authority) guidelines dated July 4, 2022 under Section 18 of the Consumer Protection Act, 2019, service charges levied by restaurants are strictly voluntary and cannot be collected mandatorily.\n\nKindly process a refund of ₹${snapshot.totalFees.toFixed(2)} to my original payment method.\n\nThank you,\nTaxShield Verified Consumer`}
-                className="w-full p-3 font-mono text-xs rounded-xl border border-white/20 bg-slate-950 text-slate-200 focus:outline-none focus:border-[#D4AF37] leading-relaxed"
+                className="w-full p-3 font-mono text-xs rounded-xl border border-slate-300 dark:border-white/20 bg-slate-50 dark:bg-slate-950 text-slate-800 dark:text-slate-200 focus:outline-none focus:border-sky-500 dark:focus:border-[#D4AF37] leading-relaxed"
               />
             </div>
 
@@ -868,7 +868,7 @@ export default function SmartSpendingDashboard() {
                 variant="primary"
                 size="sm"
                 onClick={handleCopyRefundText}
-                className="font-bold shadow-[0_0_15px_rgba(212,175,55,0.4)]"
+                className="font-bold shadow-md shadow-sky-500/25 dark:shadow-[0_0_15px_rgba(212,175,55,0.4)]"
               >
                 {copiedRefund ? <Check size={14} /> : <Copy size={14} />}
                 {copiedRefund ? 'Copied Notice!' : 'Copy Notice Text'}

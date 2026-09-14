@@ -46,7 +46,7 @@ function metalColors(themeMode, activeTheme) {
     }
   }
   return { 
-    tint: '#0284C7', back: '#E8F4FD',
+    tint: '#0284C7', back: '#FFFFFF',
     repetition: 4, softness: 0.5, distortion: 0.35,
     contour: 0.5, shiftRed: -0.1, shiftBlue: 0.25, angle: 150,
   }
@@ -81,7 +81,7 @@ export default function LiquidMetalHero({
   return (
     <section
       className={cn(
-        'relative min-h-[92vh] flex items-center overflow-hidden',
+        'relative min-h-[92vh] flex items-center overflow-hidden bg-white dark:bg-transparent',
         className
       )}
     >
@@ -111,17 +111,20 @@ export default function LiquidMetalHero({
           )}
         </Suspense>
 
-        {/* Paper-grain texture overlay */}
-        <div className="absolute inset-0 pointer-events-none paper-grain" />
-
-        {/* Multi-layer vignette for depth */}
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_80%_at_50%_0%,rgba(212,175,55,0.08)_0%,transparent_60%)]" />
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_30%_20%,_rgba(138,109,27,0.05)_0%,_transparent_50%),_radial-gradient(ellipse_at_70%_80%,_rgba(13,148,136,0.04)_0%,_transparent_50%)]" />
+        {/* Paper-grain texture overlay in dark mode */}
+        {activeTheme === 'dark' && (
+          <>
+            <div className="absolute inset-0 pointer-events-none paper-grain" />
+            {/* Multi-layer vignette for depth */}
+            <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_80%_at_50%_0%,rgba(212,175,55,0.08)_0%,transparent_60%)]" />
+            <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_30%_20%,_rgba(138,109,27,0.05)_0%,_transparent_50%),_radial-gradient(ellipse_at_70%_80%,_rgba(13,148,136,0.04)_0%,_transparent_50%)]" />
+          </>
+        )}
 
         {/* Bottom fade to page background */}
         <div
           className="absolute bottom-0 left-0 right-0 h-40 pointer-events-none"
-          style={{ background: 'linear-gradient(to bottom, transparent, var(--background, #050811))' }}
+          style={{ background: activeTheme === 'light' ? 'linear-gradient(to bottom, transparent, #FFFFFF)' : 'linear-gradient(to bottom, transparent, var(--background, #050811))' }}
         />
       </div>
 
@@ -141,11 +144,11 @@ export default function LiquidMetalHero({
               className="inline-flex items-center gap-2 px-4 py-2 rounded-full border backdrop-blur-md mb-8"
               style={{
                 background: 'color-mix(in srgb, var(--bg-card, rgba(13,19,34,0.85)) 60%, transparent)',
-                borderColor: 'var(--border-gold, rgba(212,175,55,0.45))',
-                boxShadow: '0 0 24px rgba(212,175,55,0.18), inset 0 1px 0 rgba(255,255,255,0.06)',
+                borderColor: 'var(--border-gold, rgba(2,132,199,0.45))',
+                boxShadow: activeTheme === 'light' ? '0 0 24px rgba(2,132,199,0.2), inset 0 1px 0 rgba(255,255,255,0.8)' : '0 0 24px rgba(212,175,55,0.18), inset 0 1px 0 rgba(255,255,255,0.06)',
               }}
             >
-              <Sparkles size={13} style={{ color: 'var(--accent-gold, #D4AF37)' }} />
+              <Sparkles size={13} className="text-sky-600 dark:text-[#D4AF37]" />
               <span className="text-xs font-bold uppercase tracking-widest font-poppins vision-pro-text-gold">{badge}</span>
             </motion.div>
           )}
@@ -170,8 +173,12 @@ export default function LiquidMetalHero({
             custom={1.5}
             className="w-20 h-[3px] mx-auto mb-8 rounded-full"
             style={{
-              background: 'linear-gradient(90deg, var(--accent-gold, #D4AF37) 0%, var(--accent-emerald, #10B981) 100%)',
-              boxShadow: '0 0 20px rgba(212,175,55,0.5)',
+              background: activeTheme === 'light'
+                ? 'linear-gradient(90deg, #0284C7 0%, #10B981 100%)'
+                : 'linear-gradient(90deg, var(--accent-gold, #D4AF37) 0%, var(--accent-emerald, #10B981) 100%)',
+              boxShadow: activeTheme === 'light'
+                ? '0 0 20px rgba(2,132,199,0.5)'
+                : '0 0 20px rgba(212,175,55,0.5)',
             }}
           />
 
@@ -182,8 +189,7 @@ export default function LiquidMetalHero({
               initial="hidden"
               animate={canAnimate ? 'visible' : 'hidden'}
               custom={2}
-              className="text-lg sm:text-xl md:text-2xl font-sans leading-relaxed max-w-2xl mx-auto mb-12"
-              style={{ color: 'var(--text-muted, #94A3B8)' }}
+              className="text-lg sm:text-xl md:text-2xl font-sans leading-relaxed max-w-2xl mx-auto mb-12 text-slate-700 dark:text-slate-300 font-medium"
             >
               {subtitle}
             </motion.p>
@@ -202,7 +208,7 @@ export default function LiquidMetalHero({
                 variant="primary"
                 size="lg"
                 onClick={onPrimaryCtaClick}
-                className="w-full sm:w-auto font-bold btn-3d elev-3 px-10 py-4 text-base shadow-[0_0_35px_rgba(212,175,55,0.45)]"
+                className="w-full sm:w-auto font-bold btn-3d elev-3 px-10 py-4 text-base shadow-lg shadow-sky-500/25 dark:shadow-[0_0_35px_rgba(212,175,55,0.45)]"
               >
                 {primaryCtaLabel} <ArrowRight size={20} />
               </Button>
@@ -212,7 +218,7 @@ export default function LiquidMetalHero({
                 variant="secondary"
                 size="lg"
                 onClick={onSecondaryCtaClick}
-                className="w-full sm:w-auto font-semibold btn-3d px-10 py-4 text-base"
+                className="w-full sm:w-auto font-semibold btn-3d px-10 py-4 text-base bg-white dark:bg-transparent border border-slate-200 dark:border-white/15 text-slate-800 dark:text-white hover:bg-slate-50"
               >
                 {secondaryCtaLabel}
               </Button>
@@ -233,9 +239,9 @@ export default function LiquidMetalHero({
                   key={i}
                   className="flex items-center gap-2 px-4 py-2 rounded-full"
                   style={{
-                    background: 'rgba(255,255,255,0.06)',
-                    border: '1px solid rgba(255,255,255,0.12)',
-                    color: 'var(--text-muted, #94A3B8)',
+                    background: activeTheme === 'light' ? 'rgba(2, 132, 199, 0.07)' : 'rgba(255,255,255,0.06)',
+                    border: activeTheme === 'light' ? '1px solid rgba(2, 132, 199, 0.2)' : '1px solid rgba(255,255,255,0.12)',
+                    color: activeTheme === 'light' ? '#0F172A' : 'var(--text-muted, #94A3B8)',
                     backdropFilter: 'blur(8px)',
                   }}
                 >
@@ -254,7 +260,11 @@ export default function LiquidMetalHero({
           <span className="text-[10px] font-mono uppercase tracking-widest" style={{ color: 'var(--text-muted)' }}>Scroll</span>
           <div
             className="w-px h-8 rounded-full"
-            style={{ background: 'linear-gradient(to bottom, var(--accent-gold, #D4AF37), transparent)' }}
+            style={{
+              background: activeTheme === 'light'
+                ? 'linear-gradient(to bottom, #0284C7, transparent)'
+                : 'linear-gradient(to bottom, var(--accent-gold, #D4AF37), transparent)',
+            }}
           />
         </div>
       )}

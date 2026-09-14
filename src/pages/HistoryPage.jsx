@@ -66,7 +66,7 @@ export default function HistoryPage() {
               </p>
             </div>
 
-            <Button variant="primary" size="md" to="/spending" className="shadow-[0_0_20px_rgba(212,175,55,0.3)]">
+            <Button variant="primary" size="md" to="/spending" className="shadow-md shadow-sky-500/25 dark:shadow-[0_0_20px_rgba(212,175,55,0.3)]">
               <Wallet size={16} /> View Spending
             </Button>
           </div>
@@ -81,7 +81,7 @@ export default function HistoryPage() {
                   <button
                     onClick={() => setActiveTab('ALL')}
                     className={`px-3.5 py-2 rounded-xl transition-all cursor-pointer ${
-                      activeTab === 'ALL' ? 'bg-gradient-to-r from-[#D4AF37] to-[#FDE68A] text-slate-950 font-bold shadow-[0_0_15px_rgba(212,175,55,0.4)]' : 'bg-black/5 dark:bg-white/5 text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-black/10 dark:hover:bg-white/10 border border-slate-200 dark:border-white/5'
+                      activeTab === 'ALL' ? 'bg-sky-600 text-white font-bold shadow-md shadow-sky-500/30 dark:from-[#D4AF37] dark:to-[#FDE68A] dark:text-slate-950 dark:shadow-[0_0_15px_rgba(212,175,55,0.4)] dark:bg-gradient-to-r' : 'bg-black/5 dark:bg-white/5 text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-black/10 dark:hover:bg-white/10 border border-slate-200 dark:border-white/5'
                     }`}
                   >
                     All Bills ({bills.length})
@@ -89,7 +89,7 @@ export default function HistoryPage() {
                   <button
                     onClick={() => setActiveTab('VERIFIED')}
                     className={`px-3.5 py-2 rounded-xl transition-all cursor-pointer ${
-                      activeTab === 'VERIFIED' ? 'bg-[#10B981] text-slate-950 font-bold shadow-[0_0_15px_rgba(16,185,129,0.4)]' : 'bg-black/5 dark:bg-white/5 text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-black/10 dark:hover:bg-white/10 border border-slate-200 dark:border-white/5'
+                      activeTab === 'VERIFIED' ? 'bg-[#10B981] text-white font-bold shadow-md shadow-emerald-500/25' : 'bg-black/5 dark:bg-white/5 text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-black/10 dark:hover:bg-white/10 border border-slate-200 dark:border-white/5'
                     }`}
                   >
                     Verified ({bills.filter(b => getStatusType(b) === 'VERIFIED').length})
@@ -97,7 +97,7 @@ export default function HistoryPage() {
                   <button
                     onClick={() => setActiveTab('REVIEW')}
                     className={`px-3.5 py-2 rounded-xl transition-all cursor-pointer ${
-                      activeTab === 'REVIEW' ? 'bg-amber-500 text-slate-950 font-bold shadow-[0_0_15px_rgba(245,158,11,0.4)]' : 'bg-black/5 dark:bg-white/5 text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-black/10 dark:hover:bg-white/10 border border-slate-200 dark:border-white/5'
+                      activeTab === 'REVIEW' ? 'bg-amber-500 text-white font-bold shadow-md shadow-amber-500/25' : 'bg-black/5 dark:bg-white/5 text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-black/10 dark:hover:bg-white/10 border border-slate-200 dark:border-white/5'
                     }`}
                   >
                     Review Recommended ({bills.filter(b => getStatusType(b) === 'REVIEW_RECOMMENDED').length})
@@ -105,7 +105,7 @@ export default function HistoryPage() {
                   <button
                     onClick={() => setActiveTab('OVERCHARGE')}
                     className={`px-3.5 py-2 rounded-xl transition-all cursor-pointer ${
-                      activeTab === 'OVERCHARGE' ? 'bg-rose-500 text-white font-bold shadow-[0_0_15px_rgba(244,63,94,0.4)]' : 'bg-black/5 dark:bg-white/5 text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-black/10 dark:hover:bg-white/10 border border-slate-200 dark:border-white/5'
+                      activeTab === 'OVERCHARGE' ? 'bg-rose-500 text-white font-bold shadow-md shadow-rose-500/25' : 'bg-black/5 dark:bg-white/5 text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-black/10 dark:hover:bg-white/10 border border-slate-200 dark:border-white/5'
                     }`}
                   >
                     Potential Overcharge ({bills.filter(b => getStatusType(b) === 'POTENTIAL_OVERCHARGE').length})
@@ -140,12 +140,12 @@ export default function HistoryPage() {
                   const statusText = bill.statusText || (bill.serviceChargeIllegal ? 'Voluntary Service Fee' : '100% Tax Verified')
 
                   return (
-                    <div key={bill.id} className="vault-glass border border-slate-200/50 dark:border-white/10 hover:border-[#D4AF37]/50 rounded-3xl p-6 flex flex-col justify-between space-y-4 transition-all duration-300 shadow-xl group">
+                    <div key={bill.id} className="vault-glass border border-slate-200/50 dark:border-white/10 hover:border-sky-500/50 dark:hover:border-[#D4AF37]/50 rounded-3xl p-6 flex flex-col justify-between space-y-4 transition-all duration-300 shadow-xl group">
                       <div className="space-y-3">
                         <div className="flex items-start justify-between">
                           <div>
-                            <span className="text-[10px] uppercase font-bold text-[#B45309] dark:text-[#D4AF37] font-mono tracking-wider">{categoryName}</span>
-                            <h3 className="font-poppins font-bold text-base text-slate-900 dark:text-white group-hover:text-[#B45309] dark:group-hover:text-[#FDE68A] transition-colors">{merchantName}</h3>
+                            <span className="text-[10px] uppercase font-bold text-sky-700 dark:text-[#D4AF37] font-mono tracking-wider">{categoryName}</span>
+                            <h3 className="font-poppins font-bold text-base text-slate-900 dark:text-white group-hover:text-sky-600 dark:group-hover:text-[#FDE68A] transition-colors">{merchantName}</h3>
                           </div>
                           <StatusBadge status={statusType} text={statusText} size="sm" />
                         </div>
@@ -175,7 +175,7 @@ export default function HistoryPage() {
 
                       <Link
                         to={`/analysis/${bill.id}`}
-                        className="w-full py-2.5 rounded-xl border border-[#D4AF37]/30 bg-[#D4AF37]/10 hover:bg-[#D4AF37]/20 text-[#B45309] dark:text-[#FDE68A] text-xs font-poppins font-semibold flex items-center justify-center gap-1.5 transition-colors"
+                        className="w-full py-2.5 rounded-xl border border-sky-500/30 dark:border-[#D4AF37]/30 bg-sky-500/10 dark:bg-[#D4AF37]/10 hover:bg-sky-500/20 dark:hover:bg-[#D4AF37]/20 text-sky-700 dark:text-[#FDE68A] text-xs font-poppins font-semibold flex items-center justify-center gap-1.5 transition-colors"
                       >
                         Inspect Analysis <ArrowUpRight size={14} />
                       </Link>

@@ -26,10 +26,10 @@ export default function Button({
   }
 
   const variantStyles = {
-    primary: 'auth-cta text-slate-950 font-bold',
-    secondary: 'vault-glass text-slate-900 dark:text-white hover:border-[#D4AF37]/50 hover:bg-black/5 dark:hover:bg-white/10',
-    outline: 'bg-transparent hover:bg-black/5 dark:hover:bg-white/5 text-[#B45309] dark:text-[#FDE68A] border border-[#D4AF37]/50',
-    ghost: 'text-slate-700 dark:text-slate-300 hover:text-[#B45309] dark:hover:text-[#FDE68A] hover:bg-black/5 dark:hover:bg-white/5',
+    primary: 'auth-cta font-bold text-white dark:text-slate-950',
+    secondary: 'vault-glass text-slate-900 dark:text-white hover:border-sky-500/50 dark:hover:border-[#D4AF37]/50 hover:bg-black/5 dark:hover:bg-white/10',
+    outline: 'bg-transparent hover:bg-black/5 dark:hover:bg-white/5 text-sky-700 dark:text-[#FDE68A] border border-sky-500/50 dark:border-[#D4AF37]/50',
+    ghost: 'text-slate-700 dark:text-slate-300 hover:text-sky-600 dark:hover:text-[#FDE68A] hover:bg-black/5 dark:hover:bg-white/5',
     danger: 'bg-rose-600 hover:bg-rose-500 text-white shadow-lg shadow-rose-900/30',
   }
 
