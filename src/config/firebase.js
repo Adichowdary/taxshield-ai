@@ -4,7 +4,7 @@ import { getAuth, GoogleAuthProvider } from 'firebase/auth'
 
 // Firebase Configuration for project taxshield-87bf9
 const firebaseConfig = {
-  apiKey: (typeof import.meta !== 'undefined' && import.meta.env?.VITE_FIREBASE_API_KEY) || "AIzaSy_demo",
+  apiKey: (typeof import.meta !== 'undefined' && import.meta.env?.VITE_FIREBASE_API_KEY) || "AIzaSyDiUQWUoCsxR5v2Fn2--pw15cqysHZqmzA",
   authDomain: "taxshield-87bf9.firebaseapp.com",
   projectId: "taxshield-87bf9",
   storageBucket: "taxshield-87bf9.firebasestorage.app",
