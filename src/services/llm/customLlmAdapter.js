@@ -69,7 +69,39 @@ export async function analyzeWithCustomLlm(billText, options = {}) {
     throw new Error(`Local TaxShield AI unavailable at ${endpoint}: ${healthErr.message}`);
   }
 
-  const apiKey = options.apiKey || (typeof import.meta !== 'undefined' && import.meta.env?.VITE_CUSTOM_LLM_API_KEY) || (typeof process !== 'undefined' && process.env?.VITE_CUSTOM_LLM_API_KEY) || "";
+  // 1. Probe dedicated backend analysis endpoint first (handles mobile and web clients)
+  try {
+    const backendUrl = (typeof window !== 'undefined' && window.location?.origin)
+      ? `${window.location.origin}/api/bills/analyze`
+      : 'http://localhost:5000/api/bills/analyze';
+
+    const backendController = new AbortController();
+    const backendTimeout = setTimeout(() => backendController.abort(), 20000);
+
+    const backendRes = await fetch(backendUrl, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      signal: backendController.signal,
+      body: JSON.stringify({ billText, options }),
+    }).catch(() => null);
+
+    clearTimeout(backendTimeout);
+
+    if (backendRes && backendRes.ok) {
+      const backendJson = await backendRes.json();
+      if (backendJson?.success && backendJson?.data) {
+        return {
+          rawText: JSON.stringify(backendJson.data),
+          provider: "custom",
+          model: modelName,
+          endpoint: backendUrl,
+          backendEnriched: true,
+        };
+      }
+    }
+  } catch {
+    // Proceed to direct Ollama endpoint
+  }
 
   const userPrompt = buildBillAnalysisPrompt(billText);
   const completionsUrl = `${endpoint}/chat/completions`;
