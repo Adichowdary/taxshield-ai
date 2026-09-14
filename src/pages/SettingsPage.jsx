@@ -1,7 +1,6 @@
 import { useState, useEffect, useCallback } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
 import Navbar from '../components/Navbar'
-import MobileNav from '../components/MobileNav'
 import Footer from '../components/Footer'
 import Button from '../components/shared/Button'
 import { useAuth } from '../context/AuthContext'
@@ -733,7 +732,6 @@ export default function SettingsPage() {
       </main>
 
       <Footer />
-      <MobileNav />
     </div>
   )
 }

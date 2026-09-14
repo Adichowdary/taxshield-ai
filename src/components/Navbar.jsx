@@ -6,6 +6,7 @@ import Container from './shared/Container'
 import { useAuth } from '../context/AuthContext'
 import { useTheme } from '../context/ThemeContext'
 import ThemeToggle from './ThemeToggle'
+import MobileNav from './MobileNav'
 
 export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false)
@@ -60,7 +61,7 @@ export default function Navbar() {
   }
 
   return (
-    <header className={`fixed top-0 left-0 right-0 z-50 glass-nav transition-all duration-300 tz-60 ${
+    <header className={`fixed top-0 left-0 right-0 z-50 glass-nav transition-all duration-300 ${
       scrolled ? 'backdrop-blur-2xl elev-2 border-b border-[var(--border-strong)]' : ''
     }`}>
       {/* Top Scroll Depth Progress Indicator Bar */}
@@ -366,6 +367,9 @@ export default function Navbar() {
           </div>
         )}
       </Container>
+
+      {/* Top Sticky/Fixed Mobile Navigation Bar */}
+      <MobileNav />
     </header>
   )
 }

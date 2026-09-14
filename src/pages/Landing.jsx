@@ -12,7 +12,6 @@ import SecuritySection from '../components/SecuritySection'
 import FAQSection from '../components/FAQSection'
 import CTA from '../components/CTA'
 import Footer from '../components/Footer'
-import MobileNav from '../components/MobileNav'
 
 export default function Landing() {
   return (
@@ -50,7 +49,6 @@ export default function Landing() {
       </main>
 
       <Footer />
-      <MobileNav />
     </div>
   )
 }

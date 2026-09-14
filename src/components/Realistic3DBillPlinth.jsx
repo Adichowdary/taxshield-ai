@@ -512,7 +512,7 @@ Consumer / TaxShield Audit Terminal`
   const scPct = Math.max(0, 100 - subtotalPct - gstPct)
 
   return (
-    <div id="scanner-section" className="vault-glass rounded-3xl p-6 sm:p-8 border border-slate-200/70 dark:border-white/10 shadow-2xl relative overflow-hidden transition-all duration-300">
+    <div id="scanner-section" className="vault-glass rounded-3xl p-4 sm:p-6 md:p-8 border border-slate-200/70 dark:border-white/10 shadow-2xl relative overflow-hidden transition-all duration-300">
       {/* Top Hairline Specular Accent */}
       <div className="absolute top-0 inset-x-0 h-[2px] bg-gradient-to-r from-transparent via-sky-500 dark:via-[#D4AF37] to-transparent" />
 
@@ -532,12 +532,12 @@ Consumer / TaxShield Audit Terminal`
         </div>
 
         {/* Preset Switcher Tabs */}
-        <div className="flex items-center gap-1.5 p-1 rounded-2xl bg-slate-100/90 dark:bg-black/40 border border-slate-200/70 dark:border-white/10 self-start sm:self-auto shadow-inner">
+        <div className="flex items-center gap-1.5 p-1 rounded-2xl bg-slate-100/90 dark:bg-black/40 border border-slate-200/70 dark:border-white/10 self-start sm:self-auto shadow-inner overflow-x-auto max-w-full scrollbar-none">
           {REAL_BILL_PRESETS.map((preset, idx) => (
             <button
               key={preset.id}
               onClick={() => handleSwitchPreset(idx)}
-              className={`px-3.5 py-1.5 rounded-xl text-xs font-semibold font-poppins transition-all cursor-pointer flex items-center gap-1.5 ${
+              className={`px-3 sm:px-3.5 py-1.5 rounded-xl text-xs font-semibold font-poppins transition-all cursor-pointer flex items-center gap-1.5 shrink-0 whitespace-nowrap ${
                 currentPresetIndex === idx
                   ? 'bg-white dark:bg-[#141C2E] text-sky-600 dark:text-white shadow-md font-bold border border-sky-200 dark:border-white/15'
                   : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
@@ -587,16 +587,16 @@ Consumer / TaxShield Audit Terminal`
 
             {/* Active Hotspot Callout Modal */}
             {activeHotspot && (
-              <div className="absolute bottom-4 inset-x-4 z-30 p-3.5 rounded-2xl bg-slate-950/95 dark:bg-[#0D1322]/95 border border-sky-500/40 dark:border-[#D4AF37]/40 text-white shadow-2xl backdrop-blur-xl animate-fade-in flex items-center justify-between gap-3">
-                <div className="flex items-center gap-3">
-                  <div className={`w-9 h-9 rounded-xl flex items-center justify-center shrink-0 ${
+              <div className="absolute bottom-3 inset-x-2 sm:inset-x-4 z-30 p-3 rounded-xl sm:rounded-2xl bg-slate-950/95 dark:bg-[#0D1322]/95 border border-sky-500/40 dark:border-[#D4AF37]/40 text-white shadow-2xl backdrop-blur-xl animate-fade-in flex items-center justify-between gap-2.5">
+                <div className="flex items-center gap-2.5 min-w-0">
+                  <div className={`w-8 h-8 sm:w-9 sm:h-9 rounded-xl flex items-center justify-center shrink-0 ${
                     activeHotspot.status === 'flagged' ? 'bg-rose-500/20 text-rose-400' : 'bg-emerald-500/20 text-emerald-400'
                   }`}>
-                    {activeHotspot.status === 'flagged' ? <AlertTriangle size={18} /> : <CheckCircle2 size={18} />}
+                    {activeHotspot.status === 'flagged' ? <AlertTriangle size={16} /> : <CheckCircle2 size={16} />}
                   </div>
-                  <div>
-                    <h4 className="font-bold text-xs">{activeHotspot.label}: <span className="font-mono text-sky-400 dark:text-[#FDE68A]">{activeHotspot.value}</span></h4>
-                    <p className="text-[11px] text-slate-300 font-sans">
+                  <div className="min-w-0">
+                    <h4 className="font-bold text-xs truncate">{activeHotspot.label}: <span className="font-mono text-sky-400 dark:text-[#FDE68A]">{activeHotspot.value}</span></h4>
+                    <p className="text-[10px] sm:text-[11px] text-slate-300 font-sans line-clamp-2 leading-snug">
                       {activeHotspot.status === 'flagged' 
                         ? 'Flagged statutory discrepancy. Non-mandatory fee violates CCPA 2022 guidelines.'
                         : 'Statutory mathematical audit passed with 99.8% verification.'}
@@ -605,7 +605,7 @@ Consumer / TaxShield Audit Terminal`
                 </div>
                 <button
                   onClick={() => setActiveHotspot(null)}
-                  className="text-xs text-slate-400 hover:text-white px-2 py-1 cursor-pointer"
+                  className="text-xs text-slate-400 hover:text-white p-1 cursor-pointer shrink-0"
                 >
                   ✕
                 </button>
@@ -722,7 +722,7 @@ Consumer / TaxShield Audit Terminal`
         <div className="lg:col-span-5 space-y-5">
           
           {/* Riotters Financial Balance Banner */}
-          <div className="p-5 rounded-2xl bg-gradient-to-br from-white to-slate-50 dark:from-[#0D1322] dark:to-[#050811] border border-slate-200/80 dark:border-white/10 shadow-lg space-y-3">
+          <div className="p-4 sm:p-5 rounded-2xl bg-white dark:bg-[#0D1322] border border-slate-200/80 dark:border-white/10 shadow-lg space-y-3">
             <div className="flex items-center justify-between text-xs">
               <span className="font-mono text-[11px] font-bold text-sky-700 dark:text-[#D4AF37] uppercase tracking-wider">
                 {currentBill.merchant}
@@ -821,7 +821,7 @@ Consumer / TaxShield Audit Terminal`
               </div>
 
               {/* Legend */}
-              <div className="flex items-center justify-between text-[10px] font-mono text-slate-600 dark:text-slate-400 pt-0.5">
+              <div className="flex flex-wrap items-center justify-between gap-1 text-[9px] sm:text-[10px] font-mono text-slate-600 dark:text-slate-400 pt-0.5">
                 <span className="flex items-center gap-1">
                   <span className="w-2 h-2 rounded-full bg-slate-900 dark:bg-slate-200" /> Base ({subtotalPct}%)
                 </span>
@@ -836,20 +836,20 @@ Consumer / TaxShield Audit Terminal`
 
             {/* Line items list */}
             <div className="divide-y divide-slate-200/70 dark:divide-white/10 text-xs font-mono space-y-2 pt-1">
-              <div className="flex justify-between pt-1 text-slate-700 dark:text-slate-300">
-                <span>Base Subtotal:</span>
-                <span className="font-bold text-slate-900 dark:text-white">₹{currentBill.subtotal.toFixed(2)}</span>
+              <div className="flex items-center justify-between gap-2 pt-1 text-slate-700 dark:text-slate-300">
+                <span className="truncate">Base Subtotal:</span>
+                <span className="font-bold text-slate-900 dark:text-white shrink-0">₹{currentBill.subtotal.toFixed(2)}</span>
               </div>
-              <div className="flex justify-between pt-2 text-slate-700 dark:text-slate-300">
-                <span>Tax Bracket ({currentBill.gstRate.split(' ')[0]}):</span>
-                <span className="font-bold text-emerald-600 dark:text-emerald-400">₹{currentBill.gstAmount.toFixed(2)}</span>
+              <div className="flex items-center justify-between gap-2 pt-2 text-slate-700 dark:text-slate-300">
+                <span className="truncate">Tax Bracket ({currentBill.gstRate.split(' ')[0]}):</span>
+                <span className="font-bold text-emerald-600 dark:text-emerald-400 shrink-0">₹{currentBill.gstAmount.toFixed(2)}</span>
               </div>
               {currentBill.serviceCharge > 0 && (
-                <div className="flex justify-between pt-2 text-rose-600 dark:text-rose-400 font-bold bg-rose-500/10 p-2 rounded-lg">
-                  <span className="flex items-center gap-1">
-                    <AlertTriangle size={13} /> Surcharge Flagged:
+                <div className="flex items-center justify-between gap-2 pt-2 text-rose-600 dark:text-rose-400 font-bold bg-rose-500/10 p-2 rounded-lg">
+                  <span className="flex items-center gap-1 truncate">
+                    <AlertTriangle size={13} className="shrink-0" /> Surcharge Flagged:
                   </span>
-                  <span>₹{currentBill.serviceCharge.toFixed(2)}</span>
+                  <span className="shrink-0">₹{currentBill.serviceCharge.toFixed(2)}</span>
                 </div>
               )}
             </div>

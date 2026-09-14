@@ -1,5 +1,4 @@
 import Navbar from '../components/Navbar'
-import MobileNav from '../components/MobileNav'
 import Footer from '../components/Footer'
 import BillComparison from '../components/BillComparison'
 
@@ -26,7 +25,6 @@ export default function ComparePage() {
       </main>
 
       <Footer />
-      <MobileNav />
     </div>
   )
 }

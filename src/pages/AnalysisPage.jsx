@@ -1,7 +1,6 @@
 import { useState, useMemo, useEffect } from 'react'
 import { useParams, Link } from 'react-router-dom'
 import Navbar from '../components/Navbar'
-import MobileNav from '../components/MobileNav'
 import Footer from '../components/Footer'
 import Container from '../components/shared/Container'
 import StatusBadge from '../components/shared/StatusBadge'
@@ -526,7 +525,6 @@ export default function AnalysisPage() {
       </main>
 
       <Footer />
-      <MobileNav />
     </div>
   )
 }

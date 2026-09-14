@@ -1,5 +1,4 @@
 import Navbar from '../components/Navbar'
-import MobileNav from '../components/MobileNav'
 import Footer from '../components/Footer'
 import { Lock, EyeOff, Key } from 'lucide-react'
 
@@ -79,7 +78,6 @@ export default function SecurityPage() {
       </main>
 
       <Footer />
-      <MobileNav />
     </div>
   )
 }

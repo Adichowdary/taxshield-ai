@@ -1,7 +1,6 @@
 import { useState, useRef, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
 import Navbar from '../components/Navbar'
-import MobileNav from '../components/MobileNav'
 import Footer from '../components/Footer'
 import Container from '../components/shared/Container'
 import BillUploader from '../components/BillUploader'
@@ -141,7 +140,6 @@ Total Amount: ₹736.00`
       </main>
 
       <Footer />
-      <MobileNav />
     </div>
   )
 }

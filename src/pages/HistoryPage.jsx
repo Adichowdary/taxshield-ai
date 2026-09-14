@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react'
 import Navbar from '../components/Navbar'
-import MobileNav from '../components/MobileNav'
 import Footer from '../components/Footer'
 import StatusBadge from '../components/shared/StatusBadge'
 import Button from '../components/shared/Button'
@@ -172,12 +171,14 @@ export default function HistoryPage() {
                           </div>
                         )}
 
-                        <div className="flex items-start justify-between">
-                          <div>
-                            <span className="text-[10px] uppercase font-bold text-sky-700 dark:text-[#D4AF37] font-mono tracking-wider">{categoryName}</span>
-                            <h3 className="font-poppins font-bold text-base text-slate-900 dark:text-white group-hover:text-sky-600 dark:group-hover:text-[#FDE68A] transition-colors">{merchantName}</h3>
+                        <div className="flex items-start justify-between gap-2.5">
+                          <div className="min-w-0">
+                            <span className="text-[10px] uppercase font-bold text-sky-700 dark:text-[#D4AF37] font-mono tracking-wider block truncate">{categoryName}</span>
+                            <h3 className="font-poppins font-bold text-base text-slate-900 dark:text-white group-hover:text-sky-600 dark:group-hover:text-[#FDE68A] transition-colors truncate">{merchantName}</h3>
                           </div>
-                          <StatusBadge status={statusType} text={statusText} size="sm" />
+                          <div className="shrink-0">
+                            <StatusBadge status={statusType} text={statusText} size="sm" />
+                          </div>
                         </div>
 
                         <div className="flex justify-between items-baseline py-2.5 border-y border-slate-200/50 dark:border-white/10 font-mono">
@@ -240,7 +241,6 @@ export default function HistoryPage() {
       </main>
 
       <Footer />
-      <MobileNav />
     </div>
   )
 }

@@ -1,7 +1,6 @@
 import { useState, useEffect, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
 import Navbar from '../components/Navbar'
-import MobileNav from '../components/MobileNav'
 import Footer from '../components/Footer'
 import Container from '../components/shared/Container'
 import Button from '../components/shared/Button'
@@ -898,7 +897,6 @@ export default function SmartSpendingDashboard() {
       )}
 
       <Footer />
-      <MobileNav />
     </div>
   )
 }

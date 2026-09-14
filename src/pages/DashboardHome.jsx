@@ -1,5 +1,4 @@
 import Navbar from '../components/Navbar'
-import MobileNav from '../components/MobileNav'
 import Footer from '../components/Footer'
 import StatusBadge from '../components/shared/StatusBadge'
 import Button from '../components/shared/Button'
@@ -15,7 +14,6 @@ import { useCountUp } from '../hooks/useCountUp'
 import TiltCard from '../components/shared/TiltCard'
 import AmbientBackground from '../components/shared/AmbientBackground'
 import Realistic3DBillPlinth from '../components/Realistic3DBillPlinth'
-import MobileHomeQuickHub from '../components/MobileHomeQuickHub'
 
 export default function DashboardHome() {
   const { currentUser } = useAuth()
@@ -71,14 +69,11 @@ export default function DashboardHome() {
 
       <Navbar />
 
-      <main className="flex-1 pt-28 pb-28 sm:pb-20 relative z-10">
+      <main className="flex-1 pt-32 sm:pt-28 pb-16 sm:pb-20 relative z-10">
         <Container className="space-y-6 sm:space-y-8">
           
-          {/* Mobile Home Quick Hub (PhonePe UPI-Style Balance/Scan Bar + Instagram-Style Story Avatars) */}
-          <MobileHomeQuickHub bills={bills} onTriggerScan={scrollToScanner} />
-
           {/* Header Greeting Card */}
-          <div className="hidden md:flex vault-glass border border-sky-500/25 dark:border-[#D4AF37]/30 rounded-3xl p-6 md:p-8 flex-col md:flex-row items-start md:items-center justify-between gap-6 relative overflow-hidden shadow-[0_20px_50px_rgba(2,132,199,0.08)] dark:shadow-[0_20px_50px_rgba(0,0,0,0.6)]">
+          <div className="vault-glass border border-sky-500/25 dark:border-[#D4AF37]/30 rounded-3xl p-5 sm:p-6 md:p-8 flex flex-col md:flex-row items-start md:items-center justify-between gap-5 sm:gap-6 relative overflow-hidden shadow-[0_20px_50px_rgba(2,132,199,0.08)] dark:shadow-[0_20px_50px_rgba(0,0,0,0.6)]">
             {/* Top specular accent */}
             <div className="absolute top-0 inset-x-0 h-[1.5px] bg-gradient-to-r from-transparent via-sky-500 dark:via-[#D4AF37] to-transparent" />
 
@@ -113,63 +108,63 @@ export default function DashboardHome() {
             <Realistic3DBillPlinth />
           </div>
 
-          {/* Metric Cards */}
-          <div ref={cardsRef} className={`grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 reveal-group persp-1000 ${cardsVisible ? 'is-visible' : ''}`}>
+          {/* Metric Cards - 2-col on mobile, 4-col on desktop */}
+          <div ref={cardsRef} className={`grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-5 reveal-group persp-1000 ${cardsVisible ? 'is-visible' : ''}`}>
             
             {/* Metric 1 */}
-            <TiltCard className="vault-glass border border-slate-200/50 dark:border-white/10 hover:border-[#38BDF8]/40 rounded-2xl p-5 space-y-3 shadow-xl transition-all duration-300 group">
-              <div className="flex items-center justify-between text-xs font-semibold uppercase tracking-wider text-slate-600 dark:text-slate-300">
-                <span>Audited Invoices</span>
-                <div className="w-8 h-8 rounded-lg bg-[#38BDF8]/10 border border-[#38BDF8]/30 flex items-center justify-center text-[#38BDF8] group-hover:scale-110 transition-transform">
-                  <FileText size={16} className="tz-30" />
+            <TiltCard className="vault-glass border border-slate-200/50 dark:border-white/10 hover:border-[#38BDF8]/40 rounded-2xl p-3.5 sm:p-5 space-y-2 sm:space-y-3 shadow-xl transition-all duration-300 group">
+              <div className="flex items-center justify-between text-[10px] sm:text-xs font-semibold uppercase tracking-wider text-slate-600 dark:text-slate-300">
+                <span className="truncate">Audited Invoices</span>
+                <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-lg bg-[#38BDF8]/10 border border-[#38BDF8]/30 flex items-center justify-center text-[#38BDF8] group-hover:scale-110 transition-transform shrink-0">
+                  <FileText size={15} className="tz-30" />
                 </div>
               </div>
-              <div className="text-3xl font-bold font-mono text-slate-900 dark:text-white tz-30 tracking-tight">
+              <div className="text-xl sm:text-3xl font-bold font-mono text-slate-900 dark:text-white tz-30 tracking-tight truncate">
                 {Math.round(animatedScanned)}
               </div>
-              <p className="text-[11px] text-slate-500 dark:text-slate-400">Total sessions monitored</p>
+              <p className="text-[10px] sm:text-[11px] text-slate-500 dark:text-slate-400 truncate">Total sessions monitored</p>
             </TiltCard>
 
             {/* Metric 2 */}
-            <TiltCard className="vault-glass border border-slate-200/50 dark:border-white/10 hover:border-[#10B981]/40 rounded-2xl p-5 space-y-3 shadow-xl transition-all duration-300 group">
-              <div className="flex items-center justify-between text-xs font-semibold uppercase tracking-wider text-slate-600 dark:text-slate-300">
-                <span>Statutory Compliant</span>
-                <div className="w-8 h-8 rounded-lg bg-[#10B981]/10 border border-[#10B981]/30 flex items-center justify-center text-[#10B981] group-hover:scale-110 transition-transform">
-                  <ShieldCheck size={16} className="tz-30" />
+            <TiltCard className="vault-glass border border-slate-200/50 dark:border-white/10 hover:border-[#10B981]/40 rounded-2xl p-3.5 sm:p-5 space-y-2 sm:space-y-3 shadow-xl transition-all duration-300 group">
+              <div className="flex items-center justify-between text-[10px] sm:text-xs font-semibold uppercase tracking-wider text-slate-600 dark:text-slate-300">
+                <span className="truncate">Statutory Compliant</span>
+                <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-lg bg-[#10B981]/10 border border-[#10B981]/30 flex items-center justify-center text-[#10B981] group-hover:scale-110 transition-transform shrink-0">
+                  <ShieldCheck size={15} className="tz-30" />
                 </div>
               </div>
-              <div className="text-3xl font-bold font-mono text-[#10B981] tz-30 tracking-tight">
+              <div className="text-xl sm:text-3xl font-bold font-mono text-[#10B981] tz-30 tracking-tight truncate">
                 {Math.round(animatedVerified)}
               </div>
-              <p className="text-[11px] text-slate-500 dark:text-slate-400">100% Tax & Math Verified</p>
+              <p className="text-[10px] sm:text-[11px] text-slate-500 dark:text-slate-400 truncate">100% Tax & Math Verified</p>
             </TiltCard>
 
             {/* Metric 3 */}
-            <TiltCard className="vault-glass border border-amber-500/20 hover:border-amber-500/40 rounded-2xl p-5 space-y-3 shadow-xl transition-all duration-300 group bg-gradient-to-br from-white/90 to-amber-50/50 dark:from-[#0D1322]/80 dark:to-amber-950/20">
-              <div className="flex items-center justify-between text-xs font-semibold uppercase tracking-wider text-amber-600 dark:text-amber-400">
-                <span>Discrepancies Flagged</span>
-                <div className="w-8 h-8 rounded-lg bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-amber-600 dark:text-amber-400 group-hover:scale-110 transition-transform">
-                  <AlertTriangle size={16} className="tz-30" />
+            <TiltCard className="vault-glass border border-amber-500/20 hover:border-amber-500/40 rounded-2xl p-3.5 sm:p-5 space-y-2 sm:space-y-3 shadow-xl transition-all duration-300 group bg-gradient-to-br from-white/90 to-amber-50/50 dark:from-[#0D1322]/80 dark:to-amber-950/20">
+              <div className="flex items-center justify-between text-[10px] sm:text-xs font-semibold uppercase tracking-wider text-amber-600 dark:text-amber-400">
+                <span className="truncate">Discrepancies Flagged</span>
+                <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-lg bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-amber-600 dark:text-amber-400 group-hover:scale-110 transition-transform shrink-0">
+                  <AlertTriangle size={15} className="tz-30" />
                 </div>
               </div>
-              <div className="text-3xl font-bold font-mono text-amber-600 dark:text-amber-400 tz-30 tracking-tight">
+              <div className="text-xl sm:text-3xl font-bold font-mono text-amber-600 dark:text-amber-400 tz-30 tracking-tight truncate">
                 {Math.round(animatedIssues)}
               </div>
-              <p className="text-[11px] text-slate-500 dark:text-slate-400">Non-mandatory charges identified</p>
+              <p className="text-[10px] sm:text-[11px] text-slate-500 dark:text-slate-400 truncate">Non-mandatory charges</p>
             </TiltCard>
 
             {/* Metric 4 */}
-            <TiltCard className="vault-glass border border-sky-500/20 dark:border-[#D4AF37]/30 hover:border-sky-500/50 dark:hover:border-[#D4AF37]/60 rounded-2xl p-5 space-y-3 shadow-xl transition-all duration-300 group bg-gradient-to-br from-white/90 to-sky-50/50 dark:from-[#0D1322]/80 dark:to-[#D4AF37]/10">
-              <div className="flex items-center justify-between text-xs font-semibold uppercase tracking-wider text-sky-700 dark:text-[#D4AF37]">
-                <span>Recoverable Surcharges</span>
-                <div className="w-8 h-8 rounded-lg bg-sky-500/10 dark:bg-[#D4AF37]/15 border border-sky-500/30 dark:border-[#D4AF37]/40 flex items-center justify-center text-sky-600 dark:text-[#FDE68A] group-hover:scale-110 transition-transform shadow-[0_0_12px_rgba(2,132,199,0.2)] dark:shadow-[0_0_12px_rgba(212,175,55,0.3)]">
-                  <TrendingUp size={16} className="tz-30" />
+            <TiltCard className="vault-glass border border-sky-500/20 dark:border-[#D4AF37]/30 hover:border-sky-500/50 dark:hover:border-[#D4AF37]/60 rounded-2xl p-3.5 sm:p-5 space-y-2 sm:space-y-3 shadow-xl transition-all duration-300 group bg-gradient-to-br from-white/90 to-sky-50/50 dark:from-[#0D1322]/80 dark:to-[#D4AF37]/10">
+              <div className="flex items-center justify-between text-[10px] sm:text-xs font-semibold uppercase tracking-wider text-sky-700 dark:text-[#D4AF37]">
+                <span className="truncate">Recoverable Surcharges</span>
+                <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-lg bg-sky-500/10 dark:bg-[#D4AF37]/15 border border-sky-500/30 dark:border-[#D4AF37]/40 flex items-center justify-center text-sky-600 dark:text-[#FDE68A] group-hover:scale-110 transition-transform shrink-0 shadow-[0_0_12px_rgba(2,132,199,0.2)] dark:shadow-[0_0_12px_rgba(212,175,55,0.3)]">
+                  <TrendingUp size={15} className="tz-30" />
                 </div>
               </div>
-              <div className="text-3xl font-bold font-mono text-sky-600 dark:text-[#FDE68A] tz-30 tracking-tight">
+              <div className="text-xl sm:text-3xl font-bold font-mono text-sky-600 dark:text-[#FDE68A] tz-30 tracking-tight truncate">
                 ₹{animatedDiffs.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
               </div>
-              <p className="text-[11px] text-slate-500 dark:text-slate-400">Total voluntary fees identified</p>
+              <p className="text-[10px] sm:text-[11px] text-slate-500 dark:text-slate-400 truncate">Total voluntary fees</p>
             </TiltCard>
           </div>
 
@@ -291,7 +286,6 @@ export default function DashboardHome() {
       </main>
 
       <Footer />
-      <MobileNav />
     </div>
   )
 }

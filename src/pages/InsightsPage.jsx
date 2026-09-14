@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react'
 import Navbar from '../components/Navbar'
-import MobileNav from '../components/MobileNav'
 import Footer from '../components/Footer'
 import Container from '../components/shared/Container'
 import Button from '../components/shared/Button'
@@ -173,7 +172,6 @@ export default function InsightsPage() {
       </main>
 
       <Footer />
-      <MobileNav />
     </div>
   )
 }

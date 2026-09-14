@@ -1,5 +1,4 @@
 import Navbar from '../components/Navbar'
-import MobileNav from '../components/MobileNav'
 import Footer from '../components/Footer'
 import Container from '../components/shared/Container'
 import AmbientBackground from '../components/shared/AmbientBackground'
@@ -85,7 +84,6 @@ export default function ComplaintPage() {
       </main>
 
       <Footer />
-      <MobileNav />
     </div>
   )
 }
