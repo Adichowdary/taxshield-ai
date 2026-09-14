@@ -348,8 +348,8 @@ export default function AnalysisPage() {
                         ? `Math Discrepancy Flagged: ₹${Math.abs(verification.difference).toFixed(2)} Difference`
                         : 'Audit Review Recommended'}
                   </span>
-                  <span className="text-[10px] font-mono uppercase px-2 py-0.5 rounded-full bg-slate-950/80 border border-white/10 text-slate-300">
-                    Engine V2.4 Active
+                  <span className="text-[11px] font-medium px-2 py-0.5 rounded-full bg-slate-950/70 border border-white/10 text-slate-300">
+                    Statutory check
                   </span>
                 </div>
                 <p className="text-xs font-sans opacity-90 leading-relaxed max-w-3xl text-slate-300">
@@ -387,8 +387,8 @@ export default function AnalysisPage() {
             </div>
 
             <div className="flex flex-col md:items-end gap-2 border-t md:border-t-0 pt-4 md:pt-0 border-slate-200/50 dark:border-white/10">
-              <span className="text-xs font-bold uppercase tracking-wider text-[#B45309] dark:text-[#D4AF37]">Total Calculated Bill</span>
-              <span className="text-3xl font-bold font-poppins gold-gradient-text font-mono">
+              <span className="text-xs font-semibold text-slate-500 dark:text-slate-400">Calculated total</span>
+              <span className="text-3xl font-bold font-poppins gold-gradient-text tabular-nums">
                 ₹{currentBill.totalAmount.toFixed(2)}
               </span>
               
@@ -448,8 +448,8 @@ export default function AnalysisPage() {
           {/* Flagged Issues List */}
           {activeIssues.length > 0 && (
             <div className="space-y-3 auth-stagger" style={{ animationDelay: '180ms' }}>
-              <h3 className="font-poppins font-bold text-xs uppercase tracking-wider text-amber-600 dark:text-amber-400 flex items-center gap-2">
-                <AlertTriangle size={16} className="text-amber-500 dark:text-amber-400" /> Active Issues Flagged ({activeIssues.length})
+              <h3 className="font-poppins font-semibold text-sm text-amber-700 dark:text-amber-300 flex items-center gap-2">
+                <AlertTriangle size={16} className="text-amber-500 shrink-0" /> Items requiring attention ({activeIssues.length})
               </h3>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {activeIssues.map((issue) => (

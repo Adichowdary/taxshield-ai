@@ -31,7 +31,7 @@ export default function MobileNav() {
   }
 
   const navItems = [
-    { label: 'Terminal', icon: LayoutDashboard, to: '/dashboard' },
+    { label: 'Home', icon: LayoutDashboard, to: '/dashboard' },
     { label: 'Spending', icon: Wallet, to: '/spending' },
     { label: 'Scan', icon: Camera, isScanBtn: true, onTap: handleScanTap },
     { label: 'History', icon: History, to: '/history' },

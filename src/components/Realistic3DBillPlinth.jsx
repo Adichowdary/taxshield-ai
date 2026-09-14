@@ -568,15 +568,11 @@ Consumer / TaxShield Audit Terminal`
       {/* Header Bar */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-5 border-b border-slate-200/50 dark:border-white/10">
         <div>
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-sky-500/10 dark:bg-[#D4AF37]/15 border border-sky-500/30 dark:border-[#D4AF37]/35 text-sky-700 dark:text-[#FDE68A] text-xs font-mono font-bold tracking-wider uppercase mb-1.5 shadow-sm">
-            <Scan size={14} className="text-sky-600 dark:text-[#D4AF37]" />
-            Photorealistic 3D Optical Audit Terminal
-          </div>
-          <h2 className="text-xl sm:text-2xl font-bold font-poppins text-slate-900 dark:text-white tracking-tight">
-            Interactive Statutory Bill Inspector
+          <h2 className="text-xl sm:text-2xl font-bold text-slate-900 dark:text-white tracking-tight">
+            Interactive Invoice Inspector
           </h2>
-          <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-300">
-            Rendered from genuine physical receipts with real thermal paper grain. Tilt in 3D, inspect OCR data tags, and audit voluntary surcharges.
+          <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-300 mt-0.5">
+            Inspect sample and uploaded receipts in 3D. Verify statutory GST calculations, detect voluntary service charges, and review itemized lines.
           </p>
         </div>
 
@@ -718,9 +714,12 @@ Consumer / TaxShield Audit Terminal`
             <input 
               ref={fileInputRef} 
               type="file" 
-              accept="image/*,.pdf" 
+              accept="image/*,application/pdf" 
               className="hidden" 
-              onChange={(e) => e.target.files?.[0] && handleFileUpload(e.target.files[0])} 
+              onChange={(e) => {
+                if (e.target.files?.[0]) handleFileUpload(e.target.files[0])
+                e.target.value = ''
+              }} 
             />
             <input 
               ref={cameraInputRef} 
@@ -728,7 +727,10 @@ Consumer / TaxShield Audit Terminal`
               accept="image/*" 
               capture="environment" 
               className="hidden" 
-              onChange={(e) => e.target.files?.[0] && handleFileUpload(e.target.files[0])} 
+              onChange={(e) => {
+                if (e.target.files?.[0]) handleFileUpload(e.target.files[0])
+                e.target.value = ''
+              }} 
             />
 
             {uploadProgress !== null ? (

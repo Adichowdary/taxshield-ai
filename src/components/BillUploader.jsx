@@ -1,20 +1,25 @@
-import { uploadImage } from "../services/cloudinary";
-import { auth } from "../config/firebase";
-import api from "../services/api";
 import { useState, useRef } from 'react'
-import { Upload, Camera, CheckCircle2, RotateCw, Trash2, ArrowRight, Cpu, Sparkles, AlertTriangle, Utensils, ShoppingCart, Shirt, Smartphone, Pill, X } from 'lucide-react'
+import { 
+  Upload, Camera, CheckCircle2, RotateCw, Trash2, ArrowRight, 
+  Sparkles, AlertCircle, Utensils, ShoppingCart, Shirt, Smartphone, 
+  Pill, X, FileText, Loader2
+} from 'lucide-react'
+import { uploadImage } from '../services/cloudinary'
+import { auth } from '../config/firebase'
+import api from '../services/api'
 import Button from './shared/Button'
 import { MOCK_BILLS } from '../data/mockData'
 import SwiggyFieldMappingCard from './SwiggyFieldMappingCard'
+import LiveCameraModal from './LiveCameraModal'
 
 export const BILL_CATEGORIES = [
   { id: 'AUTO', label: 'Auto-Detect', icon: Sparkles },
   { id: 'RESTAURANT', label: 'Dining & Food', icon: Utensils },
   { id: 'GROCERY', label: 'Supermarkets', icon: ShoppingCart },
-  { id: 'FASHION', label: 'Fashion & Zudio', icon: Shirt },
+  { id: 'FASHION', label: 'Fashion & Retail', icon: Shirt },
   { id: 'ELECTRONICS', label: 'Electronics', icon: Smartphone },
-  { id: 'PHARMACY', label: 'Pharmacy & Meds', icon: Pill },
-];
+  { id: 'PHARMACY', label: 'Pharmacy & Health', icon: Pill },
+]
 
 export default function BillUploader({ onStartScan }) {
   const [selectedCategory, setSelectedCategory] = useState('AUTO')
@@ -22,18 +27,22 @@ export default function BillUploader({ onStartScan }) {
   const [selectedIndex, setSelectedIndex] = useState(0)
   const [isDragOver, setIsDragOver] = useState(false)
   const [isUploading, setIsUploading] = useState(false)
+  const [uploadError, setUploadError] = useState('')
   const [showSwiggyGuide, setShowSwiggyGuide] = useState(false)
+  const [showCameraModal, setShowCameraModal] = useState(false)
+
   const fileInputRef = useRef(null)
-  const cameraInputRef = useRef(null)
+  const nativeCameraInputRef = useRef(null)
 
   const processFiles = (files) => {
     if (!files || files.length === 0) return
+    setUploadError('')
 
     const newEntries = Array.from(files).map((file) => ({
       file,
       previewUrl: typeof file === 'string' ? file : URL.createObjectURL(file),
-      name: file.name || 'Uploaded Bill Receipt',
-      rotation: 0
+      name: file.name || `Receipt_${new Date().toISOString().slice(0, 10)}.jpg`,
+      rotation: 0,
     }))
 
     setFileList((prev) => [...prev, ...newEntries])
@@ -55,19 +64,23 @@ export default function BillUploader({ onStartScan }) {
       `Date: ${b.date || new Date().toISOString().split('T')[0]}`,
       `GSTIN: ${b.gstin || '07AAAAA0000A1Z5'}`,
       '',
-      'ITEMS:'
+      'ITEMS:',
     ]
     if (Array.isArray(b.items)) {
-      b.items.forEach(it => {
+      b.items.forEach((it) => {
         const hsnText = it.hsn ? ` (HSN ${it.hsn})` : ''
         const taxText = it.taxRate ? ` [GST ${it.taxRate}]` : ''
-        lines.push(`${it.qty || 1}x ${it.name}${hsnText} @ ₹${Number(it.unitPrice || it.price || 0).toFixed(2)}${taxText} = ₹${Number(it.total || ((it.qty || 1) * (it.unitPrice || 0))).toFixed(2)}`)
+        lines.push(
+          `${it.qty || 1}x ${it.name}${hsnText} @ ₹${Number(it.unitPrice || it.price || 0).toFixed(2)}${taxText} = ₹${Number(
+            it.total || (it.qty || 1) * (it.unitPrice || 0)
+          ).toFixed(2)}`
+        )
       })
     }
     lines.push('')
     lines.push(`Subtotal: ₹${Number(b.subtotal || 0).toFixed(2)}`)
     if (b.discount) lines.push(`Discount: ₹${Number(b.discount || 0).toFixed(2)}`)
-    if (b.deliveryFee) lines.push(`Delivery Partner Fee: ₹${Number(b.deliveryFee || 0).toFixed(2)}`)
+    if (b.deliveryFee) lines.push(`Delivery Fee: ₹${Number(b.deliveryFee || 0).toFixed(2)}`)
     if (b.packagingFee) lines.push(`Packaging Fee: ₹${Number(b.packagingFee || 0).toFixed(2)}`)
     if (b.platformFee) lines.push(`Platform Fee: ₹${Number(b.platformFee || 0).toFixed(2)}`)
     if (b.serviceCharge) lines.push(`Service Charge: ₹${Number(b.serviceCharge || 0).toFixed(2)}`)
@@ -88,10 +101,11 @@ export default function BillUploader({ onStartScan }) {
         previewUrl: sampleBill.image,
         name: `${sampleBill.merchant || sampleBill.retailer} Receipt`,
         rotation: 0,
-        rawTextPayload: sampleToText(sampleBill)
-      }
+        rawTextPayload: sampleToText(sampleBill),
+      },
     ])
     setSelectedIndex(0)
+    setUploadError('')
   }
 
   const handleRotateCurrent = () => {
@@ -112,139 +126,150 @@ export default function BillUploader({ onStartScan }) {
     })
   }
 
-  const [uploadError, setUploadError] = useState('')
-
   const handleAnalyze = async () => {
     if (fileList.length === 0) {
-      setUploadError("Hmm — your shoebox is empty. Drop a bill photo above and we will take it from there.");
-      return;
+      setUploadError('Please select or capture a bill receipt to start analysis.')
+      return
     }
     setUploadError('')
 
     try {
-      setIsUploading(true);
+      setIsUploading(true)
 
-      const activeItem = fileList[selectedIndex] || fileList[0];
-      const scanOpts = { selectedBillType: selectedCategory !== 'AUTO' ? selectedCategory : undefined };
+      const activeItem = fileList[selectedIndex] || fileList[0]
+      const scanOpts = { 
+        selectedBillType: selectedCategory !== 'AUTO' ? selectedCategory : undefined,
+        fileName: activeItem?.name,
+        file: activeItem?.file
+      }
+
       if (activeItem?.rawTextPayload) {
         if (onStartScan) {
-          onStartScan(activeItem.rawTextPayload, scanOpts);
+          onStartScan(activeItem.rawTextPayload, scanOpts)
         }
-        return;
+        return
       }
 
       const uploadPromises = fileList.map(async (item) => {
-        let imageUrl = item.previewUrl;
+        let imageUrl = item.previewUrl
         try {
           if (item.file && typeof item.file !== 'string' && item.file.type) {
-            imageUrl = await uploadImage(item.file);
+            imageUrl = await uploadImage(item.file)
             await api.createBill({
-              userId: auth.currentUser?.uid || "guest",
+              userId: auth.currentUser?.uid || 'guest',
               billImageUrl: imageUrl,
               imageUrl,
               billType: selectedCategory !== 'AUTO' ? selectedCategory : 'RESTAURANT',
-              restaurantName: "Pending Batch AI Analysis",
-              verificationStatus: "Uploaded",
-              status: "Uploaded",
-            }).catch((err) => console.log("MongoDB batch note:", err.message));
+              restaurantName: item.name.replace(/\.[^/.]+$/, ''),
+              verificationStatus: 'Uploaded',
+              status: 'Uploaded',
+            }).catch((err) => console.warn('MongoDB note:', err.message))
           }
         } catch (err) {
-          console.log("Upload fallback to previewUrl:", err.message);
+          console.warn('Cloudinary upload fallback to preview URL:', err.message)
         }
-        return imageUrl;
-      });
+        return imageUrl
+      })
 
-      const uploadedUrls = await Promise.all(uploadPromises);
+      const uploadedUrls = await Promise.all(uploadPromises)
 
       if (onStartScan) {
-        onStartScan(uploadedUrls.length === 1 ? uploadedUrls[0] : uploadedUrls, scanOpts);
+        onStartScan(uploadedUrls.length === 1 ? uploadedUrls[0] : uploadedUrls, scanOpts)
       }
     } catch (error) {
-      console.error("Batch Analysis Error:", error);
-      setUploadError("That upload tripped on our side — try one photo, or tap a sample below and we will show you how it reads.");
+      console.error('Batch analysis error:', error)
+      setUploadError('Could not process this receipt. Please try another photo or choose a sample below.')
     } finally {
-      setIsUploading(false);
+      setIsUploading(false)
     }
-  };
+  }
 
-  const activeItem = fileList[selectedIndex] || fileList[0];
+  const activeItem = fileList[selectedIndex] || fileList[0]
 
   return (
-    <div className="vision-pro-card p-6 md:p-8 space-y-6">
-      
-      {/* Category Pill Selector */}
-      <div className="space-y-2.5 pb-2 border-b border-slate-700/30">
+    <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 sm:p-8 shadow-sm space-y-6">
+      {/* Category Selector */}
+      <div className="space-y-2 pb-4 border-b border-slate-100 dark:border-slate-800">
         <div className="flex items-center justify-between">
-          <label className="text-xs font-bold font-poppins uppercase tracking-wider text-slate-300 flex items-center gap-1.5">
-            <Sparkles size={14} className="text-lime-400" /> Bill Type & Category
+          <label className="text-xs font-semibold text-slate-700 dark:text-slate-300">
+            Bill category
           </label>
-          <span className="text-[11px] text-lime-400/90 font-medium hidden sm:inline">
-            Applies retail GST slabs & legal checks
+          <span className="text-xs text-slate-500 dark:text-slate-400">
+            Applies statutory GST slabs & CCPA checks
           </span>
         </div>
         <div className="flex flex-wrap gap-2">
           {BILL_CATEGORIES.map((cat) => {
-            const Icon = cat.icon;
-            const isSelected = selectedCategory === cat.id;
+            const Icon = cat.icon
+            const isSelected = selectedCategory === cat.id
             return (
               <button
                 key={cat.id}
                 type="button"
                 onClick={() => setSelectedCategory(cat.id)}
-                className={`px-3 py-1.5 rounded-xl text-xs font-semibold flex items-center gap-1.5 transition-all cursor-pointer ${
+                className={`px-3.5 py-1.5 rounded-xl text-xs font-medium flex items-center gap-1.5 transition-colors cursor-pointer ${
                   isSelected
-                    ? 'bg-lime-400 text-slate-950 shadow-[0_0_15px_rgba(132,204,22,0.4)] scale-105 font-bold'
-                    : 'vision-pro-pill text-slate-300 hover:text-white hover:border-lime-400/40'
+                    ? 'bg-slate-900 text-white dark:bg-white dark:text-slate-900 shadow-sm'
+                    : 'bg-slate-100 dark:bg-slate-800/80 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700'
                 }`}
               >
-                <Icon size={14} className={isSelected ? 'text-slate-950' : 'text-lime-400'} />
+                <Icon size={14} className={isSelected ? 'text-white dark:text-slate-900' : 'text-slate-500'} />
                 {cat.label}
               </button>
-            );
+            )
           })}
         </div>
       </div>
 
-      {/* Hidden File Input supporting MULTIPLE files */}
+      {/* Hidden File & Camera Inputs */}
       <input
         type="file"
         ref={fileInputRef}
-        onChange={(e) => e.target.files && processFiles(e.target.files)}
-        accept="image/jpeg,image/png,application/pdf"
+        onChange={(e) => {
+          if (e.target.files && e.target.files.length > 0) {
+            processFiles(e.target.files)
+          }
+          e.target.value = ''
+        }}
+        accept="image/*,application/pdf"
         multiple
         className="hidden"
       />
       <input
         type="file"
-        ref={cameraInputRef}
-        onChange={(e) => e.target.files && processFiles(e.target.files)}
+        ref={nativeCameraInputRef}
+        onChange={(e) => {
+          if (e.target.files && e.target.files.length > 0) {
+            processFiles(e.target.files)
+          }
+          e.target.value = ''
+        }}
         accept="image/*"
         capture="environment"
         className="hidden"
       />
 
-      {/* Receipt Guidance Notice */}
-      <div className="flex items-center gap-3 p-3.5 rounded-2xl bg-amber-500/10 border border-amber-400/30 text-amber-200 text-xs backdrop-blur-md">
-        <AlertTriangle size={18} className="text-amber-400 shrink-0" />
+      {/* High-Contrast Guidance Notice */}
+      <div className="flex items-start gap-3 p-4 rounded-xl bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800/50 text-amber-900 dark:text-amber-200 text-xs">
+        <AlertCircle size={16} className="text-amber-600 dark:text-amber-400 shrink-0 mt-0.5" />
         <div className="leading-relaxed">
-          <strong className="text-amber-300">All Retail Receipts Supported:</strong> Upload offline & online bills: Supermarkets (D-Mart), Fashion (Zudio), Electronics (Croma), Pharmacy (Apollo), or Restaurants. Non-receipt object photos are rejected by the AI engine.
+          <span className="font-semibold text-amber-950 dark:text-amber-100">Supported receipts: </span>
+          Dining & cafe bills, supermarket slips (D-Mart, Blinkit), retail & clothing (Zudio), electronics, or pharmacy. Ensure date, items, and totals are legible.
         </div>
       </div>
 
       {/* Upload Error Banner */}
       {uploadError && (
-        <div className="p-4 rounded-2xl border border-rose-500/35 bg-rose-500/10 dark:bg-rose-950/40 text-rose-900 dark:text-rose-100 flex items-start justify-between gap-3 shadow-lg backdrop-blur-md animate-in fade-in duration-200">
+        <div className="p-4 rounded-xl border border-rose-200 dark:border-rose-900 bg-rose-50 dark:bg-rose-950/40 text-rose-900 dark:text-rose-200 flex items-start justify-between gap-3 text-xs">
           <div className="flex items-start gap-2.5">
-            <AlertTriangle size={18} className="text-rose-500 shrink-0 mt-0.5" />
-            <div className="space-y-0.5">
-              <h5 className="text-xs font-bold text-rose-900 dark:text-white">Upload Error</h5>
-              <p className="text-xs leading-relaxed text-rose-800 dark:text-rose-200">{uploadError}</p>
-            </div>
+            <AlertCircle size={16} className="text-rose-600 dark:text-rose-400 shrink-0 mt-0.5" />
+            <p className="leading-relaxed">{uploadError}</p>
           </div>
-          <button 
-            type="button" 
+          <button
+            type="button"
             onClick={() => setUploadError('')}
-            className="p-1 rounded-lg hover:bg-rose-500/20 text-rose-700 dark:text-rose-300 transition-colors"
+            className="p-1 rounded-lg hover:bg-rose-100 dark:hover:bg-rose-900/50 text-rose-600 transition-colors"
+            aria-label="Dismiss error"
           >
             <X size={14} />
           </button>
@@ -254,110 +279,117 @@ export default function BillUploader({ onStartScan }) {
       {/* Upload Drop Zone (when empty) */}
       {fileList.length === 0 ? (
         <div
-          onDragOver={(e) => { e.preventDefault(); setIsDragOver(true) }}
+          onDragOver={(e) => {
+            e.preventDefault()
+            setIsDragOver(true)
+          }}
           onDragLeave={() => setIsDragOver(false)}
           onDrop={handleDrop}
-          className={`border-2 border-dashed rounded-2xl p-8 md:p-12 text-center transition-all cursor-pointer ${
-            isDragOver 
-              ? 'border-lime-400 bg-lime-400/15 scale-[1.01] shadow-[0_0_30px_rgba(132,204,22,0.3)]' 
-              : 'border-lime-400/40 hover:border-lime-400 bg-lime-400/5'
+          className={`border-2 border-dashed rounded-2xl p-8 sm:p-12 text-center transition-all ${
+            isDragOver
+              ? 'border-sky-500 bg-sky-50 dark:bg-sky-950/20'
+              : 'border-slate-300 dark:border-slate-700 hover:border-slate-400 bg-slate-50/50 dark:bg-slate-900/40'
           }`}
-          onClick={() => fileInputRef.current?.click()}
         >
-          <div className="w-16 h-16 rounded-2xl bg-lime-400/15 text-lime-400 flex items-center justify-center mx-auto mb-4 border border-lime-400/30 shadow-[0_0_20px_rgba(132,204,22,0.2)]">
-            <Upload size={32} />
+          <div className="w-14 h-14 rounded-2xl bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 flex items-center justify-center mx-auto mb-4 border border-slate-200 dark:border-slate-700">
+            <Upload size={24} />
           </div>
 
-          <h3 className="font-poppins font-bold text-lg mb-1" style={{ color: 'var(--text-primary)' }}>
-            Drop single or multiple bill receipts here
+          <h3 className="font-semibold text-base sm:text-lg text-slate-900 dark:text-white mb-1">
+            Drop your bill receipt here
           </h3>
-          <p className="text-sm mb-6" style={{ color: 'var(--text-muted)' }}>
-            Supports batch upload of JPG, PNG, or digital PDF bills at once
+          <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mb-6 max-w-sm mx-auto">
+            Upload photos (JPG, PNG, HEIC) or digital PDF invoices
           </p>
 
           <div className="flex flex-wrap items-center justify-center gap-3">
-            <Button variant="primary" size="md" onClick={(e) => { e.stopPropagation(); fileInputRef.current?.click() }}>
-              <Upload size={16} /> Select Bill File(s)
-            </Button>
-
-            <Button 
-              variant="outline" 
-              size="md" 
-              onClick={(e) => {
-                e.stopPropagation()
-                cameraInputRef.current?.click()
-              }}
+            <button
+              type="button"
+              onClick={() => fileInputRef.current?.click()}
+              className="px-5 py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 dark:bg-white dark:hover:bg-slate-100 text-white dark:text-slate-900 font-semibold text-xs transition-colors cursor-pointer flex items-center gap-2 shadow-sm"
             >
-              <Camera size={16} /> Use Camera
-            </Button>
+              <Upload size={15} /> Select Bill File
+            </button>
+
+            <button
+              type="button"
+              onClick={() => setShowCameraModal(true)}
+              className="px-5 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 border border-slate-200 dark:border-slate-700 font-medium text-xs transition-colors cursor-pointer flex items-center gap-2"
+            >
+              <Camera size={15} className="text-sky-600 dark:text-sky-400" /> Use Camera
+            </button>
           </div>
         </div>
       ) : (
-        /* Image Preview & Multi-Bill Thumbnail Bar */
-        <div className="space-y-4 auth-stagger">
-          
+        /* Image Preview & Batch Queue */
+        <div className="space-y-4">
           {/* Header Bar */}
-          <div className="flex flex-wrap items-center justify-between gap-2 pb-3 border-b border-slate-500/30">
+          <div className="flex flex-wrap items-center justify-between gap-2 pb-3 border-b border-slate-100 dark:border-slate-800">
             <div className="flex items-center gap-2">
-              <span className="bg-lime-400 text-slate-950 font-extrabold px-3 py-0.5 rounded-full text-xs shadow-md">
-                {fileList.length} {fileList.length === 1 ? 'Bill' : 'Bills'} Selected
+              <span className="bg-slate-900 dark:bg-white text-white dark:text-slate-900 font-bold px-2.5 py-0.5 rounded-full text-xs">
+                {fileList.length} {fileList.length === 1 ? 'Receipt' : 'Receipts'}
               </span>
-              <span className="text-xs font-semibold truncate max-w-[220px]" style={{ color: 'var(--text-primary)' }}>
+              <span className="text-xs font-medium text-slate-700 dark:text-slate-300 truncate max-w-[220px]">
                 {activeItem?.name}
               </span>
             </div>
 
             <div className="flex items-center gap-2">
               <button
+                type="button"
                 onClick={() => fileInputRef.current?.click()}
-                className="p-2 rounded-xl bg-lime-400/20 hover:bg-lime-400/30 text-lime-400 text-xs font-semibold flex items-center gap-1 transition-colors border border-lime-400/30"
-                title="Add more bills to batch"
+                className="px-3 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 text-xs font-medium flex items-center gap-1 transition-colors"
+                title="Add more bills"
               >
-                <Upload size={14} /> Add More Bills
+                <Upload size={13} /> Add more
               </button>
               <button
+                type="button"
                 onClick={handleRotateCurrent}
-                className="p-2 rounded-xl vision-pro-pill text-xs font-medium flex items-center gap-1 transition-colors hover:border-lime-400/40"
-                style={{ color: 'var(--text-primary)' }}
-                title="Rotate current image"
+                className="px-3 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 text-xs font-medium flex items-center gap-1 transition-colors"
+                title="Rotate image"
               >
-                <RotateCw size={14} /> Rotate
+                <RotateCw size={13} /> Rotate
               </button>
               <button
+                type="button"
                 onClick={() => handleRemoveItem(selectedIndex)}
-                className="p-2 rounded-xl bg-rose-500/15 hover:bg-rose-500/25 text-rose-300 text-xs font-medium flex items-center gap-1 transition-colors border border-rose-500/30"
-                title="Remove current receipt"
+                className="px-3 py-1.5 rounded-lg bg-rose-50 hover:bg-rose-100 dark:bg-rose-950/40 text-rose-700 dark:text-rose-300 text-xs font-medium flex items-center gap-1 transition-colors border border-rose-200 dark:border-rose-900/50"
+                title="Remove receipt"
               >
-                <Trash2 size={14} /> Remove
+                <Trash2 size={13} /> Remove
               </button>
             </div>
           </div>
 
           {/* Main Selected Image Viewer */}
-          <div className="relative vision-pro-pill rounded-2xl overflow-hidden min-h-[280px] max-h-[400px] flex items-center justify-center p-4 border-lime-400/20">
+          <div className="relative rounded-xl overflow-hidden bg-slate-100 dark:bg-slate-950 min-h-[260px] max-h-[380px] flex items-center justify-center p-4 border border-slate-200 dark:border-slate-800">
             {activeItem && (
               <img
                 src={activeItem.previewUrl}
                 alt="Selected receipt preview"
                 style={{ transform: `rotate(${activeItem.rotation}deg)` }}
-                className="max-h-[360px] w-auto object-contain transition-transform duration-300 rounded-lg shadow-xl"
+                className="max-h-[340px] w-auto object-contain transition-transform duration-300 rounded shadow-sm"
               />
             )}
           </div>
 
-          {/* Multi-Bill Thumbnail Carousel (if > 1 bill) */}
+          {/* Multi-Bill Thumbnails */}
           {fileList.length > 1 && (
             <div className="space-y-1.5 pt-1">
-              <span className="text-[11px] font-bold uppercase tracking-wider block" style={{ color: 'var(--text-muted)' }}>
-                Batch Receipt Queue ({fileList.length}):
+              <span className="text-xs font-medium text-slate-500 dark:text-slate-400 block">
+                Queue ({fileList.length}):
               </span>
-              <div className="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-thin">
+              <div className="flex items-center gap-2 overflow-x-auto pb-2">
                 {fileList.map((item, idx) => (
-                  <div
+                  <button
                     key={idx}
+                    type="button"
                     onClick={() => setSelectedIndex(idx)}
-                    className={`relative shrink-0 w-20 h-20 rounded-xl overflow-hidden border-2 cursor-pointer transition-all ${
-                      idx === selectedIndex ? 'border-lime-400 ring-2 ring-lime-400/40 scale-105 shadow-[0_0_15px_rgba(132,204,22,0.3)]' : 'border-slate-500/40 opacity-70 hover:opacity-100'
+                    className={`relative shrink-0 w-16 h-16 rounded-lg overflow-hidden border-2 cursor-pointer transition-all ${
+                      idx === selectedIndex
+                        ? 'border-slate-900 dark:border-white ring-2 ring-slate-400/30'
+                        : 'border-slate-200 dark:border-slate-700 opacity-70 hover:opacity-100'
                     }`}
                   >
                     <img
@@ -365,66 +397,60 @@ export default function BillUploader({ onStartScan }) {
                       alt={`Receipt ${idx + 1}`}
                       className="w-full h-full object-cover"
                     />
-                    <span className="absolute bottom-1 right-1 bg-slate-950/80 text-lime-400 font-bold text-[9px] px-1 rounded">
+                    <span className="absolute bottom-0.5 right-0.5 bg-black/75 text-white font-mono text-[9px] px-1 rounded">
                       #{idx + 1}
                     </span>
-                  </div>
+                  </button>
                 ))}
               </div>
             </div>
           )}
 
           {/* Action Trigger Button */}
-          {uploadError && (
-            <p role="alert" className="text-xs font-semibold text-rose-500 dark:text-rose-300 bg-rose-500/10 border border-rose-500/30 rounded-xl px-3.5 py-2.5">{uploadError}</p>
-          )}
-          <Button
-            variant="primary"
-            size="lg"
+          <button
+            type="button"
             onClick={handleAnalyze}
-            className="w-full py-4 text-base font-bold"
             disabled={isUploading}
+            className="w-full py-3.5 px-6 rounded-xl bg-slate-900 hover:bg-slate-800 dark:bg-white dark:hover:bg-slate-100 text-white dark:text-slate-900 font-semibold text-sm transition-colors cursor-pointer flex items-center justify-center gap-2 shadow-sm disabled:opacity-60"
           >
             {isUploading ? (
-              <span className="flex items-center justify-center gap-2">
-                <Cpu className="animate-spin" size={20} /> Processing Batch AI Engine ({fileList.length} Bills)...
-              </span>
+              <>
+                <Loader2 className="animate-spin" size={18} /> Processing Receipt Audit…
+              </>
             ) : (
-              <span className="flex items-center justify-center gap-2">
-                <Sparkles size={20} />
-                {fileList.length > 1
-                  ? `Analyze All ${fileList.length} Bills with AI Batch Engine`
-                  : 'Analyze This Bill with AI'}
-                <ArrowRight size={20} />
-              </span>
+              <>
+                <span>{fileList.length > 1 ? `Audit All ${fileList.length} Receipts` : 'Audit This Bill'}</span>
+                <ArrowRight size={16} />
+              </>
             )}
-          </Button>
+          </button>
         </div>
       )}
 
       {/* Instructions & Guidelines */}
-      <div className="vision-pro-pill p-4 text-xs space-y-3 border-lime-400/20">
+      <div className="rounded-xl p-4 bg-slate-50 dark:bg-slate-800/40 border border-slate-200 dark:border-slate-700/60 text-xs space-y-2">
         <div className="flex items-center justify-between">
-          <h4 className="font-poppins font-bold flex items-center gap-1.5" style={{ color: 'var(--text-primary)' }}>
-            <CheckCircle2 size={15} className="text-lime-400" /> High-Accuracy AI Instructions:
+          <h4 className="font-semibold text-slate-800 dark:text-slate-200 flex items-center gap-1.5">
+            <CheckCircle2 size={15} className="text-emerald-600 dark:text-emerald-400" />
+            Tips for best accuracy
           </h4>
           <button
             type="button"
             onClick={() => setShowSwiggyGuide(!showSwiggyGuide)}
-            className="text-[11px] text-lime-400 font-bold hover:underline flex items-center gap-1 cursor-pointer"
+            className="text-xs text-sky-600 dark:text-sky-400 font-medium hover:underline cursor-pointer"
           >
-            <Sparkles size={12} /> {showSwiggyGuide ? "Hide Swiggy Field Intelligence" : "View Swiggy Screenshot AI Rules"}
+            {showSwiggyGuide ? 'Hide delivery app guide' : 'Delivery app screenshot guide'}
           </button>
         </div>
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 font-sans" style={{ color: 'var(--text-muted)' }}>
-          <span>✓ Select single or multiple receipts for batch processing</span>
-          <span>✓ Ensure all text & totals are clearly visible</span>
-          <span>✓ Keep bill layouts flat & straight</span>
-          <span>✓ Supported by parallel GPU AI engine for 99%+ accuracy</span>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-slate-600 dark:text-slate-400">
+          <span>• Ensure bill is flat and well-lit with all totals visible</span>
+          <span>• Offline thermal paper receipts & PDF invoices supported</span>
+          <span>• Checks GST rates against statutory Indian tax brackets</span>
+          <span>• Highlights voluntary service fees per CCPA guidelines</span>
         </div>
 
         {showSwiggyGuide && (
-          <div className="pt-3 animate-fade-in">
+          <div className="pt-3 animate-fade-in border-t border-slate-200 dark:border-slate-700 mt-2">
             <SwiggyFieldMappingCard />
           </div>
         )}
@@ -432,30 +458,47 @@ export default function BillUploader({ onStartScan }) {
 
       {/* Sample Bills */}
       <div className="pt-2">
-        <span className="text-xs font-bold font-poppins uppercase tracking-wider block mb-3" style={{ color: 'var(--text-muted)' }}>
-          Or try sample offline / online bill receipts:
+        <span className="text-xs font-semibold text-slate-500 dark:text-slate-400 block mb-2.5">
+          Or try a sample offline / online receipt:
         </span>
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2.5">
           {MOCK_BILLS.slice(0, 6).map((bill) => (
             <button
               key={bill.id}
+              type="button"
               onClick={() => handleSampleSelect(bill)}
-              className="vision-pro-pill p-3.5 text-left transition-all text-xs space-y-1.5 hover:border-lime-400/50 hover:bg-lime-400/5 cursor-pointer group"
+              className="p-3 text-left transition-colors text-xs space-y-1 rounded-xl bg-slate-50 dark:bg-slate-800/40 border border-slate-200 dark:border-slate-700 hover:border-slate-400 dark:hover:border-slate-500 cursor-pointer group"
             >
               <div className="flex items-center justify-between gap-1">
-                <span className="font-bold truncate text-sm" style={{ color: 'var(--text-primary)' }}>{bill.merchant || bill.retailer}</span>
-                <span className="text-[10px] px-2 py-0.5 rounded-full bg-slate-800 text-lime-400 font-semibold uppercase tracking-wider">
+                <span className="font-medium text-slate-900 dark:text-slate-100 truncate">
+                  {bill.merchant || bill.retailer}
+                </span>
+                <span className="text-[10px] px-1.5 py-0.5 rounded bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300 font-medium">
                   {bill.category || bill.billType || 'Bill'}
                 </span>
               </div>
               <div className="flex items-center justify-between">
-                <div className="text-xs font-mono font-bold text-lime-400">₹{bill.totalAmount.toFixed(2)}</div>
-                <div className="text-[10px] text-emerald-400 font-semibold">{bill.statusText || 'Compliant'}</div>
+                <div className="font-mono font-semibold text-slate-900 dark:text-slate-100 tabular-nums">
+                  ₹{bill.totalAmount.toFixed(2)}
+                </div>
+                <div className="text-[11px] text-emerald-600 dark:text-emerald-400 font-medium">
+                  {bill.statusText || 'Compliant'}
+                </div>
               </div>
             </button>
           ))}
         </div>
       </div>
+
+      {/* In-App Camera Viewfinder Modal */}
+      <LiveCameraModal
+        isOpen={showCameraModal}
+        onClose={() => setShowCameraModal(false)}
+        onCapture={(capturedFile) => {
+          processFiles([capturedFile])
+          setShowCameraModal(false)
+        }}
+      />
     </div>
   )
 }

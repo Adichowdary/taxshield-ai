@@ -77,29 +77,30 @@ export default function DashboardHome() {
             {/* Top specular accent */}
             <div className="absolute top-0 inset-x-0 h-[1.5px] bg-gradient-to-r from-transparent via-sky-500 dark:via-[#D4AF37] to-transparent" />
 
-            <div className="space-y-2 relative z-10">
-              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-sky-500/10 dark:bg-[#D4AF37]/15 border border-sky-500/30 dark:border-[#D4AF37]/35 text-sky-700 dark:text-[#FDE68A] text-xs font-mono font-bold tracking-wider uppercase">
-                <ShieldCheck size={14} className="text-sky-600 dark:text-[#D4AF37]" />
-                Institutional Financial Terminal
-              </div>
-              <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold tracking-tight text-slate-900 dark:text-white font-poppins">
+            <div className="space-y-1.5 relative z-10">
+              <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-slate-900 dark:text-white">
                 {getGreeting()}
               </h1>
-              <p className="text-xs sm:text-sm max-w-xl text-slate-700 dark:text-slate-200 leading-relaxed font-sans">
-                Welcome to your TaxShield intelligence terminal. Review statutory GST fidelity, voluntary surcharge waivers, and corporate expense recovery.
+              <p className="text-xs sm:text-sm max-w-xl text-slate-600 dark:text-slate-300 leading-relaxed">
+                Review statutory GST fidelity, uncover non-mandatory service charges, and track your invoice history.
               </p>
             </div>
 
-            <div className="flex flex-col sm:flex-row items-center gap-3 relative z-10 w-full sm:w-auto">
-              <Button 
-                variant="primary" 
-                size="md" 
+            <div className="flex flex-col sm:flex-row items-center gap-2.5 relative z-10 w-full sm:w-auto">
+              <button 
+                type="button"
                 onClick={scrollToScanner} 
-                className="w-full sm:w-auto font-bold shadow-[0_0_25px_rgba(2,132,199,0.35)] dark:shadow-[0_0_25px_rgba(212,175,55,0.4)] flex items-center justify-center gap-2 group cursor-pointer"
+                className="w-full sm:w-auto px-5 py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 dark:bg-white dark:hover:bg-slate-100 text-white dark:text-slate-900 font-semibold text-xs flex items-center justify-center gap-2 transition-colors cursor-pointer shadow-sm"
               >
-                <Camera size={18} className="text-white dark:text-slate-950 group-hover:scale-110 transition-transform" />
-                Scan Bill Receipt
-              </Button>
+                <Camera size={16} />
+                Audit a Bill
+              </button>
+              <Link 
+                to="/history"
+                className="w-full sm:w-auto px-4 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-white/10 dark:hover:bg-white/15 text-slate-800 dark:text-slate-200 font-medium text-xs flex items-center justify-center gap-1.5 transition-colors text-center"
+              >
+                View History
+              </Link>
             </div>
           </div>
 

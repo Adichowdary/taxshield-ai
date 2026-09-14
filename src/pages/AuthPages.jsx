@@ -153,8 +153,21 @@ export function LoginPage() {
   const [verificationSent, setVerificationSent] = useState(false)
   const [showSplash, setShowSplash] = useState(false)
 
-  const { login, loginWithGoogle, loginWithGoogleRedirect, resetPassword, sendVerification, currentUser } = useAuth()
+  const { login, loginAsDemo, loginWithGoogle, loginWithGoogleRedirect, resetPassword, sendVerification, currentUser } = useAuth()
   const navigate = useNavigate()
+
+  const handleDemoSignIn = async () => {
+    setError('')
+    setLoading(true)
+    try {
+      await loginAsDemo()
+      setShowSplash(true)
+    } catch (err) {
+      setError('Demo sign-in note: ' + err.message)
+    } finally {
+      setLoading(false)
+    }
+  }
 
   const handleSubmit = async (e) => {
     e.preventDefault()
@@ -326,11 +339,20 @@ export function LoginPage() {
               <button
                 type="submit"
                 disabled={loading}
-                className="auth-cta w-full py-3.5 rounded-xl font-poppins font-bold text-sm text-slate-950 flex items-center justify-center gap-2 disabled:opacity-60 disabled:pointer-events-none"
+                className="auth-cta w-full py-3.5 rounded-xl font-poppins font-bold text-sm text-slate-950 flex items-center justify-center gap-2 disabled:opacity-60 disabled:pointer-events-none cursor-pointer"
               >
                 <span className="relative z-10 flex items-center gap-2">
                   {loading ? 'Authenticating…' : 'Sign in'} <ArrowRight size={16} />
                 </span>
+              </button>
+
+              <button
+                type="button"
+                onClick={handleDemoSignIn}
+                disabled={loading}
+                className="w-full py-2.5 px-4 rounded-xl border border-slate-300/80 dark:border-white/20 bg-slate-100/80 dark:bg-white/5 hover:bg-slate-200/80 dark:hover:bg-white/10 text-slate-800 dark:text-slate-200 font-semibold text-xs transition-colors cursor-pointer flex items-center justify-center gap-2 shadow-sm"
+              >
+                <Sparkles size={14} className="text-amber-500" /> Instant Demo Sign-in
               </button>
             </form>
           </>

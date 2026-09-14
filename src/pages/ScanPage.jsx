@@ -104,15 +104,12 @@ Total Amount: ₹736.00`
         <Container className="max-w-4xl space-y-6">
           
           {/* Title Header */}
-          <div className="text-center space-y-2 auth-stagger" style={{ animationDelay: '80ms' }}>
-            <span className="bg-lime-400/10 text-lime-600 dark:text-lime-400 text-xs font-bold px-3.5 py-1 rounded-full border border-lime-400/30 uppercase tracking-wider inline-flex items-center gap-1">
-              <Sparkles size={13} /> TaxShield AI Receipt Intelligence
-            </span>
-            <h1 className="text-3xl sm:text-4xl font-poppins font-bold vision-pro-text-glow text-slate-900 dark:text-white">
-              Scan Your Bill
+          <div className="text-center space-y-2">
+            <h1 className="text-2xl sm:text-3xl font-bold text-slate-900 dark:text-white tracking-tight">
+              Audit an Invoice or Receipt
             </h1>
-            <p className="text-sm sm:text-base max-w-xl mx-auto font-sans text-slate-600 dark:text-slate-300">
-              Upload a clear photo or digital PDF receipt. TaxShield AI will extract every line item, verify GST rules, and highlight potential overcharges.
+            <p className="text-xs sm:text-sm max-w-xl mx-auto text-slate-600 dark:text-slate-400 leading-relaxed">
+              Upload a receipt photo or PDF bill. TaxShield audits GST rate compliance, highlights recoverable CCPA service fees, and checks arithmetic.
             </p>
           </div>
 

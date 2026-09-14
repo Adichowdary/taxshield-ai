@@ -1,10 +1,12 @@
 import { useState, useRef, useEffect, useCallback } from 'react'
-import { Camera, X, RefreshCw, SwitchCamera, AlertCircle, Sparkles, Check } from 'lucide-react'
+import { createPortal } from 'react-dom'
+import { Camera, X, RefreshCw, SwitchCamera, AlertCircle, Upload } from 'lucide-react'
 
 export default function LiveCameraModal({ isOpen, onClose, onCapture }) {
   const videoRef = useRef(null)
   const streamRef = useRef(null)
-  const fileFallbackRef = useRef(null)
+  const nativeCameraInputRef = useRef(null)
+  const fileInputRef = useRef(null)
 
   const [hasPermission, setHasPermission] = useState(null)
   const [errorMsg, setErrorMsg] = useState('')
@@ -13,8 +15,13 @@ export default function LiveCameraModal({ isOpen, onClose, onCapture }) {
 
   const stopStream = useCallback(() => {
     if (streamRef.current) {
-      streamRef.current.getTracks().forEach((track) => track.stop())
+      try {
+        streamRef.current.getTracks().forEach((track) => track.stop())
+      } catch {}
       streamRef.current = null
+    }
+    if (videoRef.current) {
+      videoRef.current.srcObject = null
     }
   }, [])
 
@@ -23,51 +30,102 @@ export default function LiveCameraModal({ isOpen, onClose, onCapture }) {
     setErrorMsg('')
     setHasPermission(null)
 
-    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+    if (typeof navigator === 'undefined' || !navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
       setHasPermission(false)
-      setErrorMsg('Direct camera access is not supported on this browser or connection.')
+      setErrorMsg('Direct browser camera is unavailable on this connection. You can use your device camera directly below.')
       return
     }
 
+    // Set a 3.5s timeout watchdog so user is NEVER stuck on a loading spinner
+    let resolved = false
+    const watchdog = setTimeout(() => {
+      if (!resolved && hasPermission === null) {
+        setHasPermission(false)
+        setErrorMsg('Camera access is taking longer than expected. Tap below to use your device camera directly.')
+      }
+    }, 3500)
+
     try {
-      const constraints = {
-        video: {
-          facingMode: { ideal: mode },
-          width: { ideal: 1920 },
-          height: { ideal: 1080 },
-        },
-        audio: false,
+      let stream = null
+
+      // Tier 1: Try ideal facing mode & resolution
+      try {
+        stream = await navigator.mediaDevices.getUserMedia({
+          video: {
+            facingMode: { ideal: mode },
+            width: { ideal: 1280 },
+            height: { ideal: 720 },
+          },
+          audio: false,
+        })
+      } catch {
+        // Tier 2: Try simple facing mode
+        try {
+          stream = await navigator.mediaDevices.getUserMedia({
+            video: { facingMode: mode },
+            audio: false,
+          })
+        } catch {
+          // Tier 3: Universal fallback to any available video stream
+          stream = await navigator.mediaDevices.getUserMedia({
+            video: true,
+            audio: false,
+          })
+        }
       }
 
-      const stream = await navigator.mediaDevices.getUserMedia(constraints)
+      resolved = true
+      clearTimeout(watchdog)
+
+      if (!stream) {
+        throw new Error('No video stream received from device.')
+      }
+
       streamRef.current = stream
 
       if (videoRef.current) {
         videoRef.current.srcObject = stream
-        videoRef.current.play().catch((err) => console.warn('Video play error:', err))
+        try {
+          await videoRef.current.play()
+        } catch (playErr) {
+          console.warn('Video play warning:', playErr)
+        }
       }
       setHasPermission(true)
     } catch (err) {
+      resolved = true
+      clearTimeout(watchdog)
       console.warn('getUserMedia error:', err)
       setHasPermission(false)
       if (err.name === 'NotAllowedError' || err.name === 'PermissionDeniedError') {
-        setErrorMsg('Camera permission was denied. Please allow camera access in your browser settings.')
+        setErrorMsg('Camera permission was blocked. You can allow camera in browser settings or use the native camera button below.')
       } else if (err.name === 'NotFoundError' || err.name === 'DevicesNotFoundError') {
         setErrorMsg('No camera hardware detected on this device.')
       } else {
-        setErrorMsg('Could not start live camera. You can still select or take a photo below.')
+        setErrorMsg('Could not open direct browser camera. Tap below to capture with your device camera.')
       }
     }
-  }, [facingMode, stopStream])
+  }, [facingMode, stopStream, hasPermission])
 
   useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (e.key === 'Escape') {
+        stopStream()
+        onClose()
+      }
+    }
+
     if (isOpen) {
+      window.addEventListener('keydown', handleKeyDown)
       startCamera(facingMode)
     } else {
       stopStream()
     }
-    return () => stopStream()
-  }, [isOpen, facingMode, startCamera, stopStream])
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown)
+      stopStream()
+    }
+  }, [isOpen, facingMode, startCamera, stopStream, onClose])
 
   const handleCapture = () => {
     if (!videoRef.current || !streamRef.current) return
@@ -75,22 +133,30 @@ export default function LiveCameraModal({ isOpen, onClose, onCapture }) {
     setIsCapturing(true)
     try {
       const video = videoRef.current
+      const width = video.videoWidth || 1280
+      const height = video.videoHeight || 720
+
       const canvas = document.createElement('canvas')
-      canvas.width = video.videoWidth || 1280
-      canvas.height = video.videoHeight || 720
+      canvas.width = width
+      canvas.height = height
 
       const ctx = canvas.getContext('2d')
-      ctx.drawImage(video, 0, 0, canvas.width, canvas.height)
+      ctx.drawImage(video, 0, 0, width, height)
 
       canvas.toBlob(
         (blob) => {
           setIsCapturing(false)
           if (blob) {
-            const capturedFile = new File(
-              [blob],
-              `bill_camera_${Date.now()}.jpg`,
-              { type: 'image/jpeg' }
-            )
+            let capturedFile
+            const fileName = `bill_camera_${Date.now()}.jpg`
+            try {
+              capturedFile = new File([blob], fileName, { type: 'image/jpeg' })
+            } catch {
+              blob.name = fileName
+              blob.lastModified = Date.now()
+              capturedFile = blob
+            }
+
             stopStream()
             onCapture(capturedFile)
             onClose()
@@ -110,45 +176,51 @@ export default function LiveCameraModal({ isOpen, onClose, onCapture }) {
     setFacingMode(nextMode)
   }
 
-  const handleFallbackFileInput = (e) => {
+  const handleNativeCapture = (e) => {
     const file = e.target.files?.[0]
     if (file) {
       stopStream()
       onCapture(file)
       onClose()
     }
+    e.target.value = ''
   }
 
   if (!isOpen) return null
 
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/85 backdrop-blur-md animate-fade-in">
-      <div className="relative w-full max-w-lg rounded-3xl bg-slate-950 border border-sky-500/30 dark:border-[#D4AF37]/30 shadow-2xl overflow-hidden flex flex-col text-white max-h-[92vh]">
+  if (typeof document === 'undefined') return null
+
+  return createPortal(
+    <div 
+      className="fixed inset-0 z-[9999] flex items-center justify-center p-3 sm:p-4 bg-slate-950/85 backdrop-blur-md animate-fade-in"
+      role="dialog"
+      aria-modal="true"
+      aria-label="Camera receipt scanner"
+    >
+      <div className="relative w-full max-w-lg rounded-2xl bg-slate-900 border border-slate-700/60 shadow-2xl overflow-hidden flex flex-col text-slate-100 max-h-[92vh]">
         {/* Header Bar */}
-        <div className="flex items-center justify-between px-4 py-3 border-b border-white/10 bg-slate-900/80">
-          <div className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-xl bg-sky-500/20 text-sky-400 dark:bg-[#D4AF37]/20 dark:text-[#FDE68A] flex items-center justify-center font-bold">
+        <div className="flex items-center justify-between px-5 py-3.5 border-b border-slate-800 bg-slate-900">
+          <div className="flex items-center gap-2.5">
+            <div className="w-8 h-8 rounded-lg bg-sky-500/15 text-sky-400 flex items-center justify-center">
               <Camera size={16} />
             </div>
             <div>
-              <h3 className="font-poppins font-bold text-xs sm:text-sm tracking-tight text-white flex items-center gap-1.5">
-                Live Optical Bill Scanner
-              </h3>
-              <p className="text-[10px] text-slate-400">Position bill receipt inside the reticle</p>
+              <h3 className="font-semibold text-sm text-white">Receipt Scanner</h3>
+              <p className="text-xs text-slate-400">Position your bill inside the frame</p>
             </div>
           </div>
           <button
             type="button"
             onClick={onClose}
-            className="p-1.5 rounded-full hover:bg-white/10 text-slate-400 hover:text-white transition-colors cursor-pointer"
-            aria-label="Close Camera"
+            className="p-2 rounded-lg hover:bg-slate-800 text-slate-400 hover:text-white transition-colors cursor-pointer"
+            aria-label="Close camera"
           >
-            <X size={20} />
+            <X size={18} />
           </button>
         </div>
 
         {/* Camera Viewport Area */}
-        <div className="relative flex-1 min-h-[320px] sm:min-h-[420px] bg-black flex items-center justify-center overflow-hidden">
+        <div className="relative flex-1 min-h-[300px] sm:min-h-[400px] bg-black flex items-center justify-center overflow-hidden">
           {hasPermission === true && (
             <>
               <video
@@ -159,76 +231,108 @@ export default function LiveCameraModal({ isOpen, onClose, onCapture }) {
                 className="w-full h-full object-cover"
               />
 
-              {/* Viewfinder Receipt Reticle Box */}
-              <div className="absolute inset-8 sm:inset-12 border-2 border-dashed border-sky-400/70 dark:border-[#D4AF37]/70 rounded-2xl pointer-events-none flex flex-col justify-between p-3 shadow-[0_0_20px_rgba(2,132,199,0.2)]">
-                <div className="flex justify-between text-[10px] font-mono text-sky-300 dark:text-[#FDE68A] font-bold">
-                  <span>[ OCR SENSOR ]</span>
-                  <span>1080P HD</span>
-                </div>
-
-                {/* Laser scanline animation */}
-                <div className="w-full h-[2px] bg-gradient-to-r from-transparent via-sky-400 dark:via-[#D4AF37] to-transparent animate-laser-scan shadow-[0_0_12px_#38BDF8]" />
-
-                <div className="text-center text-[11px] font-medium text-slate-200 bg-black/60 py-1 px-2 rounded-lg backdrop-blur-md self-center">
-                  Align receipt edges & tap shutter
-                </div>
+              {/* Viewfinder Reticle */}
+              <div className="absolute inset-6 sm:inset-10 border-2 border-dashed border-sky-400/60 rounded-xl pointer-events-none flex flex-col justify-between p-3">
+                <span className="text-[11px] font-medium text-sky-200 bg-black/50 px-2 py-0.5 rounded self-start backdrop-blur-sm">
+                  Align receipt flat
+                </span>
+                <span className="text-[11px] font-medium text-slate-200 bg-black/60 px-2 py-0.5 rounded self-center backdrop-blur-sm">
+                  Tap shutter to capture
+                </span>
               </div>
             </>
           )}
 
-          {/* Loading / Starting Camera */}
+          {/* Loading / Connecting View */}
           {hasPermission === null && (
-            <div className="text-center space-y-2 p-6">
-              <RefreshCw size={28} className="animate-spin text-sky-400 dark:text-[#D4AF37] mx-auto" />
-              <p className="text-xs font-semibold text-slate-300">Initializing camera sensor...</p>
+            <div className="text-center space-y-4 p-6 max-w-xs">
+              <RefreshCw size={24} className="animate-spin text-sky-400 mx-auto" />
+              <div>
+                <p className="text-xs font-semibold text-slate-200">Connecting to camera…</p>
+                <p className="text-[11px] text-slate-400 mt-1">Accept permission prompt if prompted</p>
+              </div>
+
+              {/* Instant Native Device Camera Fallback */}
+              <div className="pt-2 space-y-2">
+                <label
+                  htmlFor="live-modal-native-cam"
+                  className="w-full py-2.5 px-4 rounded-xl bg-sky-600 hover:bg-sky-500 text-white font-semibold text-xs transition-colors cursor-pointer flex items-center justify-center gap-2"
+                >
+                  <Camera size={15} /> Use Native Device Camera
+                </label>
+                <input
+                  id="live-modal-native-cam"
+                  ref={nativeCameraInputRef}
+                  type="file"
+                  accept="image/*"
+                  capture="environment"
+                  className="sr-only"
+                  onChange={handleNativeCapture}
+                />
+              </div>
             </div>
           )}
 
           {/* Permission Denied or Not Supported Error */}
           {hasPermission === false && (
             <div className="p-6 text-center space-y-4 max-w-sm">
-              <div className="w-12 h-12 rounded-2xl bg-rose-500/20 text-rose-400 border border-rose-500/30 flex items-center justify-center mx-auto">
-                <AlertCircle size={24} />
+              <div className="w-11 h-11 rounded-xl bg-amber-500/15 text-amber-400 border border-amber-500/30 flex items-center justify-center mx-auto">
+                <AlertCircle size={22} />
               </div>
               <div className="space-y-1">
-                <h4 className="font-bold text-sm text-white">Camera Access Notice</h4>
+                <h4 className="font-semibold text-sm text-white">Camera Access</h4>
                 <p className="text-xs text-slate-300 leading-relaxed">
                   {errorMsg}
                 </p>
               </div>
 
-              {/* Fallback Native File Capture Button */}
-              <button
-                type="button"
-                onClick={() => fileFallbackRef.current?.click()}
-                className="w-full py-2.5 px-4 rounded-xl bg-sky-600 hover:bg-sky-500 dark:bg-gradient-to-r dark:from-[#B45309] dark:to-[#D4AF37] text-white font-bold text-xs shadow-lg transition-all cursor-pointer flex items-center justify-center gap-2"
-              >
-                <Camera size={16} /> Open Native Device Camera
-              </button>
+              {/* Action options */}
+              <div className="pt-1 space-y-2.5">
+                <label
+                  htmlFor="live-modal-native-cam-fallback"
+                  className="w-full py-2.5 px-4 rounded-xl bg-sky-600 hover:bg-sky-500 text-white font-semibold text-xs transition-colors cursor-pointer flex items-center justify-center gap-2 shadow"
+                >
+                  <Camera size={15} /> Take Photo with Device Camera
+                </label>
+                <input
+                  id="live-modal-native-cam-fallback"
+                  type="file"
+                  accept="image/*"
+                  capture="environment"
+                  className="sr-only"
+                  onChange={handleNativeCapture}
+                />
 
-              <input
-                ref={fileFallbackRef}
-                type="file"
-                accept="image/*"
-                capture="environment"
-                className="hidden"
-                onChange={handleFallbackFileInput}
-              />
+                <label
+                  htmlFor="live-modal-file-fallback"
+                  className="w-full py-2 px-4 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 font-medium text-xs transition-colors cursor-pointer flex items-center justify-center gap-2"
+                >
+                  <Upload size={14} /> Choose Photo from Gallery
+                </label>
+                <input
+                  id="live-modal-file-fallback"
+                  type="file"
+                  accept="image/*,application/pdf"
+                  className="sr-only"
+                  onChange={handleNativeCapture}
+                />
+              </div>
             </div>
           )}
         </div>
 
-        {/* Shutter / Controls Footer */}
+        {/* Shutter & Controls Footer */}
         {hasPermission === true && (
-          <div className="px-6 py-4 bg-slate-950 border-t border-white/10 flex items-center justify-between">
+          <div className="px-6 py-4 bg-slate-900 border-t border-slate-800 flex items-center justify-between">
             {/* Flip Camera Button */}
             <button
               type="button"
               onClick={handleFlipCamera}
-              className="p-3 rounded-2xl bg-white/10 hover:bg-white/20 text-slate-300 hover:text-white transition-colors cursor-pointer"
-              title="Flip Front/Rear Camera"
+              className="p-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white transition-colors cursor-pointer"
+              title="Switch camera"
+              aria-label="Switch camera"
             >
-              <SwitchCamera size={20} />
+              <SwitchCamera size={18} />
             </button>
 
             {/* Shutter Action Button */}
@@ -236,44 +340,39 @@ export default function LiveCameraModal({ isOpen, onClose, onCapture }) {
               type="button"
               onClick={handleCapture}
               disabled={isCapturing}
-              aria-label="Take Photo"
-              className="w-16 h-16 rounded-full p-1.5 border-4 border-white/30 hover:border-white transition-all active:scale-95 touch-manipulation cursor-pointer flex items-center justify-center shadow-2xl"
+              aria-label="Take photo"
+              className="w-14 h-14 rounded-full p-1 border-2 border-white/40 hover:border-white transition-transform active:scale-95 cursor-pointer flex items-center justify-center"
             >
-              <div 
-                className="w-full h-full rounded-full flex items-center justify-center"
-                style={{
-                  background: 'linear-gradient(135deg, #0284C7 0%, #38BDF8 100%)',
-                  boxShadow: '0 0 20px rgba(2, 132, 199, 0.6)'
-                }}
-              >
+              <div className="w-full h-full rounded-full bg-sky-500 hover:bg-sky-400 flex items-center justify-center transition-colors">
                 {isCapturing ? (
-                  <RefreshCw size={22} className="animate-spin text-white" />
+                  <RefreshCw size={18} className="animate-spin text-white" />
                 ) : (
-                  <Camera size={24} className="text-white" />
+                  <Camera size={20} className="text-white" />
                 )}
               </div>
             </button>
 
             {/* Native Gallery Fallback */}
-            <button
-              type="button"
-              onClick={() => fileFallbackRef.current?.click()}
-              className="p-3 rounded-2xl bg-white/10 hover:bg-white/20 text-slate-300 hover:text-white text-xs font-semibold transition-colors cursor-pointer"
-              title="Upload from Device"
+            <label
+              htmlFor="live-modal-footer-file"
+              className="p-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white text-xs font-medium transition-colors cursor-pointer flex items-center gap-1.5"
+              title="Upload existing file"
             >
-              File
-            </button>
-
+              <Upload size={16} />
+              <span className="hidden sm:inline">Upload</span>
+            </label>
             <input
-              ref={fileFallbackRef}
+              id="live-modal-footer-file"
+              ref={fileInputRef}
               type="file"
-              accept="image/*"
-              className="hidden"
-              onChange={handleFallbackFileInput}
+              accept="image/*,application/pdf"
+              className="sr-only"
+              onChange={handleNativeCapture}
             />
           </div>
         )}
       </div>
-    </div>
+    </div>,
+    document.body
   )
 }

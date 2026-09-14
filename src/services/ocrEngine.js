@@ -12,6 +12,66 @@ export class NonBillImageError extends Error {
 /**
  * Preprocesses and extracts verbatim raw text from bill receipt images using Tesseract.js OCR.
  * @param {string|File|Blob} imageSource - Image URL, Base64 Data URL, Blob, or File object.
+/**
+ * Scales an image down to optimal OCR size (max 1600px) on an in-memory canvas
+ */
+async function getOptimizedOcrInput(imageSource) {
+  if (typeof window === 'undefined' || typeof document === 'undefined') {
+    return imageSource;
+  }
+
+  try {
+    let srcUrl = '';
+    if (typeof imageSource === 'string') {
+      srcUrl = imageSource;
+    } else if (imageSource instanceof Blob || imageSource instanceof File) {
+      srcUrl = URL.createObjectURL(imageSource);
+    } else {
+      return imageSource;
+    }
+
+    const img = new Image();
+    img.crossOrigin = 'anonymous';
+
+    await new Promise((resolve, reject) => {
+      img.onload = resolve;
+      img.onerror = reject;
+      img.src = srcUrl;
+    });
+
+    const maxDim = 1600;
+    let width = img.naturalWidth || img.width;
+    let height = img.naturalHeight || img.height;
+
+    if (width > maxDim || height > maxDim) {
+      if (width > height) {
+        height = Math.round((height * maxDim) / width);
+        width = maxDim;
+      } else {
+        width = Math.round((width * maxDim) / height);
+        height = maxDim;
+      }
+    }
+
+    const canvas = document.createElement('canvas');
+    canvas.width = width;
+    canvas.height = height;
+    const ctx = canvas.getContext('2d');
+    ctx.drawImage(img, 0, 0, width, height);
+
+    if (srcUrl.startsWith('blob:')) {
+      try { URL.revokeObjectURL(srcUrl); } catch {}
+    }
+
+    return canvas;
+  } catch {
+    return imageSource;
+  }
+}
+
+/**
+ * Preprocesses and extracts verbatim raw text from bill receipt images using Tesseract.js OCR.
+ * @param {string|File|Blob} imageSource - Image URL, Base64 Data URL, Blob, or File object.
  * @param {Function} onProgress - Optional callback for OCR progress updates (0 to 100).
  * @returns {Promise<{ text: string, confidence: number }>}
  */
@@ -20,17 +80,26 @@ export async function performOcr(imageSource, onProgress = null) {
 
   let worker = null;
   try {
-    worker = await createWorker('eng');
-    
-    // Note: Do not restrict whitelist artificially to prevent stripping Indian receipt symbols (₹, :, /, -, etc.)
-    const ret = await worker.recognize(imageSource);
-    const text = ret?.data?.text || '';
-    const confidence = ret?.data?.confidence || 80;
+    const optimizedInput = await getOptimizedOcrInput(imageSource);
 
-    await worker.terminate();
-    return { text: text.trim(), confidence };
+    // Timeout after 8 seconds so OCR never permanently stalls
+    const ocrPromise = (async () => {
+      worker = await createWorker('eng');
+      const ret = await worker.recognize(optimizedInput);
+      const text = ret?.data?.text || '';
+      const confidence = ret?.data?.confidence || 80;
+      await worker.terminate();
+      worker = null;
+      return { text: text.trim(), confidence };
+    })();
+
+    const timeoutPromise = new Promise((_, reject) =>
+      setTimeout(() => reject(new Error('OCR recognition timeout')), 8000)
+    );
+
+    return await Promise.race([ocrPromise, timeoutPromise]);
   } catch (err) {
-    console.warn("Tesseract OCR worker warning:", err.message);
+    console.warn("Tesseract OCR preprocessing note:", err.message);
     if (worker) {
       try { await worker.terminate(); } catch {}
     }

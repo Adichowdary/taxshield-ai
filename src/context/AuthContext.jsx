@@ -21,6 +21,7 @@ const defaultAuthValue = {
   currentUser: null,
   loading: false,
   login: async () => {},
+  loginAsDemo: async () => {},
   register: async () => {},
   logout: () => {},
   loginWithGoogle: async () => {},
@@ -54,8 +55,33 @@ export function AuthProvider({ children }) {
     })
 
 
+    // Check for demo session if offline or testing
+    const storedDemo = typeof localStorage !== 'undefined' ? localStorage.getItem('taxshield_demo_session') : null
+    if (storedDemo) {
+      try {
+        const parsed = JSON.parse(storedDemo)
+        if (parsed?.uid) {
+          setCurrentUser(parsed)
+          setLoading(false)
+        }
+      } catch {}
+    }
+
     const unsubscribe = onAuthStateChanged(auth, (user) => {
-      setCurrentUser(user || null)
+      if (user) {
+        setCurrentUser(user)
+      } else {
+        const demo = typeof localStorage !== 'undefined' ? localStorage.getItem('taxshield_demo_session') : null
+        if (demo) {
+          try {
+            setCurrentUser(JSON.parse(demo))
+          } catch {
+            setCurrentUser(null)
+          }
+        } else {
+          setCurrentUser(null)
+        }
+      }
       setLoading(false)
     })
 
@@ -129,8 +155,29 @@ export function AuthProvider({ children }) {
     return updatePassword(auth.currentUser, newPassword)
   }
 
+  // Demo login for quick testing & instant review
+  const loginAsDemo = async () => {
+    const demoUser = {
+      uid: 'demo-executive-user-001',
+      email: 'alex.morgan@taxshield.ai',
+      displayName: 'Alex Morgan',
+      photoURL: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=120&auto=format&fit=crop',
+      emailVerified: true,
+      isDemo: true
+    }
+    if (typeof localStorage !== 'undefined') {
+      localStorage.setItem('taxshield_demo_session', JSON.stringify(demoUser))
+      localStorage.setItem('taxshield_user_name', 'Alex Morgan')
+    }
+    setCurrentUser(demoUser)
+    return demoUser
+  }
+
   // Logout
   const logout = () => {
+    if (typeof localStorage !== 'undefined') {
+      localStorage.removeItem('taxshield_demo_session')
+    }
     setCurrentUser(null)
     return signOut(auth).catch(() => {})
   }
@@ -139,6 +186,7 @@ export function AuthProvider({ children }) {
     currentUser,
     register,
     login,
+    loginAsDemo,
     loginWithGoogle,
     loginWithGoogleRedirect,
     resetPassword,

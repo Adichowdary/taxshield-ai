@@ -289,8 +289,9 @@ const Dashboard3DScanner = forwardRef(function Dashboard3DScanner({ onBillScanne
   }
 
   const handleFileUpload = (e) => {
-    const file = e.target.files?.[0]
+    const file = e?.target?.files?.[0] || (e instanceof Blob || e instanceof File ? e : null)
     if (!file) return
+    if (e?.target) e.target.value = ''
 
     // Pick a demo bill payload or construct custom bill from upload
     const customBill = {

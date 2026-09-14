@@ -83,9 +83,6 @@ export default function Navbar() {
               <span className="font-poppins font-extrabold text-lg tracking-tight leading-none text-slate-900 dark:text-white">
                 TaxShield
               </span>
-              <span className="hidden sm:inline-block text-[10px] font-bold px-2 py-0.5 rounded-full border uppercase tracking-wider font-mono text-sky-700 dark:text-[#FDE68A] bg-sky-500/10 dark:bg-[#D4AF37]/10 border-sky-500/30 dark:border-[#D4AF37]/30">
-                INSTITUTIONAL AUDIT
-              </span>
             </div>
           </Link>
 
