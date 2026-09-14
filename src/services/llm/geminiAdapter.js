@@ -82,15 +82,53 @@ export async function prepareGenerativeContentInput(billInput) {
   return { promptText: trimmed };
 }
 
-export async function analyzeWithGemini(billInput, options = {}) {
-  const apiKey = options.apiKey || (typeof import.meta !== 'undefined' && import.meta.env?.VITE_GEMINI_API_KEY) || (typeof process !== 'undefined' && process.env?.VITE_GEMINI_API_KEY);
-  const modelName = options.model || (typeof import.meta !== 'undefined' && import.meta.env?.VITE_GEMINI_MODEL) || (typeof process !== 'undefined' && process.env?.VITE_GEMINI_MODEL) || "gemini-2.0-flash";
+export async function checkGeminiHealth(customKey, customModel) {
+  const apiKey = customKey || 
+    (typeof localStorage !== 'undefined' && localStorage.getItem('taxshield_gemini_api_key')) ||
+    (typeof import.meta !== 'undefined' && import.meta.env?.VITE_GEMINI_API_KEY) || 
+    (typeof process !== 'undefined' && process.env?.VITE_GEMINI_API_KEY);
 
-  if (!apiKey || apiKey.includes("your_gemini_api_key")) {
-    throw new Error("Gemini API Key is missing or default. Set VITE_GEMINI_API_KEY in .env");
+  const modelName = customModel || 
+    (typeof localStorage !== 'undefined' && localStorage.getItem('taxshield_gemini_model')) ||
+    (typeof import.meta !== 'undefined' && import.meta.env?.VITE_GEMINI_MODEL) || 
+    (typeof process !== 'undefined' && process.env?.VITE_GEMINI_MODEL) || 
+    "gemini-2.0-flash";
+
+  if (!apiKey || apiKey.includes("your_gemini_api_key") || apiKey.trim() === "") {
+    return { online: false, error: "Gemini API key is missing or unconfigured." };
   }
 
-  const genAI = new GoogleGenerativeAI(apiKey);
+  try {
+    const genAI = new GoogleGenerativeAI(apiKey.trim());
+    const model = genAI.getGenerativeModel({ model: modelName });
+    const res = await model.generateContent("Reply with pong");
+    const text = res?.response?.text();
+    if (text) {
+      return { online: true, model: modelName, message: text.slice(0, 50) };
+    }
+    return { online: false, error: "Received empty response from Gemini API." };
+  } catch (err) {
+    return { online: false, error: err.message };
+  }
+}
+
+export async function analyzeWithGemini(billInput, options = {}) {
+  const apiKey = options.apiKey || 
+    (typeof localStorage !== 'undefined' && localStorage.getItem('taxshield_gemini_api_key')) ||
+    (typeof import.meta !== 'undefined' && import.meta.env?.VITE_GEMINI_API_KEY) || 
+    (typeof process !== 'undefined' && process.env?.VITE_GEMINI_API_KEY);
+
+  const modelName = options.model || 
+    (typeof localStorage !== 'undefined' && localStorage.getItem('taxshield_gemini_model')) ||
+    (typeof import.meta !== 'undefined' && import.meta.env?.VITE_GEMINI_MODEL) || 
+    (typeof process !== 'undefined' && process.env?.VITE_GEMINI_MODEL) || 
+    "gemini-2.0-flash";
+
+  if (!apiKey || apiKey.includes("your_gemini_api_key") || apiKey.trim() === "") {
+    throw new Error("Gemini API Key is missing or default. Set VITE_GEMINI_API_KEY in .env or enter it in Settings > AI Model.");
+  }
+
+  const genAI = new GoogleGenerativeAI(apiKey.trim());
   const model = genAI.getGenerativeModel({
     model: modelName,
     systemInstruction: BILL_ANALYSIS_SYSTEM_PROMPT,

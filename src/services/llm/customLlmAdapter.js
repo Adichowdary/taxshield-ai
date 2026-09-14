@@ -77,12 +77,8 @@ export async function analyzeWithCustomLlm(billText, options = {}) {
     headers["Authorization"] = `Bearer ${apiKey}`;
   }
 
-  // FIX: Local Ollama/vLLM models (LLaMA 3:8B, Qwen 2.5, Mistral) benefit from embedding
-  // the full schema instruction directly in the prompt + requesting strict JSON mode.
-  const embeddedUserMessage = `${BILL_ANALYSIS_SYSTEM_PROMPT}\n\n---\n\n${userPrompt}`;
-
   const controller = new AbortController();
-  const timeoutId = setTimeout(() => controller.abort(), 60000); // 60s timeout for local inference
+  const timeoutId = setTimeout(() => controller.abort(), 45000); // 45s timeout for local inference
 
   let response;
   try {
@@ -95,13 +91,12 @@ export async function analyzeWithCustomLlm(billText, options = {}) {
         temperature: 0.0,
         top_p: 0.9,
         seed: 42,
-        max_tokens: 4096,
+        max_tokens: 2048,
         // Enforce JSON object output format across Ollama and OpenAI-compatible endpoints
         response_format: { type: "json_object" },
-        format: "json",
         messages: [
           { role: "system", content: BILL_ANALYSIS_SYSTEM_PROMPT },
-          { role: "user", content: embeddedUserMessage }
+          { role: "user", content: userPrompt }
         ]
       })
     });

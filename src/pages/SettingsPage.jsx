@@ -32,9 +32,12 @@ import {
   Scale,
   Zap,
   ChevronDown,
-  ChevronUp
+  ChevronUp,
+  Eye,
+  EyeOff
 } from 'lucide-react'
 import { checkCustomLlmHealth } from '../services/llm/customLlmAdapter'
+import { checkGeminiHealth } from '../services/llm/geminiAdapter'
 
 export default function SettingsPage() {
   const navigate = useNavigate()
@@ -132,10 +135,22 @@ export default function SettingsPage() {
   )
   const [gpuHealth, setGpuHealth] = useState({ checking: false, checked: false, online: false })
 
+  // Gemini Cloud AI State
+  const [geminiApiKey, setGeminiApiKey] = useState(() => 
+    localStorage.getItem('taxshield_gemini_api_key') || import.meta.env.VITE_GEMINI_API_KEY || ''
+  )
+  const [geminiModel, setGeminiModel] = useState(() => 
+    localStorage.getItem('taxshield_gemini_model') || import.meta.env.VITE_GEMINI_MODEL || 'gemini-2.0-flash'
+  )
+  const [geminiHealth, setGeminiHealth] = useState({ checking: false, checked: false, online: false, message: '' })
+  const [showGeminiKey, setShowGeminiKey] = useState(false)
+
   const handleSave = async () => {
     localStorage.setItem('taxshield_llm_provider', llmProvider)
     localStorage.setItem('taxshield_custom_endpoint', customEndpoint)
     localStorage.setItem('taxshield_custom_model', customModel)
+    localStorage.setItem('taxshield_gemini_api_key', geminiApiKey)
+    localStorage.setItem('taxshield_gemini_model', geminiModel)
     
     if (fullName && updateUserProfile) {
       await updateUserProfile(fullName)
@@ -151,11 +166,21 @@ export default function SettingsPage() {
     setGpuHealth({ checking: false, checked: true, online: res.online, models: res.models || [] })
   }, [customEndpoint])
 
+  const runGeminiHealthCheck = useCallback(async () => {
+    setGeminiHealth({ checking: true, checked: false, online: false, message: '' })
+    const res = await checkGeminiHealth(geminiApiKey, geminiModel)
+    setGeminiHealth({ checking: false, checked: true, online: res.online, error: res.error, message: res.message || '' })
+  }, [geminiApiKey, geminiModel])
+
   useEffect(() => {
     if (activeTab === 'ai-llm') {
-      runGpuHealthCheck()
+      if (llmProvider === 'custom') {
+        runGpuHealthCheck()
+      } else if (llmProvider === 'gemini') {
+        runGeminiHealthCheck()
+      }
     }
-  }, [activeTab, runGpuHealthCheck])
+  }, [activeTab, llmProvider, runGpuHealthCheck, runGeminiHealthCheck])
 
   return (
     <div className="min-h-screen vision-pro-bg vision-pro-grid bg-vignette relative overflow-hidden font-sans text-slate-100 flex flex-col selection:bg-lime-400 selection:text-slate-950">
@@ -540,6 +565,109 @@ export default function SettingsPage() {
                         </span>
                       </div>
                     )}
+                  </div>
+                )}
+
+                {/* Gemini Cloud AI Configuration Form */}
+                {llmProvider === 'gemini' && (
+                  <div className="vision-pro-pill p-4 space-y-3.5 border-cyan-400/30">
+                    <div className="flex items-center justify-between">
+                      <h4 className="font-bold flex items-center gap-1.5 text-cyan-300">
+                        <Zap size={15} className="text-cyan-400" /> Google Gemini Cloud Engine
+                      </h4>
+                      <button
+                        type="button"
+                        onClick={runGeminiHealthCheck}
+                        disabled={geminiHealth.checking}
+                        className="text-[11px] text-cyan-400 font-semibold flex items-center gap-1 hover:underline disabled:opacity-50 cursor-pointer"
+                      >
+                        <RefreshCw size={12} className={geminiHealth.checking ? "animate-spin" : ""} /> Check Gemini Status
+                      </button>
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                      <div>
+                        <label className="font-semibold block mb-1" style={{ color: 'var(--text-primary)' }}>Gemini API Key</label>
+                        <div className="relative">
+                          <input
+                            type={showGeminiKey ? 'text' : 'password'}
+                            value={geminiApiKey}
+                            onChange={(e) => setGeminiApiKey(e.target.value)}
+                            placeholder="AIzaSy..."
+                            className="w-full p-2.5 pr-9 vision-pro-pill border-cyan-400/30 text-slate-100 font-mono text-xs focus:outline-none auth-input-glow"
+                          />
+                          <button
+                            type="button"
+                            onClick={() => setShowGeminiKey(!showGeminiKey)}
+                            className="absolute right-2.5 top-2.5 text-slate-400 hover:text-white transition-colors"
+                          >
+                            {showGeminiKey ? <EyeOff size={14} /> : <Eye size={14} />}
+                          </button>
+                        </div>
+                      </div>
+                      <div>
+                        <label className="font-semibold block mb-1" style={{ color: 'var(--text-primary)' }}>Active Vision Model</label>
+                        <input
+                          type="text"
+                          value={geminiModel}
+                          onChange={(e) => setGeminiModel(e.target.value)}
+                          placeholder="gemini-2.0-flash"
+                          className="w-full p-2.5 vision-pro-pill border-cyan-400/30 text-slate-100 font-mono text-xs focus:outline-none auth-input-glow"
+                        />
+                      </div>
+                    </div>
+
+                    {/* Quick Model Selector Presets */}
+                    <div className="space-y-1.5 pt-1">
+                      <label className="text-[11px] font-semibold block" style={{ color: 'var(--text-muted)' }}>
+                        Recommended Gemini Models:
+                      </label>
+                      <div className="flex flex-wrap gap-1.5">
+                        {[
+                          { tag: 'gemini-2.0-flash', label: 'gemini-2.0-flash', note: 'Fastest & Recommended' },
+                          { tag: 'gemini-1.5-flash', label: 'gemini-1.5-flash', note: 'Standard Flash' },
+                          { tag: 'gemini-1.5-pro', label: 'gemini-1.5-pro', note: 'High Complexity OCR' },
+                        ].map((m) => (
+                          <button
+                            key={m.tag}
+                            type="button"
+                            onClick={() => setGeminiModel(m.tag)}
+                            className={`px-2.5 py-1 rounded-lg text-[11px] font-medium border transition-all cursor-pointer flex items-center gap-1 ${
+                              geminiModel === m.tag
+                                ? 'bg-cyan-500/25 border-cyan-400 text-cyan-300 font-bold shadow-[0_0_10px_rgba(6,182,212,0.3)]'
+                                : 'bg-slate-900/60 border-slate-700 text-slate-300 hover:border-cyan-400/50'
+                            }`}
+                          >
+                            <span>{m.tag}</span>
+                            <span className="text-[9px] opacity-70">({m.note})</span>
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* Gemini Health Status Indicator */}
+                    {geminiHealth.checked && (
+                      <div className={`p-3 rounded-xl border flex items-center gap-2 font-medium ${
+                        geminiHealth.online 
+                          ? 'bg-emerald-500/15 text-emerald-300 border-emerald-400/30' 
+                          : 'bg-amber-500/15 text-amber-300 border-amber-400/30'
+                      }`}>
+                        <span className={`w-2.5 h-2.5 rounded-full ${geminiHealth.online ? 'bg-emerald-400 animate-pulse' : 'bg-amber-400'}`}></span>
+                        <span>
+                          {geminiHealth.online 
+                            ? `Gemini Cloud API Verified Online! Model: ${geminiModel}. Ready for multimodal vision and instant bill audits.`
+                            : `Gemini verification issue: ${geminiHealth.error || 'Please enter a valid Gemini API key.'}`
+                          }
+                        </span>
+                      </div>
+                    )}
+
+                    <p className="text-[11px] text-slate-400 flex items-center gap-1">
+                      <span>Get a free Google Gemini API Key at:</span>
+                      <a href="https://aistudio.google.com/app/apikey" target="_blank" rel="noopener noreferrer" className="text-cyan-400 underline font-semibold">
+                        aistudio.google.com
+                      </a>
+                    </p>
                   </div>
                 )}
 
