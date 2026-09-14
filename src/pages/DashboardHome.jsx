@@ -15,6 +15,7 @@ import { useCountUp } from '../hooks/useCountUp'
 import TiltCard from '../components/shared/TiltCard'
 import AmbientBackground from '../components/shared/AmbientBackground'
 import Realistic3DBillPlinth from '../components/Realistic3DBillPlinth'
+import MobileHomeQuickHub from '../components/MobileHomeQuickHub'
 
 export default function DashboardHome() {
   const { currentUser } = useAuth()
@@ -71,10 +72,13 @@ export default function DashboardHome() {
       <Navbar />
 
       <main className="flex-1 pt-28 pb-28 sm:pb-20 relative z-10">
-        <Container className="space-y-8">
+        <Container className="space-y-6 sm:space-y-8">
           
+          {/* Mobile Home Quick Hub (PhonePe UPI-Style Balance/Scan Bar + Instagram-Style Story Avatars) */}
+          <MobileHomeQuickHub bills={bills} onTriggerScan={scrollToScanner} />
+
           {/* Header Greeting Card */}
-          <div className="vault-glass border border-sky-500/25 dark:border-[#D4AF37]/30 rounded-3xl p-6 md:p-8 flex flex-col md:flex-row items-start md:items-center justify-between gap-6 relative overflow-hidden shadow-[0_20px_50px_rgba(2,132,199,0.08)] dark:shadow-[0_20px_50px_rgba(0,0,0,0.6)]">
+          <div className="hidden md:flex vault-glass border border-sky-500/25 dark:border-[#D4AF37]/30 rounded-3xl p-6 md:p-8 flex-col md:flex-row items-start md:items-center justify-between gap-6 relative overflow-hidden shadow-[0_20px_50px_rgba(2,132,199,0.08)] dark:shadow-[0_20px_50px_rgba(0,0,0,0.6)]">
             {/* Top specular accent */}
             <div className="absolute top-0 inset-x-0 h-[1.5px] bg-gradient-to-r from-transparent via-sky-500 dark:via-[#D4AF37] to-transparent" />
 

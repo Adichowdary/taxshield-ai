@@ -93,19 +93,19 @@ export default function HistoryPage() {
               {/* Filter Controls Bar */}
               <div className="vault-glass border border-slate-200/50 dark:border-white/10 rounded-3xl p-4 flex flex-col md:flex-row items-stretch md:items-center justify-between gap-4 auth-stagger shadow-xl" style={{ animationDelay: '140ms' }}>
                 
-                {/* Tab Filter Buttons */}
-                <div className="flex flex-wrap items-center gap-1.5 text-xs font-semibold">
+                {/* Tab Filter Buttons - Clean, mobile scrollable */}
+                <div className="flex items-center gap-1.5 overflow-x-auto pb-1 text-xs font-semibold scrollbar-none w-full md:w-auto">
                   <button
                     onClick={() => setActiveTab('ALL')}
-                    className={`px-3.5 py-2 rounded-xl transition-all cursor-pointer ${
+                    className={`px-3 py-2 rounded-xl whitespace-nowrap transition-all cursor-pointer shrink-0 ${
                       activeTab === 'ALL' ? 'bg-sky-600 text-white font-bold shadow-md shadow-sky-500/30 dark:from-[#D4AF37] dark:to-[#FDE68A] dark:text-slate-950 dark:shadow-[0_0_15px_rgba(212,175,55,0.4)] dark:bg-gradient-to-r' : 'bg-black/5 dark:bg-white/5 text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-black/10 dark:hover:bg-white/10 border border-slate-200 dark:border-white/5'
                     }`}
                   >
-                    All Bills ({bills.length})
+                    All ({bills.length})
                   </button>
                   <button
                     onClick={() => setActiveTab('VERIFIED')}
-                    className={`px-3.5 py-2 rounded-xl transition-all cursor-pointer ${
+                    className={`px-3 py-2 rounded-xl whitespace-nowrap transition-all cursor-pointer shrink-0 ${
                       activeTab === 'VERIFIED' ? 'bg-[#10B981] text-white font-bold shadow-md shadow-emerald-500/25' : 'bg-black/5 dark:bg-white/5 text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-black/10 dark:hover:bg-white/10 border border-slate-200 dark:border-white/5'
                     }`}
                   >
@@ -113,19 +113,19 @@ export default function HistoryPage() {
                   </button>
                   <button
                     onClick={() => setActiveTab('REVIEW')}
-                    className={`px-3.5 py-2 rounded-xl transition-all cursor-pointer ${
+                    className={`px-3 py-2 rounded-xl whitespace-nowrap transition-all cursor-pointer shrink-0 ${
                       activeTab === 'REVIEW' ? 'bg-amber-500 text-white font-bold shadow-md shadow-amber-500/25' : 'bg-black/5 dark:bg-white/5 text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-black/10 dark:hover:bg-white/10 border border-slate-200 dark:border-white/5'
                     }`}
                   >
-                    Review Recommended ({bills.filter(b => getStatusType(b) === 'REVIEW_RECOMMENDED').length})
+                    Needs Review ({bills.filter(b => getStatusType(b) === 'REVIEW_RECOMMENDED').length})
                   </button>
                   <button
                     onClick={() => setActiveTab('OVERCHARGE')}
-                    className={`px-3.5 py-2 rounded-xl transition-all cursor-pointer ${
+                    className={`px-3 py-2 rounded-xl whitespace-nowrap transition-all cursor-pointer shrink-0 ${
                       activeTab === 'OVERCHARGE' ? 'bg-rose-500 text-white font-bold shadow-md shadow-rose-500/25' : 'bg-black/5 dark:bg-white/5 text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-black/10 dark:hover:bg-white/10 border border-slate-200 dark:border-white/5'
                     }`}
                   >
-                    Potential Overcharge ({bills.filter(b => getStatusType(b) === 'POTENTIAL_OVERCHARGE').length})
+                    Overcharge ({bills.filter(b => getStatusType(b) === 'POTENTIAL_OVERCHARGE').length})
                   </button>
                 </div>
 

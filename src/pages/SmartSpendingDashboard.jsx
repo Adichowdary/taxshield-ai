@@ -393,18 +393,18 @@ export default function SmartSpendingDashboard() {
             </div>
 
             {/* Time Horizon Filter Pills */}
-            <div className="vault-glass p-1.5 rounded-2xl flex items-center gap-1.5 self-start lg:self-auto border border-slate-200 dark:border-white/10 shadow-lg">
+            <div className="vault-glass p-1 rounded-2xl flex items-center gap-1 self-start lg:self-auto border border-slate-200 dark:border-white/10 shadow-lg overflow-x-auto max-w-full">
               {['1M', '3M', '6M', 'ALL'].map((tab) => (
                 <button
                   key={tab}
                   onClick={() => setTimeHorizon(tab)}
-                  className={`px-4 py-2 rounded-xl text-xs font-bold transition-all duration-300 cursor-pointer ${
+                  className={`px-3 py-1.5 sm:px-4 sm:py-2 rounded-xl text-xs font-bold whitespace-nowrap transition-all duration-300 cursor-pointer ${
                     timeHorizon === tab 
                       ? 'bg-sky-600 text-white shadow-md shadow-sky-500/30 scale-105 dark:from-[#D4AF37] dark:to-[#FDE68A] dark:text-slate-950 dark:shadow-[0_0_15px_rgba(212,175,55,0.4)] dark:bg-gradient-to-r' 
                       : 'text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-black/5 dark:hover:bg-white/10'
                   }`}
                 >
-                  {tab === '1M' ? 'This Month' : tab === '3M' ? '3 Months' : tab === '6M' ? '6 Months' : 'All Time'}
+                  {tab === '1M' ? '1 Month' : tab === '3M' ? '3 Months' : tab === '6M' ? '6 Months' : 'All Time'}
                 </button>
               ))}
             </div>
@@ -566,22 +566,22 @@ export default function SmartSpendingDashboard() {
                 </div>
               </div>
 
-              <div className="flex items-center gap-2.5">
+              <div className="flex flex-wrap items-center gap-2">
                 <Button 
                   variant="outline" 
                   size="sm" 
                   onClick={() => setShowBudgetForm(!showBudgetForm)}
-                  className="rounded-xl border-slate-300 dark:border-white/20 bg-slate-100/60 dark:bg-white/5 text-slate-800 dark:text-slate-200 hover:bg-slate-200/80 dark:hover:bg-white/10 hover:text-slate-900 dark:hover:text-white font-semibold"
+                  className="rounded-xl border-slate-300 dark:border-white/20 bg-slate-100/60 dark:bg-white/5 text-slate-800 dark:text-slate-200 hover:bg-slate-200/80 dark:hover:bg-white/10 hover:text-slate-900 dark:hover:text-white font-semibold text-xs py-2 px-3"
                 >
-                  <Sliders size={14} /> {showBudgetForm ? 'Close Controls' : 'Edit Target'}
+                  <Sliders size={14} /> {showBudgetForm ? 'Close' : 'Target'}
                 </Button>
                 <Button 
                   variant="primary" 
                   size="sm" 
                   onClick={() => setShowRefundModal(true)}
-                  className="rounded-xl font-bold shadow-md shadow-sky-500/25 dark:shadow-[0_0_20px_rgba(212,175,55,0.3)]"
+                  className="rounded-xl font-bold shadow-md shadow-sky-500/25 dark:shadow-[0_0_20px_rgba(212,175,55,0.3)] text-xs py-2 px-3"
                 >
-                  <FileText size={14} /> CCPA Waiver Notice (₹{snapshot.totalFees.toFixed(0)})
+                  <FileText size={14} /> CCPA Notice (₹{snapshot.totalFees.toFixed(0)})
                 </Button>
               </div>
             </div>
@@ -765,8 +765,14 @@ export default function SmartSpendingDashboard() {
               <Button
                 variant="primary"
                 size="sm"
-                onClick={() => navigate('/scan')}
-                className="font-bold shrink-0 shadow-[0_0_15px_rgba(2,132,199,0.3)] dark:shadow-[0_0_15px_rgba(212,175,55,0.3)]"
+                onClick={() => {
+                  navigate('/dashboard')
+                  setTimeout(() => {
+                    const el = document.getElementById('scanner-section')
+                    if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' })
+                  }, 400)
+                }}
+                className="font-bold shrink-0 shadow-[0_0_15px_rgba(2,132,199,0.3)] dark:shadow-[0_0_15px_rgba(212,175,55,0.3)] text-xs py-2 px-3"
               >
                 <Receipt size={14} /> Scan New Bill
               </Button>

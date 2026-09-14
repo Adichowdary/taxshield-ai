@@ -46,10 +46,13 @@ export async function analyzeWithCustomLlm(billText, options = {}) {
     (typeof process !== 'undefined' && process.env?.VITE_CUSTOM_LLM_MODEL) || 
     "qwen2.5:3b";
 
-  // Check health & auto-resolve model if configured model is not installed
+  // Check health & fail fast if Ollama endpoint is offline
   try {
     const health = await checkCustomLlmHealth(endpoint);
-    if (health.online && Array.isArray(health.models) && health.models.length > 0) {
+    if (!health.online) {
+      throw new Error(`TaxShield AI local endpoint (${endpoint}) is offline.`);
+    }
+    if (Array.isArray(health.models) && health.models.length > 0) {
       if (!health.models.includes(modelName)) {
         // Pick best available model in Ollama
         const preferred = ['qwen2.5:3b', 'llama3:8b', 'nirnay-ai:latest'];
@@ -57,8 +60,8 @@ export async function analyzeWithCustomLlm(billText, options = {}) {
         if (match) modelName = match;
       }
     }
-  } catch {
-    // Keep modelName fallback
+  } catch (healthErr) {
+    throw new Error(`Local TaxShield AI unavailable at ${endpoint}: ${healthErr.message}`);
   }
 
   const apiKey = options.apiKey || (typeof import.meta !== 'undefined' && import.meta.env?.VITE_CUSTOM_LLM_API_KEY) || (typeof process !== 'undefined' && process.env?.VITE_CUSTOM_LLM_API_KEY) || "";

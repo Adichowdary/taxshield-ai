@@ -120,9 +120,18 @@ export function subscribeToBillHistory(onChange) {
     .then((docs) => {
       if (Array.isArray(docs) && docs.length > 0) {
         if (typeof localStorage !== "undefined") {
-          localStorage.setItem(STORAGE_KEY, JSON.stringify(docs));
+          const current = getBillHistory();
+          const merged = [...docs];
+          current.forEach(c => {
+            if (!merged.some(m => (m.id && m.id === c.id) || (m._id && m._id === c.id))) {
+              merged.push(c);
+            }
+          });
+          localStorage.setItem(STORAGE_KEY, JSON.stringify(merged));
+          onChange(merged);
+        } else {
+          onChange(docs);
         }
-        onChange(docs);
       }
     })
     .catch((err) => {
