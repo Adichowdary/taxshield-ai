@@ -23,7 +23,9 @@ import {
   AlertTriangle, 
   HelpCircle, 
   CheckCircle2, 
-  XCircle 
+  XCircle,
+  FileCheck,
+  Eye
 } from 'lucide-react'
 
 const DEFAULT_SAMPLE_BILL = {
@@ -98,6 +100,8 @@ export default function AnalysisPage() {
       invoiceNo: foundBill.invoiceNumber || (foundBill.gstin ? `#${foundBill.gstin.slice(0, 8)}` : "TG-10482"),
       address: foundBill.address || "Main Market, Commercial Center",
       gstin: foundBill.gstin || "07AAAAA0000A1Z5",
+      billImageUrl: foundBill.billImageUrl || foundBill.image || foundBill.previewUrl || null,
+      image: foundBill.billImageUrl || foundBill.image || foundBill.previewUrl || null,
       statedTotal,
       subtotal,
       discount,
@@ -401,6 +405,46 @@ export default function AnalysisPage() {
               </label>
             </div>
           </div>
+
+          {/* Original Scanned Bill Image Preview Card */}
+          {currentBill.billImageUrl && (
+            <div className="vault-glass border border-slate-200/80 dark:border-white/10 rounded-3xl p-5 md:p-6 space-y-4 shadow-xl auth-stagger" style={{ animationDelay: '150ms' }}>
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2.5">
+                  <div className="w-8 h-8 rounded-xl bg-sky-500/10 dark:bg-[#D4AF37]/15 border border-sky-500/30 dark:border-[#D4AF37]/30 text-sky-600 dark:text-[#D4AF37] flex items-center justify-center">
+                    <FileCheck size={16} />
+                  </div>
+                  <div>
+                    <h3 className="text-sm font-bold text-slate-900 dark:text-white font-poppins">
+                      Original Scanned Bill Document
+                    </h3>
+                    <p className="text-xs text-slate-500 dark:text-slate-400">
+                      High-resolution document stored securely and verified by OCR engine.
+                    </p>
+                  </div>
+                </div>
+                <a
+                  href={currentBill.billImageUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="px-3 py-1.5 rounded-xl bg-slate-100 dark:bg-white/10 hover:bg-slate-200 dark:hover:bg-white/15 text-xs font-semibold text-slate-700 dark:text-slate-200 transition-colors flex items-center gap-1.5"
+                >
+                  <Eye size={13} /> View Fullscreen
+                </a>
+              </div>
+
+              <div className="relative rounded-2xl overflow-hidden border border-slate-200 dark:border-white/10 bg-slate-950/20 max-h-[360px] flex items-center justify-center p-2">
+                <img
+                  src={currentBill.billImageUrl}
+                  alt="Scanned Bill Receipt"
+                  className="max-h-[340px] w-auto object-contain rounded-xl shadow-md"
+                  onError={(e) => {
+                    e.currentTarget.src = 'https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=500&auto=format&fit=crop';
+                  }}
+                />
+              </div>
+            </div>
+          )}
 
           {/* Flagged Issues List */}
           {activeIssues.length > 0 && (

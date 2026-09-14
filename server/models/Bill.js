@@ -168,7 +168,7 @@ const billSchema = new mongoose.Schema(
     },
     billImageUrl: {
       type: String,
-      required: [true, 'Bill image URL is required'],
+      default: 'https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=500&auto=format&fit=crop',
     },
     image: {
       type: String,

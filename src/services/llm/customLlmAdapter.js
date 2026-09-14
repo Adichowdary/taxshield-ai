@@ -39,12 +39,27 @@ export async function analyzeWithCustomLlm(billText, options = {}) {
     "http://localhost:11434/v1"
   ).replace(/\/+$/, "");
 
-  const modelName = 
+  let modelName = 
     options.model || 
     (typeof localStorage !== 'undefined' && localStorage.getItem('taxshield_custom_model')) ||
     (typeof import.meta !== 'undefined' && import.meta.env?.VITE_CUSTOM_LLM_MODEL) || 
     (typeof process !== 'undefined' && process.env?.VITE_CUSTOM_LLM_MODEL) || 
-    "taxshield-1b";
+    "qwen2.5:3b";
+
+  // Check health & auto-resolve model if configured model is not installed
+  try {
+    const health = await checkCustomLlmHealth(endpoint);
+    if (health.online && Array.isArray(health.models) && health.models.length > 0) {
+      if (!health.models.includes(modelName)) {
+        // Pick best available model in Ollama
+        const preferred = ['qwen2.5:3b', 'llama3:8b', 'nirnay-ai:latest'];
+        const match = preferred.find(p => health.models.includes(p)) || health.models[0];
+        if (match) modelName = match;
+      }
+    }
+  } catch {
+    // Keep modelName fallback
+  }
 
   const apiKey = options.apiKey || (typeof import.meta !== 'undefined' && import.meta.env?.VITE_CUSTOM_LLM_API_KEY) || (typeof process !== 'undefined' && process.env?.VITE_CUSTOM_LLM_API_KEY) || "";
 

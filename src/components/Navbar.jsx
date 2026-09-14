@@ -225,9 +225,20 @@ export default function Navbar() {
             )}
           </div>
 
-          {/* Mobile Drawer Button */}
+          {/* Mobile Quick Controls */}
           <div className="flex md:hidden items-center gap-2">
+            {/* Quick 1-Tap Theme Toggle */}
             <button
+              type="button"
+              onClick={() => setTheme(activeTheme === 'dark' ? 'light' : 'dark')}
+              className="p-2 rounded-xl border border-slate-200 dark:border-white/10 text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-white/10 transition-colors"
+              aria-label="Toggle light/dark theme"
+            >
+              {activeTheme === 'dark' ? <Sun size={18} className="text-[#FDE68A]" /> : <Moon size={18} className="text-sky-600" />}
+            </button>
+
+            <button
+              type="button"
               onClick={() => setIsOpen(!isOpen)}
               className={`p-2 rounded-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-500 dark:focus-visible:ring-lime-400 ${activeTheme === 'dark' ? 'text-slate-200 hover:bg-white/10' : 'text-slate-600 hover:bg-slate-100'}`}
               aria-label="Toggle menu"
@@ -244,33 +255,36 @@ export default function Navbar() {
         {isOpen && (
           <div id="mobile-nav-drawer" className={`md:hidden py-4 border-t rounded-b-2xl shadow-xl px-3 space-y-3 animate-fade-in ${
             activeTheme === 'dark' 
-              ? 'bg-[#0A0F1D]/95 border-white/15 text-white backdrop-blur-2xl' 
-              : 'bg-white/95 border-slate-200 text-slate-900 backdrop-blur-2xl'
+              ? 'bg-[#0A0F1D]/98 border-white/15 text-white backdrop-blur-2xl' 
+              : 'bg-white/98 border-slate-200 text-slate-900 backdrop-blur-2xl'
           }`}>
             {/* Mobile 3-Way Theme Switcher */}
             <div className="flex items-center justify-between p-2 rounded-xl bg-black/5 dark:bg-white/5 border border-slate-200 dark:border-white/10">
               <span className="text-xs font-semibold text-slate-600 dark:text-slate-300">Theme</span>
               <div className="flex items-center gap-1">
                 <button
+                  type="button"
                   onClick={() => setTheme('dark')}
                   className={`px-2.5 py-1 text-xs rounded-lg flex items-center gap-1 transition-all ${
-                    themeMode === 'dark' ? 'bg-[#D4AF37]/20 text-[#B45309] dark:text-[#FDE68A] font-bold' : 'text-slate-500'
+                    themeMode === 'dark' ? 'bg-[#D4AF37]/20 text-[#B45309] dark:text-[#FDE68A] font-bold' : 'text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'
                   }`}
                 >
                   <Moon size={13} /> Dark
                 </button>
                 <button
+                  type="button"
                   onClick={() => setTheme('light')}
                   className={`px-2.5 py-1 text-xs rounded-lg flex items-center gap-1 transition-all ${
-                    themeMode === 'light' ? 'bg-sky-500/20 text-sky-600 dark:text-sky-300 font-bold' : 'text-slate-500'
+                    themeMode === 'light' ? 'bg-sky-500/20 text-sky-600 dark:text-sky-300 font-bold' : 'text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'
                   }`}
                 >
                   <Sun size={13} /> Light
                 </button>
                 <button
+                  type="button"
                   onClick={() => setTheme('system')}
                   className={`px-2.5 py-1 text-xs rounded-lg flex items-center gap-1 transition-all ${
-                    themeMode === 'system' ? 'bg-sky-500/20 text-sky-600 dark:text-sky-400 font-bold' : 'text-slate-500'
+                    themeMode === 'system' ? 'bg-sky-500/20 text-sky-600 dark:text-sky-400 font-bold' : 'text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'
                   }`}
                 >
                   <Laptop size={13} /> Auto
@@ -281,30 +295,34 @@ export default function Navbar() {
             {isLanding ? (
               <>
                 <button
+                  type="button"
                   onClick={() => handleScroll('how-it-works')}
-                  className="w-full text-left px-4 py-2.5 text-sm font-medium hover:bg-white/10 rounded-xl"
+                  className="w-full text-left px-4 py-2.5 text-sm font-medium text-slate-800 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-white/10 rounded-xl transition-colors"
                 >
                   How It Works
                 </button>
                 <button
+                  type="button"
                   onClick={() => handleScroll('features')}
-                  className="w-full text-left px-4 py-2.5 text-sm font-medium hover:bg-white/10 rounded-xl"
+                  className="w-full text-left px-4 py-2.5 text-sm font-medium text-slate-800 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-white/10 rounded-xl transition-colors"
                 >
                   Features
                 </button>
                 <button
+                  type="button"
                   onClick={() => handleScroll('transparency')}
-                  className="w-full text-left px-4 py-2.5 text-sm font-medium hover:bg-white/10 rounded-xl"
+                  className="w-full text-left px-4 py-2.5 text-sm font-medium text-slate-800 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-white/10 rounded-xl transition-colors"
                 >
                   Tax Rules
                 </button>
                 <button
+                  type="button"
                   onClick={() => handleScroll('faq')}
-                  className="w-full text-left px-4 py-2.5 text-sm font-medium hover:bg-white/10 rounded-xl"
+                  className="w-full text-left px-4 py-2.5 text-sm font-medium text-slate-800 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-white/10 rounded-xl transition-colors"
                 >
                   FAQ
                 </button>
-                <div className="pt-2 border-t border-white/10 flex flex-col gap-2">
+                <div className="pt-2 border-t border-slate-200 dark:border-white/10 flex flex-col gap-2">
                   <Button variant="secondary" size="md" to="/login" className="w-full">
                     Sign In
                   </Button>
@@ -318,28 +336,28 @@ export default function Navbar() {
                 <Link
                   to="/dashboard"
                   onClick={() => setIsOpen(false)}
-                  className="block px-4 py-2.5 text-sm font-medium hover:bg-white/10 rounded-xl"
+                  className="block px-4 py-2.5 text-sm font-medium text-slate-800 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-white/10 rounded-xl transition-colors"
                 >
                   Dashboard
                 </Link>
                 <Link
                   to="/spending"
                   onClick={() => setIsOpen(false)}
-                  className="block px-4 py-2.5 text-sm font-medium hover:bg-white/10 rounded-xl"
+                  className="block px-4 py-2.5 text-sm font-medium text-slate-800 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-white/10 rounded-xl transition-colors"
                 >
                   Spending
                 </Link>
                 <Link
                   to="/history"
                   onClick={() => setIsOpen(false)}
-                  className="block px-4 py-2.5 text-sm font-medium hover:bg-white/10 rounded-xl"
+                  className="block px-4 py-2.5 text-sm font-medium text-slate-800 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-white/10 rounded-xl transition-colors"
                 >
                   Bill History
                 </Link>
                 <Link
                   to="/complaint"
                   onClick={() => setIsOpen(false)}
-                  className="block px-4 py-2.5 text-sm font-medium hover:bg-white/10 rounded-xl"
+                  className="block px-4 py-2.5 text-sm font-medium text-slate-800 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-white/10 rounded-xl transition-colors"
                 >
                   Complaint
                 </Link>

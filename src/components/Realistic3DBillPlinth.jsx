@@ -8,6 +8,8 @@ import {
 import { useTheme } from '../context/ThemeContext'
 import Button from './shared/Button'
 import { saveBillToHistory } from '../services/llm/historyService'
+import { uploadImage } from '../services/cloudinary'
+import { analyzeBill } from '../services/llm/llmGateway'
 
 export const REAL_BILL_PRESETS = [
   {
@@ -95,8 +97,9 @@ export default function Realistic3DBillPlinth({ onSelectBill, activeBillId, onTr
   const [uploadStepText, setUploadStepText] = useState('')
   const [showDisputeModal, setShowDisputeModal] = useState(false)
   const [copiedNotice, setCopiedNotice] = useState(false)
+  const [activeUploadedBill, setActiveUploadedBill] = useState(null)
 
-  const currentBill = REAL_BILL_PRESETS[currentPresetIndex]
+  const currentBill = activeUploadedBill || REAL_BILL_PRESETS[currentPresetIndex]
 
   // ---------------------------------------------------------------------------
   // Three.js Photorealistic Physical Plinth Scene
@@ -340,10 +343,23 @@ export default function Realistic3DBillPlinth({ onSelectBill, activeBillId, onTr
 
   // Switch Texture on Preset Change
   const handleSwitchPreset = (idx) => {
+    setActiveUploadedBill(null)
     setCurrentPresetIndex(idx)
     setActiveHotspot(null)
+    const preset = REAL_BILL_PRESETS[idx]
+    if (paperMeshRef.current && preset.texturePath) {
+      new THREE.TextureLoader().load(preset.texturePath, (tex) => {
+        tex.colorSpace = THREE.SRGBColorSpace
+        tex.wrapS = THREE.ClampToEdgeWrapping
+        tex.wrapT = THREE.ClampToEdgeWrapping
+        if (paperMeshRef.current?.material) {
+          paperMeshRef.current.material.map = tex
+          paperMeshRef.current.material.needsUpdate = true
+        }
+      })
+    }
     if (onSelectBill) {
-      onSelectBill(REAL_BILL_PRESETS[idx])
+      onSelectBill(preset)
     }
   }
 
@@ -358,53 +374,107 @@ export default function Realistic3DBillPlinth({ onSelectBill, activeBillId, onTr
     }, 1800)
   }
 
-  // Simulated File Upload & OCR flow
-  const handleFileUpload = (file) => {
+  // Real File Upload & Dynamic 3D Texture & AI OCR flow
+  const handleFileUpload = async (file) => {
     if (!file) return
-    setUploadProgress(20)
-    setUploadStepText('Optical character recognition in progress...')
+    try {
+      // 1. Generate local object URL for instant zero-latency visual feedback
+      const localPreviewUrl = URL.createObjectURL(file)
 
-    setTimeout(() => {
-      setUploadProgress(55)
-      setUploadStepText('Cross-referencing GSTIN & CCPA 2022 statutory tables...')
-    }, 700)
+      // 2. Immediately update 3D physical paper plinth texture
+      if (paperMeshRef.current) {
+        const textureLoader = new THREE.TextureLoader()
+        textureLoader.load(localPreviewUrl, (tex) => {
+          tex.colorSpace = THREE.SRGBColorSpace
+          tex.wrapS = THREE.ClampToEdgeWrapping
+          tex.wrapT = THREE.ClampToEdgeWrapping
+          if (paperMeshRef.current?.material) {
+            paperMeshRef.current.material.map = tex
+            paperMeshRef.current.material.needsUpdate = true
+          }
+        })
+      }
 
-    setTimeout(() => {
-      setUploadProgress(85)
-      setUploadStepText('Auditing arithmetic and service charge levies...')
-    }, 1400)
+      // 3. Start optical laser scanning effect
+      setIsScanning(true)
+      setUploadProgress(25)
+      setUploadStepText('Uploading document to secure cloud vault...')
 
-    setTimeout(() => {
+      // 4. Upload image to Cloudinary (with fallback to preview URL)
+      let finalImageUrl = localPreviewUrl
+      try {
+        finalImageUrl = await uploadImage(file)
+        setUploadProgress(60)
+        setUploadStepText('Running optical character recognition...')
+      } catch (uploadErr) {
+        console.warn('Cloudinary upload fallback to local URL:', uploadErr.message)
+      }
+
+      // 5. Run statutory bill analysis
+      setUploadProgress(80)
+      setUploadStepText('Auditing arithmetic, GST brackets & CCPA service charge...')
+      
+      const analyzedResult = await analyzeBill(finalImageUrl, {
+        billImageUrl: finalImageUrl,
+        imageUrl: finalImageUrl,
+        selectedBillType: 'RESTAURANT'
+      })
+
       setUploadProgress(100)
       setUploadStepText('Audit Complete! Invoice verified.')
 
-      // Register new bill to history
-      const newBill = {
-        id: `upload-${Date.now()}`,
-        merchant: file.name.replace(/\.[^/.]+$/, '').replace(/[-_]/g, ' ') || 'Uploaded Establishment',
-        type: 'Scanned Document',
-        date: new Date().toISOString().split('T')[0],
-        totalAmount: 1840.00,
-        subtotal: 1600.00,
-        gstRate: '5%',
-        gstAmount: 80.00,
-        serviceCharge: 160.00,
-        serviceChargeIllegal: true,
-        consumerScore: 78,
-        status: 'REVIEW_RECOMMENDED',
-        statusText: '10% Voluntary Surcharge Flagged',
-        flags: [
-          { text: '10% Service Charge levied without opt-in (CCPA 2022 Guidelines Violation)', amount: 160.00 }
+      // 6. Format result for active 3D Plinth details panel
+      const totalAmount = Number(analyzedResult.totalAmount || analyzedResult.total || 0)
+      const subtotal = Number(analyzedResult.subtotal || 0)
+      const gstAmount = Number(analyzedResult.gst || analyzedResult.taxes || 0)
+      const serviceCharge = Number(analyzedResult.serviceCharge || 0)
+      const legitimateAmount = Number((subtotal + gstAmount).toFixed(2))
+
+      const formattedBill = {
+        id: analyzedResult.id,
+        merchant: analyzedResult.retailer || analyzedResult.restaurantName || file.name.replace(/\.[^/.]+$/, '').replace(/[-_]/g, ' ') || 'Uploaded Establishment',
+        type: `${analyzedResult.billType || 'Restaurant'} Receipt`,
+        category: analyzedResult.category || 'Dining & Hospitality',
+        invoiceNo: analyzedResult.invoiceNumber || `SCN-${Date.now().toString().slice(-6)}`,
+        date: analyzedResult.date || new Date().toISOString().split('T')[0],
+        totalAmount,
+        legitimateAmount: legitimateAmount > 0 ? legitimateAmount : totalAmount,
+        subtotal,
+        gstRate: `${analyzedResult.taxVerdict?.actualGstRate || 5}% Statutory Composite`,
+        gstAmount,
+        serviceCharge,
+        serviceChargeIllegal: Boolean(analyzedResult.serviceChargeIllegal || serviceCharge > 0),
+        consumerScore: analyzedResult.consumerScore || 80,
+        billImageUrl: finalImageUrl,
+        image: finalImageUrl,
+        flags: (analyzedResult.flags || []).map((f, i) => ({
+          id: `flag-${i}`,
+          text: f.title ? `${f.title}: ${f.description}` : (f.text || f.description),
+          amount: serviceCharge,
+          statutoryCode: 'CCPA Sec 2(47)'
+        })),
+        hotspots: [
+          { label: 'Merchant GSTIN', value: analyzedResult.gstin || '27AABC1234F1Z1', top: '20%', left: '30%', status: 'verified' },
+          { label: 'Subtotal', value: `₹${subtotal.toFixed(2)}`, top: '48%', left: '72%', status: 'verified' },
+          { label: 'Total GST', value: `₹${gstAmount.toFixed(2)}`, top: '56%', left: '72%', status: 'verified' },
+          ...(serviceCharge > 0 ? [{ label: 'Illegal Service Fee', value: `₹${serviceCharge.toFixed(2)}`, top: '65%', left: '72%', status: 'flagged' }] : [])
         ]
       }
-      saveBillToHistory(newBill)
+
+      setActiveUploadedBill(formattedBill)
+      if (onSelectBill) onSelectBill(formattedBill)
 
       setTimeout(() => {
+        setIsScanning(false)
         setUploadProgress(null)
         setUploadStepText('')
-        if (onSelectBill) onSelectBill(newBill)
-      }, 1200)
-    }, 2100)
+      }, 1000)
+    } catch (error) {
+      console.error('Plinth upload & audit error:', error)
+      setIsScanning(false)
+      setUploadProgress(null)
+      setUploadStepText('')
+    }
   }
 
   // Copy formal dispute draft
@@ -487,10 +557,10 @@ Consumer / TaxShield Audit Terminal`
         <div className="lg:col-span-7 space-y-5">
           
           {/* 3D Physical Paper Plinth Canvas */}
-          <div className="relative min-h-[420px] sm:min-h-[450px] flex items-center justify-center rounded-2xl bg-gradient-to-b from-slate-100/60 to-slate-200/50 dark:from-[#070A12]/90 dark:to-[#0D1322]/95 border border-slate-200/80 dark:border-white/10 overflow-hidden shadow-inner group">
+          <div className="relative h-[280px] sm:h-[380px] lg:h-[450px] flex items-center justify-center rounded-2xl bg-gradient-to-b from-slate-100/60 to-slate-200/50 dark:from-[#070A12]/90 dark:to-[#0D1322]/95 border border-slate-200/80 dark:border-white/10 overflow-hidden shadow-inner group">
             
             {/* Three.js Canvas Container */}
-            <div ref={mountRef} className="w-full h-[420px] sm:h-[450px] cursor-grab active:cursor-grabbing z-10" />
+            <div ref={mountRef} className="w-full h-full cursor-grab active:cursor-grabbing z-10" />
 
             {/* Interactive OCR Hotspot Tags */}
             <div className="absolute inset-0 pointer-events-none z-20">
@@ -560,7 +630,7 @@ Consumer / TaxShield Audit Terminal`
               setIsDragOver(false)
               if (e.dataTransfer.files?.[0]) handleFileUpload(e.dataTransfer.files[0])
             }}
-            className={`p-5 rounded-2xl border-2 border-dashed transition-all duration-300 relative overflow-hidden ${
+            className={`p-4 sm:p-5 rounded-2xl border-2 border-dashed transition-all duration-300 relative overflow-hidden ${
               isDragOver 
                 ? 'border-sky-500 dark:border-[#D4AF37] bg-sky-500/10 dark:bg-[#D4AF37]/10 shadow-[0_0_25px_rgba(2,132,199,0.25)] dark:shadow-[0_0_25px_rgba(212,175,55,0.25)] scale-[1.01]' 
                 : 'border-slate-300/80 dark:border-white/15 bg-white/70 dark:bg-white/[0.02] hover:border-sky-500/50 dark:hover:border-[#D4AF37]/50'
@@ -600,30 +670,32 @@ Consumer / TaxShield Audit Terminal`
               </div>
             ) : (
               <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
-                <div className="flex items-center gap-3.5 text-center sm:text-left">
-                  <div className="w-12 h-12 rounded-xl bg-sky-500/10 dark:bg-[#D4AF37]/10 border border-sky-500/30 dark:border-[#D4AF37]/30 text-sky-600 dark:text-[#D4AF37] flex items-center justify-center shrink-0 shadow-sm">
-                    <Upload size={22} />
+                <div className="flex items-center gap-3.5 text-center sm:text-left w-full sm:w-auto">
+                  <div className="w-11 h-11 sm:w-12 sm:h-12 rounded-xl bg-sky-500/10 dark:bg-[#D4AF37]/10 border border-sky-500/30 dark:border-[#D4AF37]/30 text-sky-600 dark:text-[#D4AF37] flex items-center justify-center shrink-0 shadow-sm mx-auto sm:mx-0">
+                    <Upload size={20} />
                   </div>
-                  <div>
+                  <div className="text-left">
                     <h4 className="text-sm font-bold text-slate-900 dark:text-white font-poppins">
                       Drag & Drop Bill Receipt to Audit
                     </h4>
                     <p className="text-xs text-slate-600 dark:text-slate-300 mt-0.5">
-                      Or snap photo directly on mobile camera. Instant OCR & CCPA verification.
+                      Snap photo directly on mobile camera. Instant OCR & CCPA audit.
                     </p>
                   </div>
                 </div>
 
-                <div className="flex items-center gap-2 shrink-0">
+                <div className="w-full sm:w-auto flex items-stretch sm:items-center gap-2 shrink-0">
                   <button
+                    type="button"
                     onClick={() => fileInputRef.current?.click()}
-                    className="px-3.5 py-2 rounded-xl bg-slate-900 dark:bg-white text-white dark:text-slate-950 font-bold text-xs shadow-md hover:bg-slate-800 dark:hover:bg-slate-100 transition-colors cursor-pointer flex items-center gap-1.5"
+                    className="flex-1 sm:flex-initial px-4 py-2.5 rounded-xl bg-slate-900 dark:bg-white text-white dark:text-slate-950 font-bold text-xs shadow-md hover:bg-slate-800 dark:hover:bg-slate-100 transition-colors cursor-pointer flex items-center justify-center gap-1.5"
                   >
                     <Upload size={14} /> Browse
                   </button>
                   <button
+                    type="button"
                     onClick={() => cameraInputRef.current?.click()}
-                    className="px-3.5 py-2 rounded-xl bg-slate-100 dark:bg-white/10 text-slate-800 dark:text-slate-200 border border-slate-300 dark:border-white/15 font-semibold text-xs hover:bg-slate-200 dark:hover:bg-white/15 transition-colors cursor-pointer flex items-center gap-1.5"
+                    className="flex-1 sm:flex-initial px-4 py-2.5 rounded-xl bg-slate-100 dark:bg-white/10 text-slate-800 dark:text-slate-200 border border-slate-300 dark:border-white/15 font-semibold text-xs hover:bg-slate-200 dark:hover:bg-white/15 transition-colors cursor-pointer flex items-center justify-center gap-1.5"
                   >
                     <Camera size={14} className="text-sky-600 dark:text-[#D4AF37]" /> Camera
                   </button>

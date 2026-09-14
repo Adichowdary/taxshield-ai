@@ -70,7 +70,7 @@ export default function DashboardHome() {
 
       <Navbar />
 
-      <main className="flex-1 pt-28 pb-20 relative z-10">
+      <main className="flex-1 pt-28 pb-28 sm:pb-20 relative z-10">
         <Container className="space-y-8">
           
           {/* Header Greeting Card */}
