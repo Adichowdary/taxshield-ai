@@ -4,6 +4,7 @@ import Bill from '../models/Bill.js';
 import mongoose from 'mongoose';
 import cloudinary from '../config/cloudinary.js';
 import { optionalAuth } from '../middleware/auth.js';
+import { checkOllamaStatus, analyzeBillWithOllama } from '../services/ollamaService.js';
 
 const router = express.Router();
 
@@ -11,6 +12,43 @@ const router = express.Router();
 const upload = multer({
   storage: multer.memoryStorage(),
   limits: { fileSize: 10 * 1024 * 1024 }, // 10MB limit
+});
+
+/**
+ * @route   GET /api/bills/llm-health
+ * @desc    Check status and models of local Ollama / TaxShield AI engine
+ * @access  Public
+ */
+router.get('/llm-health', async (req, res) => {
+  const status = await checkOllamaStatus();
+  res.json(status);
+});
+
+/**
+ * @route   POST /api/bills/analyze
+ * @desc    Analyze receipt text using local Ollama model (taxshield-ai) and compute statutory audit
+ * @access  Public
+ */
+router.post('/analyze', async (req, res, next) => {
+  try {
+    const { billText, options, imageUrl } = req.body;
+    if (!billText || typeof billText !== 'string' || billText.trim().length < 5) {
+      return res.status(400).json({
+        success: false,
+        message: 'Valid billText string is required',
+      });
+    }
+
+    const auditResult = await analyzeBillWithOllama(billText, {
+      ...options,
+      billImageUrl: imageUrl || options?.billImageUrl,
+    });
+
+    res.json(auditResult);
+  } catch (error) {
+    console.error('[POST /api/bills/analyze Error]', error);
+    next(error);
+  }
 });
 
 /**

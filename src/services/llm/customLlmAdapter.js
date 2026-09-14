@@ -48,7 +48,7 @@ export async function analyzeWithCustomLlm(billText, options = {}) {
     (typeof localStorage !== 'undefined' && localStorage.getItem('taxshield_custom_model')) ||
     (typeof import.meta !== 'undefined' && import.meta.env?.VITE_CUSTOM_LLM_MODEL) || 
     (typeof process !== 'undefined' && process.env?.VITE_CUSTOM_LLM_MODEL) || 
-    "taxshield-1b";
+    "taxshield-ai";
 
   // Check health & fail fast if Ollama endpoint is offline
   try {
@@ -59,8 +59,8 @@ export async function analyzeWithCustomLlm(billText, options = {}) {
     const availableModels = health._rawModels || health.models || [];
     if (Array.isArray(availableModels) && availableModels.length > 0) {
       if (!availableModels.includes(modelName)) {
-        // If taxshield-1b requested, check if a local fine-tune or standard model exists
-        const preferred = ['taxshield-1b', 'qwen2.5:3b', 'llama3:8b', 'nirnay-ai:latest', availableModels[0]];
+        // Prefer specialized TaxShield AI models
+        const preferred = ['taxshield-ai', 'taxshield-1b', 'qwen2.5:3b', 'llama3:8b', availableModels[0]];
         const match = preferred.find(p => availableModels.includes(p)) || availableModels[0];
         if (match) modelName = match;
       }
