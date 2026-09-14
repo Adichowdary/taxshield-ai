@@ -10,6 +10,7 @@ import { MOCK_BILLS } from '../data/mockData'
 import { Link } from 'react-router-dom'
 import { Search, ArrowUpRight, UploadCloud, Wallet } from 'lucide-react'
 import { subscribeToBillHistory } from '../services/llm/historyService'
+import { api } from '../services/api'
 
 export default function HistoryPage() {
   const [query, setQuery] = useState('')
@@ -24,6 +25,22 @@ export default function HistoryPage() {
         setBills(MOCK_BILLS)
       }
     })
+
+    // Also sync from MongoDB backend if available
+    api.getBills().then((dbBills) => {
+      if (Array.isArray(dbBills) && dbBills.length > 0) {
+        setBills((prev) => {
+          const merged = [...dbBills]
+          prev.forEach((p) => {
+            if (!merged.some(m => m.id === p.id || m._id === p.id)) {
+              merged.push(p)
+            }
+          })
+          return merged
+        })
+      }
+    }).catch((err) => console.log('MongoDB history sync:', err.message))
+
     return unsub
   }, [])
 
@@ -54,7 +71,7 @@ export default function HistoryPage() {
 
       <Navbar />
 
-      <main className="flex-1 pt-28 pb-20 relative z-10">
+      <main className="flex-1 pt-28 pb-28 sm:pb-20 relative z-10">
         <Container className="space-y-6">
           
           {/* Header */}
@@ -138,10 +155,23 @@ export default function HistoryPage() {
                   const scVal = Number(bill.serviceCharge || 0)
                   const statusType = bill.status || (bill.serviceChargeIllegal ? 'REVIEW_RECOMMENDED' : 'VERIFIED')
                   const statusText = bill.statusText || (bill.serviceChargeIllegal ? 'Voluntary Service Fee' : '100% Tax Verified')
+                  const imgUrl = bill.billImageUrl || bill.image
 
                   return (
                     <div key={bill.id} className="vault-glass border border-slate-200/50 dark:border-white/10 hover:border-sky-500/50 dark:hover:border-[#D4AF37]/50 rounded-3xl p-6 flex flex-col justify-between space-y-4 transition-all duration-300 shadow-xl group">
                       <div className="space-y-3">
+                        {imgUrl && (
+                          <div className="w-full h-36 rounded-2xl overflow-hidden bg-slate-100 dark:bg-black/30 border border-slate-200/80 dark:border-white/10 relative">
+                            <img
+                              src={imgUrl}
+                              alt={merchantName}
+                              className="w-full h-full object-cover object-top group-hover:scale-105 transition-transform duration-300"
+                              onError={(e) => { e.currentTarget.parentElement.style.display = 'none' }}
+                            />
+                            <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent pointer-events-none" />
+                          </div>
+                        )}
+
                         <div className="flex items-start justify-between">
                           <div>
                             <span className="text-[10px] uppercase font-bold text-sky-700 dark:text-[#D4AF37] font-mono tracking-wider">{categoryName}</span>

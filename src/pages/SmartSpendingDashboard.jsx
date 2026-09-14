@@ -781,6 +781,8 @@ export default function SmartSpendingDashboard() {
                 const cat = b.detectedCategory || 'RESTAURANT'
                 const catConfig = SPENDING_CATEGORIES.find(c => c.id === cat) || SPENDING_CATEGORIES[0]
 
+                const imgUrl = b.billImageUrl || b.image
+
                 return (
                   <div
                     key={b.id}
@@ -788,6 +790,17 @@ export default function SmartSpendingDashboard() {
                     className="p-4 rounded-2xl border border-slate-200 dark:border-white/10 hover:border-sky-500/60 dark:hover:border-[#D4AF37]/60 bg-slate-50/60 hover:bg-slate-100/80 dark:bg-white/[0.02] dark:hover:bg-white/[0.06] transition-all cursor-pointer flex flex-col justify-between space-y-3 group shadow-md"
                   >
                     <div className="space-y-1.5">
+                      {imgUrl && (
+                        <div className="w-full h-24 rounded-xl overflow-hidden bg-slate-100 dark:bg-black/30 border border-slate-200 dark:border-white/10 relative mb-1">
+                          <img
+                            src={imgUrl}
+                            alt={name}
+                            className="w-full h-full object-cover object-top group-hover:scale-105 transition-transform duration-300"
+                            onError={(e) => { e.currentTarget.parentElement.style.display = 'none' }}
+                          />
+                        </div>
+                      )}
+
                       <div className="flex items-center justify-between">
                         <span className="text-[11px] font-bold px-2 py-0.5 rounded-md border flex items-center gap-1"
                               style={{ backgroundColor: `${catConfig.themeColor}20`, color: catConfig.themeColor, borderColor: `${catConfig.themeColor}40` }}>
