@@ -4,6 +4,7 @@ import { analyzeWithCustomLlm } from "./customLlmAdapter.js";
 import { analyzeWithNemotron } from "./nemotronAdapter.js";
 import { saveBillToHistory, compareBillWithPast } from "./historyService.js";
 import { verifyBillMath, buildMathFlags, auditShoppingTax, getTaxVerdict, canonicalBillType } from "./taxEngine.js";
+import { performOcr, parseOcrReceiptText } from "../ocrEngine.js";
 import { api } from "../api.js";
 
 /**
@@ -392,6 +393,29 @@ export async function analyzeBill(billText, options = {}) {
   const detectedImageUrl = options.billImageUrl || options.imageUrl || options.image || 
     (typeof billText === 'string' && (billText.startsWith('http') || billText.startsWith('data:image') || billText.startsWith('blob:')) ? billText : null);
 
+  const isImage = Boolean(
+    detectedImageUrl || 
+    (billText && typeof billText !== 'string') || 
+    (typeof billText === 'string' && (billText.startsWith('data:image') || billText.startsWith('blob:')))
+  );
+
+  let ocrExtractedText = "";
+  if (isImage) {
+    try {
+      console.info("[OCR Engine] Extracting text line items from receipt image...");
+      const ocrRes = await performOcr(detectedImageUrl || billText);
+      if (ocrRes?.text && ocrRes.text.length > 5) {
+        ocrExtractedText = ocrRes.text;
+        console.info(`[OCR Engine] Verbatim receipt text extracted (${ocrRes.text.length} chars, ${ocrRes.confidence}% confidence).`);
+      }
+    } catch (ocrErr) {
+      console.warn("[OCR Engine] OCR preprocessing note:", ocrErr.message);
+    }
+  }
+
+  // Text payload to supply to text-based LLMs like local TaxShield AI
+  const textPayload = ocrExtractedText || billText;
+
   // Read active provider preference (localStorage overrides .env)
   const activeProvider = options.provider || 
     (typeof localStorage !== 'undefined' && localStorage.getItem("taxshield_llm_provider")) || 
@@ -410,12 +434,13 @@ export async function analyzeBill(billText, options = {}) {
   // Primary execution attempt
   try {
     if (activeProvider === "custom") {
-      adapterResult = await analyzeWithCustomLlm(billText, options);
+      adapterResult = await analyzeWithCustomLlm(textPayload, options);
     } else if (activeProvider === "claude") {
-      adapterResult = await analyzeWithClaude(billText, options);
+      adapterResult = await analyzeWithClaude(textPayload, options);
     } else if (activeProvider === "nemotron") {
-      adapterResult = await analyzeWithNemotron(billText, options);
+      adapterResult = await analyzeWithNemotron(textPayload, options);
     } else {
+      // Gemini can accept image directly for multimodal vision
       adapterResult = await analyzeWithGemini(billText, options);
     }
 
@@ -446,13 +471,13 @@ export async function analyzeBill(billText, options = {}) {
     }
   }
 
-  // If both failed or JSON parsing failed, activate deterministic statutory analysis
+  // If both failed or JSON parsing failed, activate deterministic statutory OCR analysis
   if (!normalizedData) {
-    console.info("Employing deterministic statutory bill analysis engine...");
-    normalizedData = buildDeterministicStatutoryBill(billText, options, detectedImageUrl);
-    providerUsed = "statutory-deterministic-engine";
+    console.info("[OCR Engine] Employing deterministic statutory receipt analysis...");
+    normalizedData = parseOcrReceiptText(ocrExtractedText || billText, options, detectedImageUrl);
+    providerUsed = "tesseract-statutory-ocr-engine";
     isFallbackUsed = true;
-    fallbackReason = fallbackReason || "Local and Cloud LLM providers bypassed; statutory engine generated audit.";
+    fallbackReason = fallbackReason || "Local and Cloud LLM providers offline; parsed directly from receipt OCR text.";
   }
 
   // Ensure image URL is attached

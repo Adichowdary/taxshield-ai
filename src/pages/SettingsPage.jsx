@@ -525,13 +525,13 @@ export default function SettingsPage() {
                     </div>
 
                     {/* Detected Ollama Models if online */}
-                    {gpuHealth.online && gpuHealth.models && gpuHealth.models.length > 0 && (
+                    {gpuHealth.online && gpuHealth.models && gpuHealth.models.filter(m => !m.toLowerCase().includes("nirnay")).length > 0 && (
                       <div className="space-y-1.5 pt-1">
                         <label className="text-[11px] font-semibold block text-emerald-400">
                           Detected Installed Models in Ollama:
                         </label>
                         <div className="flex flex-wrap gap-1.5">
-                          {gpuHealth.models.map((installedModel) => (
+                          {gpuHealth.models.filter(m => !m.toLowerCase().includes("nirnay")).map((installedModel) => (
                             <button
                               key={installedModel}
                               type="button"

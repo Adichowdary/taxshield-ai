@@ -17,10 +17,14 @@ export async function checkCustomLlmHealth(endpoint) {
 
     if (response && response.ok) {
       const data = await response.json().catch(() => null);
+      const allModels = data?.data?.map(m => m.id) || [];
+      // Filter out nirnay-ai from user visibility so users only see official TaxShield / standard tags
+      const cleanModels = allModels.filter(m => !m.toLowerCase().includes("nirnay"));
       return {
         online: true,
         endpoint: cleanEndpoint,
-        models: data?.data?.map(m => m.id) || []
+        models: cleanModels,
+        _rawModels: allModels
       };
     }
 
@@ -44,7 +48,7 @@ export async function analyzeWithCustomLlm(billText, options = {}) {
     (typeof localStorage !== 'undefined' && localStorage.getItem('taxshield_custom_model')) ||
     (typeof import.meta !== 'undefined' && import.meta.env?.VITE_CUSTOM_LLM_MODEL) || 
     (typeof process !== 'undefined' && process.env?.VITE_CUSTOM_LLM_MODEL) || 
-    "qwen2.5:3b";
+    "taxshield-1b";
 
   // Check health & fail fast if Ollama endpoint is offline
   try {
@@ -52,11 +56,12 @@ export async function analyzeWithCustomLlm(billText, options = {}) {
     if (!health.online) {
       throw new Error(`TaxShield AI local endpoint (${endpoint}) is offline.`);
     }
-    if (Array.isArray(health.models) && health.models.length > 0) {
-      if (!health.models.includes(modelName)) {
-        // Pick best available model in Ollama
-        const preferred = ['qwen2.5:3b', 'llama3:8b', 'nirnay-ai:latest'];
-        const match = preferred.find(p => health.models.includes(p)) || health.models[0];
+    const availableModels = health._rawModels || health.models || [];
+    if (Array.isArray(availableModels) && availableModels.length > 0) {
+      if (!availableModels.includes(modelName)) {
+        // If taxshield-1b requested, check if a local fine-tune or standard model exists
+        const preferred = ['taxshield-1b', 'qwen2.5:3b', 'llama3:8b', 'nirnay-ai:latest', availableModels[0]];
+        const match = preferred.find(p => availableModels.includes(p)) || availableModels[0];
         if (match) modelName = match;
       }
     }
