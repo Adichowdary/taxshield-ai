@@ -71,8 +71,8 @@ export default function ComplaintPage() {
       <main className="flex-1 pt-28 pb-20 relative z-10">
         <Container className="max-w-5xl space-y-6">
           <div className="auth-stagger" style={{ animationDelay: '80ms' }}>
-            <h1 className="text-3xl font-poppins font-bold tracking-tight" style={{ color: 'var(--text-primary)' }}>Consumer Complaint Assistant</h1>
-            <p className="text-xs sm:text-sm" style={{ color: 'var(--text-muted)' }}>
+            <h1 className="text-3xl font-poppins font-bold tracking-tight text-slate-900 dark:text-white">Consumer Complaint Assistant</h1>
+            <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-300">
               Generate formal CCPA-aligned grievance drafts to address unlawful mandatory service charges or tax overcharges
             </p>
           </div>

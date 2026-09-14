@@ -102,6 +102,12 @@ export default function Realistic3DBillPlinth({ onSelectBill, activeBillId, onTr
   const [showCameraModal, setShowCameraModal] = useState(false)
   const [copiedNotice, setCopiedNotice] = useState(false)
   const [activeUploadedBill, setActiveUploadedBill] = useState(null)
+  const [uploadError, setUploadError] = useState(null)
+
+  const isScanningRef = useRef(isScanning)
+  useEffect(() => {
+    isScanningRef.current = isScanning
+  }, [isScanning])
 
   // Listen for global open-camera event from mobile dock or external actions
   useEffect(() => {
@@ -137,7 +143,7 @@ export default function Realistic3DBillPlinth({ onSelectBill, activeBillId, onTr
       powerPreference: 'high-performance',
     })
     renderer.setSize(width, height)
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 1.5))
     renderer.shadowMap.enabled = true
     renderer.shadowMap.type = THREE.PCFSoftShadowMap
     renderer.outputColorSpace = THREE.SRGBColorSpace
@@ -305,7 +311,7 @@ export default function Realistic3DBillPlinth({ onSelectBill, activeBillId, onTr
 
       // Optical Laser Scan Animation
       if (laserBarRef.current && laserFanRef.current) {
-        const laserSpeed = isScanning ? 4.5 : 1.2
+        const laserSpeed = isScanningRef.current ? 4.5 : 1.2
         const laserY = Math.sin(elapsed * laserSpeed) * 2.2
         laserBarRef.current.position.y = laserY
         laserFanRef.current.position.y = laserY
@@ -350,7 +356,7 @@ export default function Realistic3DBillPlinth({ onSelectBill, activeBillId, onTr
         mount.removeChild(renderer.domElement)
       }
     }
-  }, [currentPresetIndex, isDark, isScanning])
+  }, [isDark])
 
   // Switch Texture on Preset Change
   const handleSwitchPreset = (idx) => {
@@ -388,6 +394,11 @@ export default function Realistic3DBillPlinth({ onSelectBill, activeBillId, onTr
   // Real File Upload & Dynamic 3D Texture & AI OCR flow
   const handleFileUpload = async (file) => {
     if (!file) return
+    setUploadError(null)
+
+    // Store previous preset texture for clean rollback if image is not a bill
+    const prevPreset = REAL_BILL_PRESETS[currentPresetIndex]
+
     try {
       // 1. Generate local object URL for instant zero-latency visual feedback
       const localPreviewUrl = URL.createObjectURL(file)
@@ -485,6 +496,33 @@ export default function Realistic3DBillPlinth({ onSelectBill, activeBillId, onTr
       setIsScanning(false)
       setUploadProgress(null)
       setUploadStepText('')
+
+      // Rollback 3D plinth paper texture to current preset
+      if (paperMeshRef.current && prevPreset?.texturePath) {
+        const textureLoader = new THREE.TextureLoader()
+        textureLoader.load(prevPreset.texturePath, (tex) => {
+          tex.colorSpace = THREE.SRGBColorSpace
+          if (paperMeshRef.current?.material) {
+            paperMeshRef.current.material.map = tex
+            paperMeshRef.current.material.needsUpdate = true
+          }
+        })
+      }
+
+      const rawMsg = error?.message || ''
+      const isNonBill = error?.isNonBill || 
+        rawMsg.includes('NON_BILL') || 
+        rawMsg.includes('FOOD_IMAGE') || 
+        rawMsg.includes('INVALID_DOCUMENT') || 
+        rawMsg.includes('not appear') ||
+        rawMsg.includes('No payment') ||
+        rawMsg.includes('No billing')
+
+      const userMsg = isNonBill
+        ? "The uploaded image does not appear to be a valid bill, receipt, or invoice. Please upload a clear photo of an authentic bill."
+        : (rawMsg.replace(/^[A-Z_]+:\s*/, '') || "Failed to process bill receipt. Please upload a clear photo of an authentic bill.")
+
+      setUploadError(userMsg)
     }
   }
 
@@ -560,6 +598,35 @@ Consumer / TaxShield Audit Terminal`
           ))}
         </div>
       </div>
+
+      {/* Upload & Document Rejection Alert */}
+      {uploadError && (
+        <div className="mt-5 p-4 sm:p-5 rounded-2xl border border-rose-500/35 bg-rose-500/10 dark:bg-rose-950/40 text-rose-900 dark:text-rose-100 flex items-start justify-between gap-4 shadow-lg backdrop-blur-md animate-in fade-in duration-200">
+          <div className="flex items-start gap-3.5">
+            <div className="w-9 h-9 rounded-xl bg-rose-500/20 border border-rose-500/30 flex items-center justify-center shrink-0 text-rose-600 dark:text-rose-400 mt-0.5 shadow-sm">
+              <AlertTriangle size={18} />
+            </div>
+            <div className="space-y-1">
+              <h4 className="text-sm font-bold font-poppins text-rose-900 dark:text-white flex items-center gap-2">
+                Image Not Recognized as a Bill
+                <span className="text-[10px] uppercase font-mono px-2 py-0.5 rounded bg-rose-500/20 text-rose-700 dark:text-rose-300 font-semibold border border-rose-500/30">
+                  Rejected
+                </span>
+              </h4>
+              <p className="text-xs text-rose-800 dark:text-rose-200 leading-relaxed font-sans max-w-2xl">
+                {uploadError}
+              </p>
+            </div>
+          </div>
+          <button
+            onClick={() => setUploadError(null)}
+            className="p-1.5 rounded-xl hover:bg-rose-500/20 text-rose-700 dark:text-rose-300 transition-colors shrink-0 cursor-pointer"
+            aria-label="Dismiss alert"
+          >
+            <X size={16} />
+          </button>
+        </div>
+      )}
 
       {/* Main Master-Detail 7/5 Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start pt-6">

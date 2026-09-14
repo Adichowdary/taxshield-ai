@@ -26,6 +26,7 @@ export default function LoadingAnimation({ size = 'md', className = '', label = 
           loop
           muted
           playsInline
+          preload="auto"
           className="w-full h-full object-cover relative z-10"
         />
 

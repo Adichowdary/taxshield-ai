@@ -4,7 +4,7 @@ import { analyzeWithCustomLlm } from "./customLlmAdapter.js";
 import { analyzeWithNemotron } from "./nemotronAdapter.js";
 import { saveBillToHistory, compareBillWithPast } from "./historyService.js";
 import { verifyBillMath, buildMathFlags, auditShoppingTax, getTaxVerdict, canonicalBillType } from "./taxEngine.js";
-import { performOcr, parseOcrReceiptText } from "../ocrEngine.js";
+import { performOcr, parseOcrReceiptText, NonBillImageError } from "../ocrEngine.js";
 import { api } from "../api.js";
 
 /**
@@ -56,8 +56,8 @@ export function extractAndParseJson(rawText) {
 export function normalizeBillData(parsedJson, options = {}) {
   // Reject non-bill documents and food dish images
   if (parsedJson.isReceiptOrBill === false || parsedJson.rejectionReason) {
-    const reason = parsedJson.rejectionReason || "INVALID_IMAGE_FOOD_DETECTED: The uploaded image appears to be a photo of food dishes or non-receipt object, not a payment bill, receipt, or tax invoice.";
-    throw new Error(reason);
+    const reason = parsedJson.rejectionReason || "The uploaded image does not appear to contain a valid payment bill, receipt, or tax invoice. Please upload a clear photo of an authentic bill.";
+    throw new NonBillImageError(reason);
   }
 
   // Detect or canonicalize bill type
@@ -82,7 +82,7 @@ export function normalizeBillData(parsedJson, options = {}) {
   const hasTotal = Number(parsedJson.total || parsedJson.totalAmount || 0) > 0;
   const hasSubtotal = Number(parsedJson.subtotal || 0) > 0;
   if (rawItems.length === 0 && !hasTotal && !hasSubtotal) {
-    throw new Error("INVALID_DOCUMENT: No payment or line item transaction details found in this image. Please upload a valid store receipt, shopping bill, or invoice.");
+    throw new NonBillImageError("No payment or line item transaction details found in this image. Please upload a valid store receipt, shopping bill, or invoice.");
   }
 
   const lineItems = rawItems.map((item, idx) => {
@@ -449,6 +449,11 @@ export async function analyzeBill(billText, options = {}) {
       normalizedData = normalizeBillData(parsedJson, { ...options, billImageUrl: detectedImageUrl });
     }
   } catch (primaryError) {
+    // If image was verified as a non-bill by the model, reject immediately without fallback
+    if (primaryError?.isNonBill || primaryError instanceof NonBillImageError) {
+      throw primaryError;
+    }
+
     console.warn(`Primary LLM provider '${activeProvider}' failed:`, primaryError.message);
 
     if (fallbackEnabled) {
@@ -465,6 +470,9 @@ export async function analyzeBill(billText, options = {}) {
           normalizedData = normalizeBillData(parsedJson, { ...options, billImageUrl: detectedImageUrl });
         }
       } catch (fallbackError) {
+        if (fallbackError?.isNonBill || fallbackError instanceof NonBillImageError) {
+          throw fallbackError;
+        }
         console.warn("Cloud fallback also encountered an issue:", fallbackError.message);
         fallbackReason = `Primary and cloud providers offline. Switched to deterministic statutory OCR engine.`;
       }

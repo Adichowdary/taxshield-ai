@@ -1,6 +1,14 @@
 import { createWorker } from 'tesseract.js';
 import { verifyBillMath, buildMathFlags, getTaxVerdict, canonicalBillType } from './llm/taxEngine.js';
 
+export class NonBillImageError extends Error {
+  constructor(message = "The uploaded image does not appear to be a valid bill, receipt, or tax invoice. Please upload a clear photo of an authentic bill.") {
+    super(message);
+    this.name = "NonBillImageError";
+    this.isNonBill = true;
+  }
+}
+
 /**
  * Preprocesses and extracts verbatim raw text from bill receipt images using Tesseract.js OCR.
  * @param {string|File|Blob} imageSource - Image URL, Base64 Data URL, Blob, or File object.
@@ -14,11 +22,7 @@ export async function performOcr(imageSource, onProgress = null) {
   try {
     worker = await createWorker('eng');
     
-    // Set parameters to optimize for receipt text
-    await worker.setParameters({
-      tessedit_char_whitelist: '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz₹.,:-/()&%* \n\r',
-    });
-
+    // Note: Do not restrict whitelist artificially to prevent stripping Indian receipt symbols (₹, :, /, -, etc.)
     const ret = await worker.recognize(imageSource);
     const text = ret?.data?.text || '';
     const confidence = ret?.data?.confidence || 80;
@@ -38,10 +42,30 @@ export async function performOcr(imageSource, onProgress = null) {
  * Deterministic Receipt Regex & Mathematical Extractor
  * Extracts merchant, GSTIN, line items, CGST, SGST, service charge, and total amount
  * directly from OCR text with statutory validation.
+ * Throws NonBillImageError if document lacks billing markers or financial data.
  */
 export function parseOcrReceiptText(rawText, options = {}, detectedImageUrl = null) {
   const text = typeof rawText === 'string' ? rawText : '';
   const lines = text.split(/\r?\n/).map(l => l.trim()).filter(Boolean);
+
+  // Common Indian receipt keywords & markers
+  const receiptKeywords = [
+    'total', 'subtotal', 'sub-total', 'sub total', 'amount', 'tax', 'gst', 'cgst', 'sgst', 'igst',
+    'bill', 'invoice', 'receipt', 'order', 'table', 'token', 'cash', 'card', 'upi', 'payment',
+    'hsn', 'sac', 'rate', 'price', 'qty', 'quantity', 'discount', 'service charge', 'gstin',
+    'fssai', 'vat', 'mrp', 'net payable', 'grand total', 'round off', 'balance', 'change', 'rs', 'inr'
+  ];
+
+  const lowerText = text.toLowerCase();
+  const matchedKeywords = receiptKeywords.filter(kw => lowerText.includes(kw));
+  const hasNumbers = /\d+[.,]\d{2}|\b\d{2,6}\b/.test(text);
+
+  // If text is totally empty, or has no numbers and no receipt keywords, reject immediately
+  if ((lines.length === 0) || (!hasNumbers && matchedKeywords.length === 0)) {
+    throw new NonBillImageError(
+      "The uploaded image does not appear to contain a valid payment bill, receipt, or tax invoice. Please upload a clear photo of an authentic bill."
+    );
+  }
 
   let merchant = 'Retail & Dining Merchant';
   let gstin = null;
@@ -77,7 +101,7 @@ export function parseOcrReceiptText(rawText, options = {}, detectedImageUrl = nu
     if (
       line.length > 2 &&
       line.length < 50 &&
-      !/invoice|tax|receipt|bill\s+no|welcome|gstin|fssai|phone|tel|cash|table/i.test(line) &&
+      !/invoice|tax|receipt|bill\s+no|welcome|gstin|fssai|phone|tel|cash|table|date/i.test(line) &&
       !/^\d+$/.test(line)
     ) {
       merchant = line.replace(/^[#*=-]+|[#*=-]+$/g, '').trim();
@@ -107,21 +131,21 @@ export function parseOcrReceiptText(rawText, options = {}, detectedImageUrl = nu
   // Scan lines for financial markers
   for (const line of lines) {
     // Total / Grand Total / Net Payable
-    if (/(?:grand\s*total|total\s*amount|net\s*payable|amount\s*payable|balance\s*due|^total\b)/i.test(line)) {
+    if (/(?:grand\s*total|total\s*amount|net\s*payable|amount\s*payable|balance\s*due|final\s*amount|^total\b)/i.test(line)) {
       const amt = extractAmount(line);
       if (amt && amt > totalAmount) {
         totalAmount = amt;
       }
     }
     // Subtotal
-    else if (/(?:sub\s*total|food\s*total|items\s*total|gross\s*amount)/i.test(line)) {
+    else if (/(?:sub\s*total|food\s*total|items\s*total|gross\s*amount|taxable\s*value)/i.test(line)) {
       const amt = extractAmount(line);
       if (amt && amt > 0) {
         subtotal = amt;
       }
     }
     // Service Charge (CCPA Flagged)
-    else if (/(?:service\s*charge|service\s*fee|s\.?c\.?\s*@)/i.test(line)) {
+    else if (/(?:service\s*charge|service\s*fee|s\.?c\.?\s*@|staff\s*contribution)/i.test(line)) {
       const amt = extractAmount(line);
       if (amt && amt > 0) {
         serviceCharge = amt;
@@ -149,7 +173,7 @@ export function parseOcrReceiptText(rawText, options = {}, detectedImageUrl = nu
       }
     }
     // Discount
-    else if (/(?:discount|promo|coupon|saving)/i.test(line)) {
+    else if (/(?:discount|promo|coupon|saving|less)/i.test(line)) {
       const amt = extractAmount(line);
       if (amt && amt > 0) {
         discount = amt;
@@ -157,12 +181,12 @@ export function parseOcrReceiptText(rawText, options = {}, detectedImageUrl = nu
     }
     // Potential Line Item (Name ... Quantity ... Price)
     else {
-      const itemMatch = line.match(/^(\d+)?\s*[xX*-]?\s*([A-Za-z][A-Za-z0-9\s&'-]{3,35})\s+(?:₹|rs\.?)?\s*([0-9]+(?:\.[0-9]{2})?)$/i);
+      const itemMatch = line.match(/^(\d+)?\s*[xX*-]?\s*([A-Za-z][A-Za-z0-9\s&'-]{2,35})\s+(?:₹|rs\.?)?\s*([0-9]+(?:\.[0-9]{2})?)$/i);
       if (itemMatch) {
         const qty = itemMatch[1] ? parseInt(itemMatch[1], 10) : 1;
         const name = itemMatch[2].trim();
         const price = parseFloat(itemMatch[3]);
-        if (!isNaN(price) && price > 0 && !/total|subtotal|gst|tax|charge/i.test(name)) {
+        if (!isNaN(price) && price > 0 && !/total|subtotal|gst|tax|charge|discount/i.test(name)) {
           lineItems.push({
             id: `item-${lineItems.length + 1}`,
             name,
@@ -200,19 +224,15 @@ export function parseOcrReceiptText(rawText, options = {}, detectedImageUrl = nu
     totalAmount = Number((subtotal + serviceCharge + totalGst - discount).toFixed(2));
   }
 
-  // Fallback defaults if OCR image was completely unreadable
-  if (subtotal === 0 && totalAmount === 0) {
-    subtotal = 640.00;
-    serviceCharge = 64.00;
-    cgst = 16.00;
-    sgst = 16.00;
-    totalAmount = 736.00;
-    lineItems.push(
-      { id: 'item-1', name: 'Special Paneer Tikka Platter', qty: 1, quantity: 1, price: 340.00, unitPrice: 340.00, total: 340.00, gstRate: 5 },
-      { id: 'item-2', name: 'Butter Naan Basket', qty: 2, quantity: 2, price: 90.00, unitPrice: 90.00, total: 180.00, gstRate: 5 },
-      { id: 'item-3', name: 'Fresh Mint Lime Soda', qty: 1, quantity: 1, price: 120.00, unitPrice: 120.00, total: 120.00, gstRate: 5 }
+  // CRITICAL REJECTION: If no financial amounts or items were detected and fewer than 2 receipt keywords matched, reject as non-bill
+  if (subtotal === 0 && totalAmount === 0 && lineItems.length === 0) {
+    throw new NonBillImageError(
+      "The uploaded image does not appear to contain a valid payment bill, receipt, or tax invoice. Please upload a clear photo of an authentic bill."
     );
-  } else if (lineItems.length === 0 && subtotal > 0) {
+  }
+
+  // If we have a subtotal/total but no line items could be parsed, create a verified summary item
+  if (lineItems.length === 0 && subtotal > 0) {
     lineItems.push({
       id: 'item-1',
       name: 'Itemized Receipt Charges',

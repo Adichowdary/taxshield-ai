@@ -2,7 +2,7 @@ import { uploadImage } from "../services/cloudinary";
 import { auth } from "../config/firebase";
 import api from "../services/api";
 import { useState, useRef } from 'react'
-import { Upload, Camera, CheckCircle2, RotateCw, Trash2, ArrowRight, Cpu, Sparkles, AlertTriangle, Utensils, ShoppingCart, Shirt, Smartphone, Pill } from 'lucide-react'
+import { Upload, Camera, CheckCircle2, RotateCw, Trash2, ArrowRight, Cpu, Sparkles, AlertTriangle, Utensils, ShoppingCart, Shirt, Smartphone, Pill, X } from 'lucide-react'
 import Button from './shared/Button'
 import { MOCK_BILLS } from '../data/mockData'
 import SwiggyFieldMappingCard from './SwiggyFieldMappingCard'
@@ -230,6 +230,26 @@ export default function BillUploader({ onStartScan }) {
           <strong className="text-amber-300">All Retail Receipts Supported:</strong> Upload offline & online bills: Supermarkets (D-Mart), Fashion (Zudio), Electronics (Croma), Pharmacy (Apollo), or Restaurants. Non-receipt object photos are rejected by the AI engine.
         </div>
       </div>
+
+      {/* Upload Error Banner */}
+      {uploadError && (
+        <div className="p-4 rounded-2xl border border-rose-500/35 bg-rose-500/10 dark:bg-rose-950/40 text-rose-900 dark:text-rose-100 flex items-start justify-between gap-3 shadow-lg backdrop-blur-md animate-in fade-in duration-200">
+          <div className="flex items-start gap-2.5">
+            <AlertTriangle size={18} className="text-rose-500 shrink-0 mt-0.5" />
+            <div className="space-y-0.5">
+              <h5 className="text-xs font-bold text-rose-900 dark:text-white">Upload Error</h5>
+              <p className="text-xs leading-relaxed text-rose-800 dark:text-rose-200">{uploadError}</p>
+            </div>
+          </div>
+          <button 
+            type="button" 
+            onClick={() => setUploadError('')}
+            className="p-1 rounded-lg hover:bg-rose-500/20 text-rose-700 dark:text-rose-300 transition-colors"
+          >
+            <X size={14} />
+          </button>
+        </div>
+      )}
 
       {/* Upload Drop Zone (when empty) */}
       {fileList.length === 0 ? (

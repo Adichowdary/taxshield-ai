@@ -6,7 +6,7 @@ import Container from '../components/shared/Container'
 import BillUploader from '../components/BillUploader'
 import ScanProgressModal from '../components/ScanProgressModal'
 import { analyzeBill } from '../services/llm/llmGateway'
-import { Sparkles, AlertCircle } from 'lucide-react'
+import { Sparkles, AlertCircle, X } from 'lucide-react'
 
 export default function ScanPage() {
   const [isScanning, setIsScanning] = useState(false)
@@ -63,12 +63,19 @@ Total Amount: ₹736.00`
       setIsScanning(false)
       setIsAnalysisDone(false)
       const msg = err.message || "Failed to process bill receipt with AI."
-      if (msg.includes("FOOD_IMAGE_DETECTED") || msg.includes("INVALID_IMAGE_FOOD")) {
-        setScanError("Food Dish Photo Detected: The uploaded image appears to be a picture of food/dishes rather than a payment bill or receipt. Please upload a clear restaurant receipt or tax invoice.")
-      } else if (msg.includes("INVALID_DOCUMENT")) {
-        setScanError("Invalid Document: No billing or financial transaction details found. Please upload a restaurant receipt or payment invoice.")
+      const isNonBill = err.isNonBill || 
+        msg.includes("NON_BILL") || 
+        msg.includes("FOOD_IMAGE") || 
+        msg.includes("INVALID_IMAGE_FOOD") || 
+        msg.includes("INVALID_DOCUMENT") || 
+        msg.includes("not appear") || 
+        msg.includes("No payment") || 
+        msg.includes("No billing")
+
+      if (isNonBill) {
+        setScanError("The uploaded image does not appear to be a valid bill, receipt, or invoice. Please upload a clear photo of an authentic physical or digital bill.")
       } else {
-        setScanError(msg)
+        setScanError(msg.replace(/^[A-Z_]+:\s*/, ''))
       }
     }
   }
@@ -98,25 +105,43 @@ Total Amount: ₹736.00`
           
           {/* Title Header */}
           <div className="text-center space-y-2 auth-stagger" style={{ animationDelay: '80ms' }}>
-            <span className="bg-lime-400/10 text-lime-400 text-xs font-bold px-3.5 py-1 rounded-full border border-lime-400/30 uppercase tracking-wider inline-flex items-center gap-1">
+            <span className="bg-lime-400/10 text-lime-600 dark:text-lime-400 text-xs font-bold px-3.5 py-1 rounded-full border border-lime-400/30 uppercase tracking-wider inline-flex items-center gap-1">
               <Sparkles size={13} /> TaxShield AI Receipt Intelligence
             </span>
-            <h1 className="text-3xl sm:text-4xl font-poppins font-bold vision-pro-text-glow" style={{ color: 'var(--text-primary)' }}>
+            <h1 className="text-3xl sm:text-4xl font-poppins font-bold vision-pro-text-glow text-slate-900 dark:text-white">
               Scan Your Bill
             </h1>
-            <p className="text-sm sm:text-base max-w-xl mx-auto font-sans" style={{ color: 'var(--text-muted)' }}>
+            <p className="text-sm sm:text-base max-w-xl mx-auto font-sans text-slate-600 dark:text-slate-300">
               Upload a clear photo or digital PDF receipt. TaxShield AI will extract every line item, verify GST rules, and highlight potential overcharges.
             </p>
           </div>
 
           {/* Error Banner */}
           {scanError && (
-            <div className="p-4 rounded-2xl text-xs flex items-start gap-2.5 border bg-rose-500/15 border-rose-400/30 text-rose-300 backdrop-blur-md">
-              <AlertCircle size={16} className="text-rose-400 shrink-0 mt-0.5" />
-              <div>
-                <span className="font-bold block">Analysis Error</span>
-                <span>{scanError}</span>
+            <div className="p-4 sm:p-5 rounded-2xl border border-rose-500/35 bg-rose-500/10 dark:bg-rose-950/40 text-rose-900 dark:text-rose-100 flex items-start justify-between gap-4 shadow-lg backdrop-blur-md animate-in fade-in duration-200">
+              <div className="flex items-start gap-3">
+                <div className="w-9 h-9 rounded-xl bg-rose-500/20 border border-rose-500/30 flex items-center justify-center shrink-0 text-rose-600 dark:text-rose-400 mt-0.5 shadow-sm">
+                  <AlertCircle size={18} />
+                </div>
+                <div className="space-y-1">
+                  <h4 className="text-sm font-bold font-poppins text-rose-900 dark:text-white flex items-center gap-2">
+                    Image Not Recognized as a Bill
+                    <span className="text-[10px] uppercase font-mono px-2 py-0.5 rounded bg-rose-500/20 text-rose-700 dark:text-rose-300 font-semibold border border-rose-500/30">
+                      Rejected
+                    </span>
+                  </h4>
+                  <p className="text-xs text-rose-800 dark:text-rose-200 leading-relaxed font-sans max-w-2xl">
+                    {scanError}
+                  </p>
+                </div>
               </div>
+              <button
+                onClick={() => setScanError(null)}
+                className="p-1.5 rounded-xl hover:bg-rose-500/20 text-rose-700 dark:text-rose-300 transition-colors shrink-0 cursor-pointer"
+                aria-label="Dismiss alert"
+              >
+                <X size={16} />
+              </button>
             </div>
           )}
 

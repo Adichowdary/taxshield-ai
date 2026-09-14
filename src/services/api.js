@@ -4,7 +4,7 @@
  * Communicates with the Node.js + Express backend connected to MongoDB Atlas.
  * Integrates seamlessly with existing client-side Firebase Auth sessions.
  */
-import { auth } from '../config/firebase';
+import { auth } from '../config/firebase.js';
 
 const API_BASE = (typeof import.meta !== 'undefined' && import.meta.env?.VITE_API_BASE_URL) || '/api';
 

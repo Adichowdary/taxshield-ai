@@ -30,22 +30,52 @@ export default function LoginSuccessSplash({ userName = '', onComplete }) {
     // Lock body scrolling during splash video animation
     document.body.style.overflow = 'hidden'
 
-    // Fallback timer: in case video ends or browser prevents playback, advance after 10.5s
-    const fallbackTimer = setTimeout(() => {
+    // Attempt instant autoplay with fast buffering
+    if (videoRef.current) {
+      videoRef.current.preload = 'auto'
+      videoRef.current.playsInline = true
+      videoRef.current.muted = true
+      const playPromise = videoRef.current.play()
+      if (playPromise !== undefined) {
+        playPromise
+          .then(() => setHasStarted(true))
+          .catch((err) => {
+            console.warn('Autoplay restricted by browser, forcing muted play:', err)
+            if (videoRef.current) {
+              videoRef.current.muted = true
+              setIsMuted(true)
+              videoRef.current.play().then(() => setHasStarted(true)).catch(() => {})
+            }
+          })
+      }
+    }
+
+    // Generous fallback safety timeout ONLY if video completely fails to load or play
+    const safetyTimer = setTimeout(() => {
       handleFinish()
-    }, 10500)
+    }, 35000)
 
     return () => {
-      clearTimeout(fallbackTimer)
+      clearTimeout(safetyTimer)
       document.body.style.overflow = ''
     }
   }, [])
 
   const handleTimeUpdate = () => {
     if (videoRef.current && videoRef.current.duration) {
-      const pct = Math.min(100, Math.round((videoRef.current.currentTime / videoRef.current.duration) * 100))
+      const current = videoRef.current.currentTime
+      const duration = videoRef.current.duration
+      const pct = Math.min(100, Math.round((current / duration) * 100))
       setProgress(pct)
     }
+  }
+
+  const handleVideoEnded = () => {
+    // Complete video finished playing in full
+    setProgress(100)
+    setTimeout(() => {
+      handleFinish()
+    }, 450)
   }
 
   const toggleMute = () => {
@@ -62,7 +92,7 @@ export default function LoginSuccessSplash({ userName = '', onComplete }) {
     if (pct < 55) return 'Initializing TaxShield AI Engine & GST safeguards...'
     if (pct < 80) return 'Syncing bill receipts & deduction metrics...'
     if (pct < 98) return 'Building spatial intelligence terminal...'
-    return 'Welcome! Launching TaxShield Portal...'
+    return 'Complete! Launching TaxShield Portal...'
   }
 
   return (
@@ -110,11 +140,10 @@ export default function LoginSuccessSplash({ userName = '', onComplete }) {
         </div>
       </div>
 
-      {/* 3. Centerpiece: Full-Size Seamless Mobile Loading Animation */}
+      {/* 3. Centerpiece: Full-Size Seamless Complete Video Loading Animation */}
       <div className="relative z-10 w-full flex-1 flex flex-col items-center justify-center px-0 sm:px-6 my-auto overflow-hidden">
         <div className="relative w-full max-w-[480px] sm:max-w-xl md:max-w-2xl aspect-video flex items-center justify-center overflow-hidden [mask-image:linear-gradient(to_bottom,transparent_0%,black_8%,black_92%,transparent_100%)]">
           
-          {/* Video scaled up on mobile so the graphics fill the mobile screen naturally */}
           <video
             ref={videoRef}
             src="/loading.mp4"
@@ -122,9 +151,10 @@ export default function LoginSuccessSplash({ userName = '', onComplete }) {
             loop={false}
             muted={isMuted}
             playsInline
+            preload="auto"
             onPlay={() => setHasStarted(true)}
             onTimeUpdate={handleTimeUpdate}
-            onEnded={handleFinish}
+            onEnded={handleVideoEnded}
             className="w-full h-full object-contain scale-[1.28] sm:scale-100 transition-transform duration-300 relative z-10 drop-shadow-[0_0_50px_rgba(56,189,248,0.45)]"
           />
         </div>

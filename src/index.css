@@ -57,6 +57,10 @@
   --warning-bg: #FFFBEB;
   --danger: #DC2626;
   --danger-bg: #FEF2F2;
+
+  --text-primary: #0B192C;
+  --text-secondary: #1E293B;
+  --text-muted: #64748B;
 }
 
 
