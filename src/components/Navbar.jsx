@@ -6,7 +6,6 @@ import Container from './shared/Container'
 import { useAuth } from '../context/AuthContext'
 import { useTheme } from '../context/ThemeContext'
 import ThemeToggle from './ThemeToggle'
-import MobileNav from './MobileNav'
 
 export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false)
@@ -367,9 +366,6 @@ export default function Navbar() {
           </div>
         )}
       </Container>
-
-      {/* Top Sticky/Fixed Mobile Navigation Bar */}
-      <MobileNav />
     </header>
   )
 }

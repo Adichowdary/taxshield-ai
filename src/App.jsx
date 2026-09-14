@@ -5,6 +5,7 @@ import { ThemeProvider } from './context/ThemeContext'
 import ProtectedRoute from './components/ProtectedRoute'
 import PageTransition from './components/shared/PageTransition'
 import ThreeDBackground from './components/shared/ThreeDBackground'
+import MobileNav from './components/MobileNav'
 
 const Landing = lazy(() => import('./pages/Landing'))
 
@@ -70,6 +71,9 @@ function App() {
 
             </Routes>
           </Suspense>
+
+          {/* Bottom Mobile Navigation Bar (PhonePe / Insta style, strictly after user login) */}
+          <MobileNav />
         </Router>
       </AuthProvider>
     </ThemeProvider>
