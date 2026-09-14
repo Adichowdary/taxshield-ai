@@ -6,6 +6,7 @@ import ProtectedRoute from './components/ProtectedRoute'
 import PageTransition from './components/shared/PageTransition'
 import ThreeDBackground from './components/shared/ThreeDBackground'
 import MobileNav from './components/MobileNav'
+import LoadingAnimation from './components/LoadingAnimation'
 
 const Landing = lazy(() => import('./pages/Landing'))
 
@@ -31,8 +32,8 @@ function SplashWrapper() {
 
 function Loading() {
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-950">
-      <div className="w-8 h-8 border-2 border-emerald-500 border-t-transparent rounded-full animate-spin" />
+    <div className="min-h-screen flex items-center justify-center bg-[#050811] text-white">
+      <LoadingAnimation size="fullscreen" label="Loading TaxShield Intelligence..." />
     </div>
   )
 }

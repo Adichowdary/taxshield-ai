@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react'
 import { CheckCircle2, Loader2, Shield, Sparkles } from 'lucide-react'
+import LoadingAnimation from './LoadingAnimation'
 
 const SCAN_STEPS = [
   { title: 'Checking image quality & clarity', duration: 700 },
@@ -55,11 +56,8 @@ export default function ScanProgressModal({ isOpen, isDone = false, error = null
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/85 backdrop-blur-xl select-none overflow-hidden persp-1200">
       <div className="vision-pro-card !rounded-[2rem] p-8 max-w-md w-full text-center space-y-6 relative overflow-hidden elev-4 preserve-3d border-lime-400/40">
         
-        {/* Top Scan Graphic */}
-        <div className="w-16 h-16 rounded-2xl bg-lime-400/15 text-lime-400 border border-lime-400/30 flex items-center justify-center mx-auto relative shadow-[0_0_25px_rgba(132,204,22,0.4)]">
-          <Shield size={32} />
-          <Sparkles size={16} className="absolute -top-1 -right-1 text-lime-300" />
-        </div>
+        {/* Top Scan Video Animation */}
+        <LoadingAnimation size="md" className="mx-auto" />
 
         <div>
           <h3 className="font-poppins font-bold text-xl vision-pro-text-glow mb-1" style={{ color: 'var(--text-primary)' }}>
