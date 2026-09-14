@@ -17,11 +17,13 @@ export default function MobileNav() {
 
   const handleScanTap = () => {
     if (path === '/dashboard') {
+      window.dispatchEvent(new CustomEvent('taxshield:open-camera'))
       const el = document.getElementById('scanner-section')
       if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' })
     } else {
       navigate('/dashboard')
       setTimeout(() => {
+        window.dispatchEvent(new CustomEvent('taxshield:open-camera'))
         const el = document.getElementById('scanner-section')
         if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' })
       }, 350)

@@ -118,10 +118,12 @@ export default function SettingsPage() {
     }
   }, [currentUser])
 
-  // LLM Settings State
-  const [llmProvider, setLlmProvider] = useState(() => 
-    localStorage.getItem('taxshield_llm_provider') || import.meta.env.VITE_ACTIVE_LLM_PROVIDER || 'custom'
-  )
+  // LLM Settings State - Strictly TaxShield AI (custom) or Gemini AI (gemini)
+  const [llmProvider, setLlmProvider] = useState(() => {
+    const saved = localStorage.getItem('taxshield_llm_provider')
+    if (saved === 'custom' || saved === 'gemini') return saved
+    return 'gemini'
+  })
   const [customEndpoint, setCustomEndpoint] = useState(() => 
     localStorage.getItem('taxshield_custom_endpoint') || import.meta.env.VITE_CUSTOM_LLM_ENDPOINT || 'http://localhost:11434/v1'
   )
@@ -418,42 +420,10 @@ export default function SettingsPage() {
                     }`}
                   >
                     <div className="flex items-center justify-between">
-                      <span className="font-bold" style={{ color: 'var(--text-primary)' }}>Google Gemini</span>
-                      <span className="text-[10px] font-extrabold uppercase tracking-wider bg-cyan-500/20 text-cyan-400 px-1.5 py-0.5 rounded">Cloud Free</span>
+                      <span className="font-bold" style={{ color: 'var(--text-primary)' }}>Gemini AI (Google Gemini 2.0 Flash)</span>
+                      <span className="text-[10px] font-extrabold uppercase tracking-wider bg-cyan-500/20 text-cyan-400 px-1.5 py-0.5 rounded">Cloud AI</span>
                     </div>
-                    <p className="text-[11px]" style={{ color: 'var(--text-muted)' }}>Gemini 2.0 Flash cloud model with high-speed multimodal extraction.</p>
-                  </button>
-
-                  <button
-                    type="button"
-                    onClick={() => setLlmProvider('nemotron')}
-                    className={`p-4 vision-pro-pill text-left transition-all space-y-2 cursor-pointer ${
-                      llmProvider === 'nemotron' 
-                        ? 'border-lime-400 bg-lime-400/15 shadow-[0_0_20px_rgba(132,204,22,0.3)]' 
-                        : 'border-slate-500/30 hover:border-lime-400/40'
-                    }`}
-                  >
-                    <div className="flex items-center justify-between">
-                      <span className="font-bold" style={{ color: 'var(--text-primary)' }}>NVIDIA Nemotron</span>
-                      <span className="text-[10px] font-extrabold uppercase tracking-wider bg-lime-400/20 text-lime-400 px-1.5 py-0.5 rounded">Ultra 70B/550B</span>
-                    </div>
-                    <p className="text-[11px]" style={{ color: 'var(--text-muted)' }}>NVIDIA Nemotron cloud API for deep legal & compliance reasoning.</p>
-                  </button>
-
-                  <button
-                    type="button"
-                    onClick={() => setLlmProvider('claude')}
-                    className={`p-4 vision-pro-pill text-left transition-all space-y-2 cursor-pointer ${
-                      llmProvider === 'claude' 
-                        ? 'border-lime-400 bg-lime-400/15 shadow-[0_0_20px_rgba(132,204,22,0.3)]' 
-                        : 'border-slate-500/30 hover:border-lime-400/40'
-                    }`}
-                  >
-                    <div className="flex items-center justify-between">
-                      <span className="font-bold" style={{ color: 'var(--text-primary)' }}>Anthropic Claude</span>
-                      <span className="text-[10px] font-extrabold uppercase tracking-wider bg-purple-500/20 text-purple-400 px-1.5 py-0.5 rounded">Paid API</span>
-                    </div>
-                    <p className="text-[11px]" style={{ color: 'var(--text-muted)' }}>Claude 3.5 Haiku / Sonnet API for maximum reasoning accuracy.</p>
+                    <p className="text-[11px]" style={{ color: 'var(--text-muted)' }}>Gemini 2.0 Flash cloud model with ultra high-speed multimodal vision extraction and statutory verification.</p>
                   </button>
                 </div>
 

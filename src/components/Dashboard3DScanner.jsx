@@ -5,6 +5,7 @@ import { Upload, Camera, Sparkles, CheckCircle2, AlertTriangle, Shield, ArrowRig
 import Button from './shared/Button'
 import { saveBillToHistory } from '../services/llm/historyService'
 import { useTheme } from '../context/ThemeContext'
+import LiveCameraModal from './LiveCameraModal'
 
 const Dashboard3DScanner = forwardRef(function Dashboard3DScanner({ onBillScanned }, ref) {
   const navigate = useNavigate()
@@ -19,6 +20,7 @@ const Dashboard3DScanner = forwardRef(function Dashboard3DScanner({ onBillScanne
   const [scanStep, setScanStep] = useState(0)
   const [scannedBill, setScannedBill] = useState(null)
   const [isDragOver, setIsDragOver] = useState(false)
+  const [showCameraModal, setShowCameraModal] = useState(false)
 
   // -------------------------------------------------------------------------
   // 1. Real-time 3D Holographic WebGL Scanner Canvas
@@ -430,7 +432,7 @@ const Dashboard3DScanner = forwardRef(function Dashboard3DScanner({ onBillScanne
                 <Button 
                   variant="secondary" 
                   size="sm" 
-                  onClick={() => cameraInputRef.current?.click()}
+                  onClick={() => setShowCameraModal(true)}
                   disabled={isScanning}
                   className="font-semibold px-4 border border-slate-300 dark:border-white/15"
                 >
@@ -531,6 +533,16 @@ const Dashboard3DScanner = forwardRef(function Dashboard3DScanner({ onBillScanne
         </div>
 
       </div>
+
+      {/* Direct Live In-App Camera Viewfinder Modal */}
+      <LiveCameraModal
+        isOpen={showCameraModal}
+        onClose={() => setShowCameraModal(false)}
+        onCapture={(file) => {
+          setShowCameraModal(false)
+          handleFileUpload({ target: { files: [file] } })
+        }}
+      />
     </div>
   )
 })

@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect } from 'react'
+import { useNavigate } from 'react-router-dom'
 import * as THREE from 'three'
 import { 
   Sparkles, Scan, Eye, CheckCircle2, AlertTriangle, ShieldCheck, 
@@ -10,6 +11,7 @@ import Button from './shared/Button'
 import { saveBillToHistory } from '../services/llm/historyService'
 import { uploadImage } from '../services/cloudinary'
 import { analyzeBill } from '../services/llm/llmGateway'
+import LiveCameraModal from './LiveCameraModal'
 
 export const REAL_BILL_PRESETS = [
   {
@@ -76,6 +78,7 @@ export const REAL_BILL_PRESETS = [
 ]
 
 export default function Realistic3DBillPlinth({ onSelectBill, activeBillId, onTriggerAudit }) {
+  const navigate = useNavigate()
   const { activeTheme } = useTheme()
   const isDark = activeTheme === 'dark'
 
@@ -96,8 +99,16 @@ export default function Realistic3DBillPlinth({ onSelectBill, activeBillId, onTr
   const [uploadProgress, setUploadProgress] = useState(null)
   const [uploadStepText, setUploadStepText] = useState('')
   const [showDisputeModal, setShowDisputeModal] = useState(false)
+  const [showCameraModal, setShowCameraModal] = useState(false)
   const [copiedNotice, setCopiedNotice] = useState(false)
   const [activeUploadedBill, setActiveUploadedBill] = useState(null)
+
+  // Listen for global open-camera event from mobile dock or external actions
+  useEffect(() => {
+    const handleOpenCam = () => setShowCameraModal(true)
+    window.addEventListener('taxshield:open-camera', handleOpenCam)
+    return () => window.removeEventListener('taxshield:open-camera', handleOpenCam)
+  }, [])
 
   const currentBill = activeUploadedBill || REAL_BILL_PRESETS[currentPresetIndex]
 
@@ -694,7 +705,7 @@ Consumer / TaxShield Audit Terminal`
                   </button>
                   <button
                     type="button"
-                    onClick={() => cameraInputRef.current?.click()}
+                    onClick={() => setShowCameraModal(true)}
                     className="flex-1 sm:flex-initial px-4 py-2.5 rounded-xl bg-slate-100 dark:bg-white/10 text-slate-800 dark:text-slate-200 border border-slate-300 dark:border-white/15 font-semibold text-xs hover:bg-slate-200 dark:hover:bg-white/15 transition-colors cursor-pointer flex items-center justify-center gap-1.5"
                   >
                     <Camera size={14} className="text-sky-600 dark:text-[#D4AF37]" /> Camera
@@ -747,45 +758,82 @@ Consumer / TaxShield Audit Terminal`
           </div>
 
           {/* Dstudio Anomaly Detection Card */}
-          {currentBill.serviceCharge > 0 && (
-            <div className="p-5 rounded-2xl bg-gradient-to-br from-amber-500/15 via-rose-500/10 to-amber-500/5 border border-amber-500/40 dark:border-amber-500/30 shadow-lg space-y-3.5 relative overflow-hidden">
-              <div className="flex items-start justify-between">
+          {/* Red Flag (Illegal Levy) vs Green Flag (100% Compliant) Status Card */}
+          {currentBill.serviceCharge > 0 ? (
+            <div className="p-4 sm:p-5 rounded-2xl bg-gradient-to-br from-amber-500/15 via-rose-500/10 to-amber-500/5 border border-rose-500/40 dark:border-rose-500/30 shadow-lg space-y-3 relative overflow-hidden">
+              <div className="flex items-start justify-between gap-2">
                 <div className="flex items-center gap-2">
-                  <div className="w-8 h-8 rounded-lg bg-rose-500/20 text-rose-600 dark:text-rose-400 flex items-center justify-center font-bold">
+                  <div className="w-8 h-8 rounded-lg bg-rose-500/20 text-rose-600 dark:text-rose-400 flex items-center justify-center font-bold shrink-0">
                     <AlertTriangle size={18} />
                   </div>
                   <div>
-                    <h4 className="text-xs font-bold text-rose-900 dark:text-rose-300 uppercase font-mono tracking-wider">
-                      Statutory Discrepancy Flagged
+                    <h4 className="text-xs font-bold text-rose-900 dark:text-rose-300 uppercase font-mono tracking-wider flex items-center gap-1.5">
+                      <span className="w-2 h-2 rounded-full bg-rose-500 animate-ping" />
+                      Red Flag: Heavy / Illegal Charge
                     </h4>
                     <p className="text-xs font-semibold text-slate-900 dark:text-white">
-                      Voluntary 10% Service Fee Added
+                      Voluntary Service Fee Added (₹{currentBill.serviceCharge.toFixed(2)})
                     </p>
                   </div>
                 </div>
-                <span className="px-2 py-0.5 rounded bg-rose-500/20 text-rose-700 dark:text-rose-300 text-[10px] font-mono font-bold">
+                <span className="px-2 py-0.5 rounded bg-rose-500/20 text-rose-700 dark:text-rose-300 text-[10px] font-mono font-bold shrink-0 border border-rose-500/30">
                   CCPA VIOLATION
                 </span>
               </div>
 
-              <div className="p-3 rounded-xl bg-white/70 dark:bg-black/30 border border-amber-500/20 space-y-1">
+              <div className="p-3 rounded-xl bg-white/70 dark:bg-black/30 border border-rose-500/20 space-y-1">
                 <div className="text-[11px] text-slate-600 dark:text-slate-300">
                   Total Recoverable / Waivable:
                 </div>
                 <div className="text-2xl font-extrabold font-mono text-rose-600 dark:text-rose-400">
                   ₹{currentBill.serviceCharge.toFixed(2)}
                 </div>
-                <p className="text-[11px] text-slate-700 dark:text-slate-300 leading-relaxed pt-1">
-                  National Consumer Helpline Guidelines stipulate that service charge is voluntary and cannot be mandatorily added to food invoices.
+                <p className="text-[11px] text-slate-700 dark:text-slate-300 leading-relaxed pt-0.5">
+                  Central Consumer Protection Authority Guidelines stipulate that restaurant service charges are strictly voluntary and cannot be mandatorily added to consumer bills.
                 </p>
               </div>
 
-              <button
-                onClick={() => setShowDisputeModal(true)}
-                className="w-full py-2.5 rounded-xl bg-rose-600 hover:bg-rose-700 text-white font-bold text-xs shadow-md transition-colors cursor-pointer flex items-center justify-center gap-2"
-              >
-                <Scale size={15} /> Draft Consumer Dispute Notice
-              </button>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 pt-1">
+                <button
+                  type="button"
+                  onClick={() => setShowDisputeModal(true)}
+                  className="w-full py-2.5 px-3 rounded-xl bg-slate-900 dark:bg-white text-white dark:text-slate-950 font-bold text-xs shadow-md transition-colors cursor-pointer flex items-center justify-center gap-1.5 hover:bg-slate-800 dark:hover:bg-slate-100"
+                >
+                  <FileCheck size={14} /> Quick Dispute Notice
+                </button>
+                <button
+                  type="button"
+                  onClick={() => navigate(`/complaint/${currentBill.id || 'bill-101'}`)}
+                  className="w-full py-2.5 px-3 rounded-xl bg-rose-600 hover:bg-rose-700 text-white font-bold text-xs shadow-md transition-colors cursor-pointer flex items-center justify-center gap-1.5"
+                >
+                  <Scale size={14} /> File CCPA Complaint
+                </button>
+              </div>
+            </div>
+          ) : (
+            <div className="p-4 sm:p-5 rounded-2xl bg-gradient-to-br from-emerald-500/15 via-emerald-500/10 to-teal-500/5 border border-emerald-500/40 dark:border-emerald-500/30 shadow-lg space-y-2.5 relative overflow-hidden">
+              <div className="flex items-start justify-between gap-2">
+                <div className="flex items-center gap-2">
+                  <div className="w-8 h-8 rounded-lg bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 flex items-center justify-center font-bold shrink-0">
+                    <ShieldCheck size={18} />
+                  </div>
+                  <div>
+                    <h4 className="text-xs font-bold text-emerald-900 dark:text-emerald-300 uppercase font-mono tracking-wider flex items-center gap-1.5">
+                      <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+                      Green Flag: 100% Tax Compliant
+                    </h4>
+                    <p className="text-xs font-semibold text-slate-900 dark:text-white">
+                      Legitimate Statutory Tax Verified
+                    </p>
+                  </div>
+                </div>
+                <span className="px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-700 dark:text-emerald-300 text-[10px] font-mono font-bold shrink-0 border border-emerald-500/30">
+                  NO OVERCHARGE
+                </span>
+              </div>
+              <p className="text-[11px] text-slate-700 dark:text-slate-300 leading-relaxed">
+                All line items conform to statutory GST schedules ({currentBill.gstRate || '5% composite'}). Zero illegal surcharges, packaging fees, or unauthorized levies detected.
+              </p>
             </div>
           )}
 
@@ -942,6 +990,16 @@ Consumer / TaxShield Audit Terminal`
           </div>
         </div>
       )}
+
+      {/* Live Camera Viewfinder Modal */}
+      <LiveCameraModal
+        isOpen={showCameraModal}
+        onClose={() => setShowCameraModal(false)}
+        onCapture={(file) => {
+          setShowCameraModal(false)
+          handleFileUpload(file)
+        }}
+      />
 
     </div>
   )
