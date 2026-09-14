@@ -56,53 +56,52 @@ export default function LoginSuccessSplash({ userName = '', onComplete }) {
     }
   }
 
+  // Dynamic loading stage based on real-time video progress
+  const getStageLabel = (pct) => {
+    if (pct < 25) return 'Authenticating user session & security keys...'
+    if (pct < 55) return 'Initializing TaxShield AI Engine & GST safeguards...'
+    if (pct < 80) return 'Syncing bill receipts & deduction metrics...'
+    if (pct < 98) return 'Building spatial intelligence terminal...'
+    return 'Welcome! Launching TaxShield Portal...'
+  }
+
   return (
-    <div className="fixed inset-0 z-[100] h-screen w-screen overflow-hidden bg-[#030712] text-white font-sans select-none flex flex-col justify-between p-4 sm:p-6 md:p-8">
+    <div className="fixed inset-0 z-[100] h-[100dvh] w-screen overflow-hidden bg-black text-white font-sans select-none flex flex-col justify-between">
       
-      {/* Full-Screen Ambient Video Glow Layer (fills entire mobile & desktop viewport with motion lighting) */}
-      <video
-        src="/loading.mp4"
-        autoPlay
-        loop
-        muted
-        playsInline
-        className="absolute inset-0 w-full h-full object-cover blur-3xl opacity-30 scale-125 pointer-events-none z-0"
-      />
+      {/* 1. Ambient Background Glow Behind Video */}
+      <div className="pointer-events-none absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[350px] sm:w-[600px] h-[350px] sm:h-[600px] rounded-full bg-sky-500/15 blur-[120px] animate-pulse z-0" />
+      <div className="pointer-events-none absolute top-1/3 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[280px] sm:w-[450px] h-[280px] sm:h-[450px] rounded-full bg-amber-500/10 blur-[100px] z-0" />
 
-      {/* Atmospheric Spatial Vignettes */}
-      <div className="absolute inset-0 bg-gradient-to-t from-[#030712] via-transparent to-[#030712]/80 pointer-events-none z-0" />
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,transparent_40%,rgba(3,7,18,0.85)_100%)] pointer-events-none z-0" />
-
-      {/* Top Floating HUD Bar */}
-      <div className="relative z-20 w-full max-w-5xl mx-auto flex items-center justify-between">
+      {/* 2. Top Navigation & Status HUD */}
+      <div className="relative z-20 w-full max-w-5xl mx-auto flex items-center justify-between p-4 sm:p-6 pt-5 sm:pt-6">
         <div className="flex items-center gap-2">
-          <div className="flex items-center gap-1.5 sm:gap-2 px-3 py-1.5 rounded-full bg-black/70 border border-amber-400/40 text-amber-300 text-xs font-semibold backdrop-blur-xl shadow-[0_0_20px_rgba(212,175,55,0.25)]">
+          <div className="flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-slate-900/80 border border-amber-400/40 text-amber-300 text-xs font-semibold backdrop-blur-xl shadow-[0_0_20px_rgba(212,175,55,0.25)]">
             <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping inline-block" />
-            <Bot size={14} className="text-amber-400 shrink-0" />
-            <span className="truncate max-w-[140px] sm:max-w-none">TaxShield AI Live</span>
+            <Bot size={15} className="text-amber-400 shrink-0" />
+            <span className="font-poppins">TaxShield AI Live</span>
           </div>
-          <span className="hidden md:inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-black/40 border border-white/10 text-[11px] text-slate-300 backdrop-blur-md">
+          <span className="hidden md:inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/5 border border-white/10 text-[11px] text-slate-300 backdrop-blur-md">
             <ShieldCheck size={13} className="text-emerald-400" /> Authenticated
           </span>
         </div>
 
         <div className="flex items-center gap-2">
-          {/* Sound Toggle */}
+          {/* Sound Toggle Button */}
           <button
             type="button"
             onClick={toggleMute}
-            className="flex items-center gap-1 px-2.5 sm:px-3.5 py-1.5 rounded-full bg-black/70 hover:bg-black/90 border border-white/20 hover:border-amber-400/50 text-slate-200 hover:text-amber-300 text-xs font-medium backdrop-blur-xl transition-all active:scale-95 cursor-pointer shadow-lg"
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-slate-900/80 hover:bg-slate-800 border border-white/20 hover:border-amber-400/50 text-slate-200 hover:text-amber-300 text-xs font-medium backdrop-blur-xl transition-all active:scale-95 cursor-pointer shadow-lg"
             title={isMuted ? "Unmute audio" : "Mute audio"}
           >
             {isMuted ? <VolumeX size={14} /> : <Volume2 size={14} className="text-amber-400" />}
             <span className="hidden sm:inline text-[11px]">{isMuted ? 'Muted' : 'Sound On'}</span>
           </button>
 
-          {/* Skip Button */}
+          {/* Quick Skip Button */}
           <button
             type="button"
             onClick={handleFinish}
-            className="flex items-center gap-1.5 px-3 sm:px-4 py-1.5 rounded-full bg-gradient-to-r from-amber-500/30 to-amber-600/30 hover:from-amber-500/50 hover:to-amber-600/50 border border-amber-400/60 text-amber-200 hover:text-white text-xs font-semibold backdrop-blur-xl transition-all active:scale-95 cursor-pointer shadow-[0_0_20px_rgba(212,175,55,0.35)]"
+            className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-gradient-to-r from-amber-500/25 to-amber-600/25 hover:from-amber-500/40 hover:to-amber-600/40 border border-amber-400/50 text-amber-200 hover:text-white text-xs font-semibold backdrop-blur-xl transition-all active:scale-95 cursor-pointer shadow-[0_0_20px_rgba(212,175,55,0.3)]"
           >
             <span>Skip</span>
             <span className="hidden sm:inline">to Dashboard</span>
@@ -111,11 +110,11 @@ export default function LoginSuccessSplash({ userName = '', onComplete }) {
         </div>
       </div>
 
-      {/* Centerpiece: Properly Framed Video Animation (No Over-Zoom on Mobile!) */}
-      <div className="relative z-10 w-full max-w-md sm:max-w-lg md:max-w-3xl mx-auto my-auto flex flex-col items-center justify-center px-1 sm:px-4">
-        <div className="relative w-full aspect-video rounded-2xl sm:rounded-3xl overflow-hidden shadow-[0_0_50px_rgba(212,175,55,0.35)] sm:shadow-[0_0_70px_rgba(212,175,55,0.4)] border border-amber-400/40 bg-black/85 backdrop-blur-2xl group">
+      {/* 3. Centerpiece: Full-Size Seamless Mobile Loading Animation */}
+      <div className="relative z-10 w-full flex-1 flex flex-col items-center justify-center px-0 sm:px-6 my-auto overflow-hidden">
+        <div className="relative w-full max-w-[480px] sm:max-w-xl md:max-w-2xl aspect-video flex items-center justify-center overflow-hidden [mask-image:linear-gradient(to_bottom,transparent_0%,black_8%,black_92%,transparent_100%)]">
           
-          {/* Crisp, Un-Cropped Video Animation */}
+          {/* Video scaled up on mobile so the graphics fill the mobile screen naturally */}
           <video
             ref={videoRef}
             src="/loading.mp4"
@@ -126,37 +125,40 @@ export default function LoginSuccessSplash({ userName = '', onComplete }) {
             onPlay={() => setHasStarted(true)}
             onTimeUpdate={handleTimeUpdate}
             onEnded={handleFinish}
-            className="w-full h-full object-contain sm:object-cover relative z-10"
+            className="w-full h-full object-contain scale-[1.28] sm:scale-100 transition-transform duration-300 relative z-10 drop-shadow-[0_0_50px_rgba(56,189,248,0.45)]"
           />
-
-          {/* Inner Gloss Ring */}
-          <div className="absolute inset-0 rounded-[inherit] ring-1 ring-inset ring-white/15 pointer-events-none z-20" />
         </div>
       </div>
 
-      {/* Bottom Floating HUD & Progress Bar */}
-      <div className="relative z-20 w-full max-w-md sm:max-w-lg md:max-w-2xl mx-auto flex flex-col items-center text-center space-y-2.5 pb-2 sm:pb-4">
+      {/* 4. Bottom Executive Progress Terminal */}
+      <div className="relative z-20 w-full max-w-md sm:max-w-lg md:max-w-xl mx-auto px-4 sm:px-6 pb-6 sm:pb-8 space-y-3">
         
-        {/* Welcome Text Pill */}
-        <div className="inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full bg-black/70 border border-white/15 text-slate-200 text-xs sm:text-sm font-medium backdrop-blur-xl shadow-lg">
-          <Sparkles size={13} className="text-amber-400 animate-spin" />
-          <span>Welcome, <strong className="text-amber-300 font-bold">{displayNameToUse}</strong></span>
+        {/* Welcome Banner Card */}
+        <div className="flex items-center justify-between px-4 py-2.5 rounded-2xl bg-slate-900/85 border border-white/15 backdrop-blur-xl shadow-xl">
+          <div className="flex items-center gap-2 truncate">
+            <Sparkles size={15} className="text-amber-400 animate-spin shrink-0" />
+            <span className="text-xs text-slate-200 font-medium truncate">
+              Welcome back, <strong className="text-amber-300 font-bold">{displayNameToUse}</strong>
+            </span>
+          </div>
+          <span className="text-xs font-mono font-bold text-amber-400 shrink-0 ml-2">{progress}%</span>
         </div>
 
         {/* High-Tech Glowing Progress Bar */}
-        <div className="w-full space-y-1.5 px-2">
-          <div className="h-2 sm:h-2.5 w-full bg-black/70 rounded-full overflow-hidden p-0.5 border border-white/20 backdrop-blur-xl shadow-[0_0_20px_rgba(212,175,55,0.25)] relative">
+        <div className="w-full space-y-1.5">
+          <div className="h-2.5 w-full bg-slate-900/90 rounded-full overflow-hidden p-0.5 border border-amber-400/30 backdrop-blur-xl shadow-[0_0_20px_rgba(212,175,55,0.25)] relative">
             <div
               className="h-full bg-gradient-to-r from-amber-400 via-emerald-400 to-sky-400 rounded-full transition-all duration-150 shadow-[0_0_15px_rgba(212,175,55,0.9)]"
               style={{ width: `${Math.max(progress, 3)}%` }}
             />
           </div>
 
-          <div className="flex justify-between items-center text-[10px] sm:text-xs font-mono text-slate-300 px-1">
-            <span className="flex items-center gap-1.5 uppercase font-medium truncate max-w-[240px] sm:max-w-none">
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 inline-block animate-pulse shrink-0" /> Launching TaxShield Intelligence Portal...
+          <div className="flex justify-between items-center text-[10px] sm:text-xs font-mono text-slate-400 px-1">
+            <span className="flex items-center gap-1.5 uppercase font-medium truncate max-w-[280px] sm:max-w-none">
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 inline-block animate-pulse shrink-0" />
+              {getStageLabel(progress)}
             </span>
-            <span className="text-amber-300 font-bold">{progress}%</span>
+            <span className="text-slate-500 font-mono text-[10px] hidden sm:inline">TaxShield AI Engine</span>
           </div>
         </div>
       </div>

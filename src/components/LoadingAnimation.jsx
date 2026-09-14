@@ -6,10 +6,10 @@ import React from 'react'
  */
 export default function LoadingAnimation({ size = 'md', className = '', label = '' }) {
   const sizeStyles = {
-    sm: 'w-16 h-16 rounded-xl',
-    md: 'w-24 h-24 sm:w-28 sm:h-28 rounded-2xl',
-    lg: 'w-36 h-36 sm:w-44 sm:h-44 rounded-3xl',
-    fullscreen: 'w-40 h-40 sm:w-52 sm:h-52 rounded-3xl'
+    sm: 'w-28 sm:w-32 aspect-video rounded-xl',
+    md: 'w-48 sm:w-56 aspect-video rounded-2xl',
+    lg: 'w-72 sm:w-80 aspect-video rounded-3xl',
+    fullscreen: 'w-full max-w-sm sm:max-w-md aspect-video rounded-3xl'
   }
 
   const containerStyle = sizeStyles[size] || sizeStyles.md
