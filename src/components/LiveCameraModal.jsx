@@ -36,14 +36,14 @@ export default function LiveCameraModal({ isOpen, onClose, onCapture }) {
       return
     }
 
-    // Set a 3.5s timeout watchdog so user is NEVER stuck on a loading spinner
+    // Set a 1.5s timeout watchdog so user is NEVER stuck on a loading spinner
     let resolved = false
     const watchdog = setTimeout(() => {
       if (!resolved && hasPermission === null) {
         setHasPermission(false)
         setErrorMsg('Camera access is taking longer than expected. Tap below to use your device camera directly.')
       }
-    }, 3500)
+    }, 1500)
 
     try {
       let stream = null
@@ -209,14 +209,25 @@ export default function LiveCameraModal({ isOpen, onClose, onCapture }) {
               <p className="text-xs text-slate-400">Position your bill inside the frame</p>
             </div>
           </div>
-          <button
-            type="button"
-            onClick={onClose}
-            className="p-2 rounded-lg hover:bg-slate-800 text-slate-400 hover:text-white transition-colors cursor-pointer"
-            aria-label="Close camera"
-          >
-            <X size={18} />
-          </button>
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={() => nativeCameraInputRef.current?.click()}
+              className="px-2.5 py-1.5 rounded-lg bg-sky-600/20 hover:bg-sky-600/30 text-sky-300 text-xs font-medium flex items-center gap-1.5 border border-sky-500/30 cursor-pointer transition-colors"
+              title="Capture photo using device camera app"
+            >
+              <Camera size={13} />
+              <span className="hidden sm:inline">Device Camera</span>
+            </button>
+            <button
+              type="button"
+              onClick={onClose}
+              className="p-2 rounded-lg hover:bg-slate-800 text-slate-400 hover:text-white transition-colors cursor-pointer"
+              aria-label="Close camera"
+            >
+              <X size={18} />
+            </button>
+          </div>
         </div>
 
         {/* Camera Viewport Area */}

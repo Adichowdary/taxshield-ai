@@ -44,8 +44,8 @@ import {
 
 export const SPENDING_CATEGORIES = [
   {
-    id: 'RESTAURANT',
-    key: 'RESTAURANT',
+    id: 'dining',
+    key: 'dining',
     label: 'Restaurant & Dining (Cafes & Takeout)',
     fullTitle: '🍽️ Restaurant & Dining (Cafes & Takeout)',
     shortLabel: 'Dining',
@@ -61,8 +61,8 @@ export const SPENDING_CATEGORIES = [
     icon: Utensils
   },
   {
-    id: 'GROCERY',
-    key: 'GROCERY',
+    id: 'groceries',
+    key: 'groceries',
     label: 'Supermarket & Groceries (D-Mart, Big Bazaar)',
     fullTitle: '🛒 Supermarket & Groceries (D-Mart, Big Bazaar)',
     shortLabel: 'Groceries',
@@ -78,8 +78,8 @@ export const SPENDING_CATEGORIES = [
     icon: ShoppingCart
   },
   {
-    id: 'FASHION',
-    key: 'FASHION',
+    id: 'fashion',
+    key: 'fashion',
     label: 'Fashion & Apparel (Zudio, H&M, Zara)',
     fullTitle: '👗 Fashion & Apparel (Zudio, H&M, Zara)',
     shortLabel: 'Fashion',
@@ -95,8 +95,8 @@ export const SPENDING_CATEGORIES = [
     icon: ShoppingBag
   },
   {
-    id: 'ELECTRONICS',
-    key: 'ELECTRONICS',
+    id: 'electronics',
+    key: 'electronics',
     label: 'Electronics & Gadgets (Croma, Reliance)',
     fullTitle: '📱 Electronics & Gadgets (Croma, Reliance)',
     shortLabel: 'Electronics',
@@ -112,8 +112,8 @@ export const SPENDING_CATEGORIES = [
     icon: Smartphone
   },
   {
-    id: 'PHARMACY',
-    key: 'PHARMACY',
+    id: 'pharmacy',
+    key: 'pharmacy',
     label: 'Pharmacy & Healthcare (Apollo, MedPlus)',
     fullTitle: '💊 Pharmacy & Healthcare (Apollo, MedPlus)',
     shortLabel: 'Pharmacy',
@@ -130,28 +130,66 @@ export const SPENDING_CATEGORIES = [
   }
 ]
 
-export function classifyBillCategory(bill) {
-  if (bill.billType) {
-    const bt = String(bill.billType).toUpperCase()
-    if (bt.includes('GROCERY') || bt.includes('SUPERMARKET')) return 'GROCERY'
-    if (bt.includes('FASHION') || bt.includes('LIFESTYLE') || bt.includes('APPAREL')) return 'FASHION'
-    if (bt.includes('ELECTRONIC')) return 'ELECTRONICS'
-    if (bt.includes('PHARMACY') || bt.includes('HEALTH')) return 'PHARMACY'
-    if (bt.includes('RESTAURANT') || bt.includes('FOOD') || bt.includes('DINING')) return 'RESTAURANT'
+function normalizeCategoryString(raw) {
+  if (!raw || typeof raw !== 'string') return null
+  const str = raw.trim().toLowerCase()
+  if (!str || str === 'all' || str === 'all receipts') return 'all'
+
+  // Dining: restaurant, dining, food, cafe, bistro, etc.
+  if (/restaurant|dining|food|cafe|bistro|bar|takeout|eatery|bakery|dine/i.test(str)) {
+    return 'dining'
   }
-  const name = `${bill.merchant || ''} ${bill.restaurantName || ''} ${bill.retailer || ''} ${bill.category || ''} ${bill.establishmentType || ''}`.toLowerCase()
-  if (/dmart|d-mart|grocer|supermarket|bazaar|blinkit|zepto|instamart|bigbasket|reliance fresh/i.test(name)) return 'GROCERY'
-  if (/zudio|h&m|h & m|zara|trends|lifestyle|pantaloons|max fashion|westside|apparel|clothing/i.test(name)) return 'FASHION'
-  if (/croma|vijay sales|reliance digital|apple|samsung|electronics|gadget/i.test(name)) return 'ELECTRONICS'
-  if (/apollo|medplus|pharma|chemist|hospital|drug|clinic|1mg/i.test(name)) return 'PHARMACY'
-  return 'RESTAURANT'
+  // Groceries: grocery, groceries, supermarket, mart, bazaar, etc.
+  if (/grocer|supermarket|bazaar|staple|provisions|market/i.test(str)) {
+    return 'groceries'
+  }
+  // Fashion: fashion, apparel, clothing, lifestyle, etc.
+  if (/fashion|apparel|clothing|lifestyle|garment|wear|shoes|footwear/i.test(str)) {
+    return 'fashion'
+  }
+  // Electronics: electronics, gadgets, appliances, tech, etc.
+  if (/electronic|gadget|appliance|tech|hardware|computer|mobile/i.test(str)) {
+    return 'electronics'
+  }
+  // Pharmacy: pharmacy, healthcare, medical, chemist, pharma, etc.
+  if (/pharmacy|healthcare|medical|chemist|pharma|medicine|drug|health|clinic|hospital/i.test(str)) {
+    return 'pharmacy'
+  }
+  return null
+}
+
+export function normalizeCategory(categoryOrBill) {
+  if (!categoryOrBill) return 'dining'
+
+  if (typeof categoryOrBill === 'object') {
+    const bill = categoryOrBill
+    const directFields = [bill.category, bill.billType, bill.establishmentType]
+    for (const field of directFields) {
+      if (field && typeof field === 'string') {
+        const norm = normalizeCategoryString(field)
+        if (norm) return norm
+      }
+    }
+    const merchantName = `${bill.retailer || ''} ${bill.merchant || ''} ${bill.restaurantName || ''}`.toLowerCase()
+    if (/dmart|d-mart|grocer|supermarket|bazaar|blinkit|zepto|instamart|bigbasket|reliance fresh/i.test(merchantName)) return 'groceries'
+    if (/zudio|h&m|h & m|zara|trends|lifestyle|pantaloons|max fashion|westside|apparel|clothing/i.test(merchantName)) return 'fashion'
+    if (/croma|vijay sales|reliance digital|apple|samsung|electronics|gadget/i.test(merchantName)) return 'electronics'
+    if (/apollo|medplus|pharma|chemist|hospital|drug|clinic|1mg/i.test(merchantName)) return 'pharmacy'
+    return 'dining'
+  }
+
+  return normalizeCategoryString(categoryOrBill) || 'dining'
+}
+
+export function classifyBillCategory(bill) {
+  return normalizeCategory(bill)
 }
 
 export default function SmartSpendingDashboard() {
   const navigate = useNavigate()
   const { activeTheme } = useTheme()
   const [timeHorizon, setTimeHorizon] = useState('6M')
-  const [selectedCategory, setSelectedCategory] = useState('ALL')
+  const [selectedCategory, setSelectedCategory] = useState('all')
   const [bills, setBills] = useState(() => getBillHistory())
   
   const [budget, setBudget] = useState(25000)
@@ -181,39 +219,40 @@ export default function SmartSpendingDashboard() {
       .filter(b => b.id !== 'bill-108' && String(b.billType || '').toUpperCase() !== 'FUEL')
       .map(b => ({
         ...b,
-        detectedCategory: classifyBillCategory(b)
+        detectedCategory: normalizeCategory(b)
       })).filter((b) => {
-        const dt = new Date(b.date || b.timestamp || b.createdAt || Date.now())
+        const dt = new Date(b.date || b.billDate || b.timestamp || b.createdAt || Date.now())
         return Number.isNaN(dt.getTime()) || dt >= cutoff
+      }).sort((a, b) => {
+        const dtA = new Date(a.date || a.billDate || a.timestamp || a.createdAt || 0).getTime()
+        const dtB = new Date(b.date || b.billDate || b.timestamp || b.createdAt || 0).getTime()
+        return dtB - dtA
       })
   }, [bills, timeHorizon])
 
   // Category + Time Horizon filtered bills for drilldown
   const activeBills = useMemo(() => {
-    if (selectedCategory === 'ALL') return timeFilteredBills
-    return timeFilteredBills.filter(b => b.detectedCategory === selectedCategory)
+    if (selectedCategory === 'all') return timeFilteredBills
+    return timeFilteredBills.filter(b => normalizeCategory(b) === selectedCategory)
   }, [timeFilteredBills, selectedCategory])
 
   // Compute stats for each of the 6 shopping categories
   const categoryStatsMap = useMemo(() => {
-    const stats = {}
-    SPENDING_CATEGORIES.forEach(cat => {
-      stats[cat.id] = {
-        spend: 0,
-        tax: 0,
-        fees: 0,
-        count: 0,
-        overcharge: 0
-      }
-    })
+    const stats = {
+      dining: { spend: 0, tax: 0, fees: 0, count: 0, overcharge: 0 },
+      groceries: { spend: 0, tax: 0, fees: 0, count: 0, overcharge: 0 },
+      fashion: { spend: 0, tax: 0, fees: 0, count: 0, overcharge: 0 },
+      electronics: { spend: 0, tax: 0, fees: 0, count: 0, overcharge: 0 },
+      pharmacy: { spend: 0, tax: 0, fees: 0, count: 0, overcharge: 0 }
+    }
 
     timeFilteredBills.forEach(b => {
-      const cat = b.detectedCategory || 'RESTAURANT'
+      const cat = normalizeCategory(b)
       if (!stats[cat]) {
         stats[cat] = { spend: 0, tax: 0, fees: 0, count: 0, overcharge: 0 }
       }
       const total = Number(b.totalAmount || b.total || b.statedTotal || 0)
-      const tax = Number(b.taxes ?? b.gst ?? (Number(b.cgst || 0) + Number(b.sgst || 0)) ?? 0)
+      const tax = Number(b.taxes ?? b.gst ?? (Number(b.cgst || 0) + Number(b.sgst || 0)))
       const fee = Number(b.serviceCharge || 0)
       const oc = Number(b.taxVerdict?.overchargeAmount || 0)
 
@@ -240,7 +279,7 @@ export default function SmartSpendingDashboard() {
 
     activeBills.forEach(b => {
       const billTotal = Number(b.totalAmount || b.total || b.statedTotal || 0)
-      const billTax = Number(b.taxes ?? b.gst ?? (Number(b.cgst || 0) + Number(b.sgst || 0)) ?? 0)
+      const billTax = Number(b.taxes ?? b.gst ?? (Number(b.cgst || 0) + Number(b.sgst || 0)))
       const billFee = Number(b.serviceCharge || 0)
       const billDiscount = Number(b.discount || 0)
 
@@ -279,7 +318,7 @@ export default function SmartSpendingDashboard() {
         monthMap[mName] = { month: mName, spending: 0, tax: 0, fees: 0, count: 0 }
       }
       monthMap[mName].spending += Number(b.totalAmount || b.total || b.statedTotal || 0)
-      monthMap[mName].tax += Number(b.taxes ?? b.gst ?? (Number(b.cgst || 0) + Number(b.sgst || 0)) ?? 0)
+      monthMap[mName].tax += Number(b.taxes ?? b.gst ?? (Number(b.cgst || 0) + Number(b.sgst || 0)))
       monthMap[mName].fees += Number(b.serviceCharge || 0)
       monthMap[mName].count += 1
     })
@@ -307,7 +346,7 @@ export default function SmartSpendingDashboard() {
   // Top Retailer Spend Breakdown (e.g. D-Mart, Zudio, Croma, Indian Oil, Swiggy, Apollo)
   const retailerData = useMemo(() => {
     const map = {}
-    timeFilteredBills.forEach(b => {
+    activeBills.forEach(b => {
       const retailer = b.retailer || b.merchant || b.restaurantName || 'Other'
       map[retailer] = (map[retailer] || 0) + Number(b.totalAmount || b.total || 0)
     })
@@ -315,13 +354,13 @@ export default function SmartSpendingDashboard() {
       .map(([retailer, spend]) => ({ retailer, spend: Number(spend.toFixed(2)) }))
       .sort((a, b) => b.spend - a.spend)
       .slice(0, 7)
-  }, [timeFilteredBills])
+  }, [activeBills])
 
   // Platform spend breakdown
   const platformData = useMemo(() => {
     const map = {}
     activeBills.forEach(b => {
-      let p = b.platform || (b.detectedCategory === 'RESTAURANT' && b.serviceCharge > 0 ? 'Swiggy' : 'In-Store / Direct')
+      let p = b.platform || (normalizeCategory(b) === 'dining' && b.serviceCharge > 0 ? 'Swiggy' : 'In-Store / Direct')
       if (p === 'Unknown' || !p) p = 'In-Store / Direct'
       map[p] = (map[p] || 0) + Number(b.totalAmount ?? b.total ?? b.statedTotal ?? 0)
     })
@@ -417,16 +456,20 @@ export default function SmartSpendingDashboard() {
           {/* Quick Category Filter Bar */}
           <div className="no-scrollbar overflow-x-auto flex items-center gap-2 pb-1.5 pt-0.5 scroll-smooth -mx-4 px-4 sm:mx-0 sm:px-0">
             <button
-              onClick={() => setSelectedCategory('ALL')}
+              onClick={() => setSelectedCategory('all')}
               className={`shrink-0 px-3.5 py-2 sm:px-4 sm:py-2.5 rounded-xl sm:rounded-2xl text-xs sm:text-sm font-bold whitespace-nowrap transition-all cursor-pointer flex items-center gap-2 border shadow-sm ${
-                selectedCategory === 'ALL'
+                selectedCategory === 'all'
                   ? 'bg-sky-600 text-white border-sky-600 shadow-md shadow-sky-500/30 scale-105 dark:from-[#D4AF37] dark:to-[#FDE68A] dark:text-slate-950 dark:border-[#D4AF37] dark:shadow-[0_0_15px_rgba(212,175,55,0.4)] dark:bg-gradient-to-r'
                   : 'vault-glass border-slate-200 dark:border-white/10 text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-black/5 dark:hover:bg-white/10'
               }`}
             >
               <Filter size={14} />
               <span>All Receipts</span>
-              <span className="text-[10px] font-mono px-1.5 py-0.5 rounded-full bg-black/10 dark:bg-white/15">
+              <span className={`text-[10px] font-mono px-1.5 py-0.5 rounded-full ${
+                selectedCategory === 'all'
+                  ? 'bg-white/20 dark:bg-black/20 text-white dark:text-slate-950 font-bold'
+                  : 'bg-black/10 dark:bg-white/15'
+              }`}>
                 {timeFilteredBills.length}
               </span>
             </button>
@@ -437,16 +480,20 @@ export default function SmartSpendingDashboard() {
               return (
                 <button
                   key={cat.id}
-                  onClick={() => setSelectedCategory(isSel ? 'ALL' : cat.id)}
+                  onClick={() => setSelectedCategory(cat.id)}
                   className={`shrink-0 px-3.5 py-2 sm:px-4 sm:py-2.5 rounded-xl sm:rounded-2xl text-xs sm:text-sm font-bold whitespace-nowrap transition-all cursor-pointer flex items-center gap-2 border shadow-sm ${
                     isSel 
-                      ? `${cat.activeStyle} scale-105` 
+                      ? 'bg-sky-600 text-white border-sky-600 shadow-md shadow-sky-500/30 scale-105 dark:from-[#D4AF37] dark:to-[#FDE68A] dark:text-slate-950 dark:border-[#D4AF37] dark:shadow-[0_0_15px_rgba(212,175,55,0.4)] dark:bg-gradient-to-r' 
                       : 'vault-glass border-slate-200 dark:border-white/10 text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-black/5 dark:hover:bg-white/10'
                   }`}
                 >
                   <span className="text-sm">{cat.emoji}</span>
                   <span>{cat.shortLabel}</span>
-                  <span className="text-[10px] font-mono px-1.5 py-0.5 rounded-full bg-slate-200 dark:bg-white/15 text-slate-800 dark:text-slate-200">
+                  <span className={`text-[10px] font-mono px-1.5 py-0.5 rounded-full ${
+                    isSel 
+                      ? 'bg-white/20 dark:bg-black/20 text-white dark:text-slate-950 font-bold' 
+                      : 'bg-slate-200 dark:bg-white/15 text-slate-800 dark:text-slate-200'
+                  }`}>
                     {count}
                   </span>
                 </button>
@@ -465,9 +512,9 @@ export default function SmartSpendingDashboard() {
                   Select any category card to drill down into item taxes, compliance rates, and receipts
                 </p>
               </div>
-              {selectedCategory !== 'ALL' && (
+              {selectedCategory !== 'all' && (
                 <button
-                  onClick={() => setSelectedCategory('ALL')}
+                  onClick={() => setSelectedCategory('all')}
                   className="text-xs sm:text-sm text-sky-600 dark:text-[#D4AF37] hover:underline font-bold flex items-center gap-1 cursor-pointer self-start sm:self-auto"
                 >
                   Clear Category Filter <X size={14} />
@@ -484,10 +531,10 @@ export default function SmartSpendingDashboard() {
                 return (
                   <div
                     key={cat.id}
-                    onClick={() => setSelectedCategory(isSelected ? 'ALL' : cat.id)}
+                    onClick={() => setSelectedCategory(isSelected ? 'all' : cat.id)}
                     className={`vault-glass rounded-2xl sm:rounded-3xl p-4 sm:p-5 border transition-all cursor-pointer relative overflow-hidden group hover:scale-[1.01] flex flex-col justify-between shadow-md ${
                       isSelected
-                        ? `${cat.activeStyle} ring-2 ring-sky-500/20 dark:ring-white/20 shadow-lg`
+                        ? `${cat.activeStyle} ring-2 ring-sky-500/30 dark:ring-[#D4AF37]/50 shadow-lg`
                         : `border-slate-200 dark:border-white/10 ${cat.accentBorder}`
                     }`}
                   >
@@ -619,7 +666,7 @@ export default function SmartSpendingDashboard() {
             <div className="space-y-2 pt-1">
               <div className="flex justify-between items-baseline text-xs font-mono">
                 <span className="font-sans font-bold text-slate-700 dark:text-slate-300">
-                  {selectedCategory === 'ALL' ? 'Total Tracked Spend Velocity' : `${selectedCategory} Spend Velocity`}
+                  {selectedCategory === 'all' ? 'Total Tracked Spend Velocity' : `${SPENDING_CATEGORIES.find(c => c.id === selectedCategory)?.shortLabel || selectedCategory} Spend Velocity`}
                 </span>
                 <span className="font-bold text-xs sm:text-sm text-slate-900 dark:text-white">
                   ₹{snapshot.totalSpending.toFixed(2)} <span className="text-slate-500 dark:text-slate-400 font-normal text-[11px]">/ ₹{budget.toFixed(2)}</span>
@@ -768,7 +815,7 @@ export default function SmartSpendingDashboard() {
               <div>
                 <h3 className="font-poppins font-bold text-base sm:text-lg flex items-center gap-2 text-slate-900 dark:text-white">
                   <Receipt className="text-sky-600 dark:text-[#D4AF37]" size={20} />
-                  Receipts Log {selectedCategory !== 'ALL' && `— ${selectedCategory}`} ({activeBills.length})
+                  Receipts Log {selectedCategory !== 'all' && `— ${SPENDING_CATEGORIES.find(c => c.id === selectedCategory)?.shortLabel || selectedCategory}`} ({activeBills.length})
                 </h3>
                 <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-300">Click any bill to view itemized HSN breakdown and statutory tax verdict</p>
               </div>
@@ -788,86 +835,98 @@ export default function SmartSpendingDashboard() {
               </Button>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3.5 sm:gap-4">
-              {activeBills.map((b) => {
-                const total = Number(b.totalAmount || b.total || b.statedTotal || 0)
-                const tax = Number(b.taxes ?? b.gst ?? (Number(b.cgst || 0) + Number(b.sgst || 0)) ?? 0)
-                const fee = Number(b.serviceCharge || 0)
-                const name = b.retailer || b.merchant || b.restaurantName || "Retail Establishment"
-                const cat = b.detectedCategory || 'RESTAURANT'
-                const catConfig = SPENDING_CATEGORIES.find(c => c.id === cat) || SPENDING_CATEGORIES[0]
-                const isRedFlag = fee > 0 || b.serviceChargeIllegal || b.status === 'REVIEW_RECOMMENDED' || b.status === 'POTENTIAL_OVERCHARGE'
+            {activeBills.length === 0 ? (
+              <div className="py-12 px-4 text-center rounded-2xl border border-dashed border-slate-300 dark:border-white/10 bg-black/[0.02] dark:bg-white/[0.02] space-y-2">
+                <Receipt className="mx-auto text-slate-400 dark:text-slate-500" size={36} />
+                <p className="text-sm sm:text-base font-semibold text-slate-700 dark:text-slate-300">
+                  No receipts found in this category.
+                </p>
+                <p className="text-xs text-slate-500 dark:text-slate-400">
+                  Try selecting another category or switching to All Time.
+                </p>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3.5 sm:gap-4">
+                {activeBills.map((b) => {
+                  const total = Number(b.totalAmount || b.total || b.statedTotal || 0)
+                  const tax = Number(b.taxes ?? b.gst ?? (Number(b.cgst || 0) + Number(b.sgst || 0)))
+                  const fee = Number(b.serviceCharge || 0)
+                  const name = b.retailer || b.merchant || b.restaurantName || "Retail Establishment"
+                  const cat = normalizeCategory(b)
+                  const catConfig = SPENDING_CATEGORIES.find(c => c.id === cat) || SPENDING_CATEGORIES[0]
+                  const isRedFlag = fee > 0 || b.serviceChargeIllegal || b.status === 'REVIEW_RECOMMENDED' || b.status === 'POTENTIAL_OVERCHARGE'
 
-                const imgUrl = b.billImageUrl || b.image
+                  const imgUrl = b.billImageUrl || b.image
 
-                return (
-                  <div
-                    key={b.id}
-                    onClick={() => navigate(`/analysis/${b.id}`)}
-                    className="p-4 sm:p-5 rounded-2xl sm:rounded-3xl border border-slate-200 dark:border-white/10 hover:border-sky-500/60 dark:hover:border-[#D4AF37]/60 bg-slate-50/70 hover:bg-slate-100/90 dark:bg-white/[0.02] dark:hover:bg-white/[0.06] transition-all cursor-pointer flex flex-col justify-between space-y-3.5 group shadow-md"
-                  >
-                    <div className="space-y-2.5">
-                      {imgUrl && (
-                        <div className="w-full h-36 sm:h-28 rounded-xl sm:rounded-2xl overflow-hidden bg-slate-100 dark:bg-black/30 border border-slate-200 dark:border-white/10 relative mb-1">
-                          <img
-                            src={imgUrl}
-                            alt={name}
-                            className="w-full h-full object-cover object-top group-hover:scale-105 transition-transform duration-300"
-                            onError={(e) => { e.currentTarget.parentElement.style.display = 'none' }}
-                          />
-                        </div>
-                      )}
-
-                      <div className="flex items-center justify-between gap-2">
-                        <span className="text-xs font-bold px-2.5 py-0.5 rounded-lg border flex items-center gap-1.5 shrink-0"
-                              style={{ backgroundColor: `${catConfig.themeColor}20`, color: catConfig.themeColor, borderColor: `${catConfig.themeColor}40` }}>
-                          <span>{catConfig.emoji}</span> {catConfig.shortLabel}
-                        </span>
-                        <span className="text-xs font-mono text-slate-500 dark:text-slate-400 shrink-0">
-                          {b.date || 'Recent'}
-                        </span>
-                      </div>
-
-                      <div>
-                        <h4 className="font-bold text-sm sm:text-base text-slate-900 dark:text-white group-hover:text-sky-600 dark:group-hover:text-[#FDE68A] transition-colors">
-                          {name}
-                        </h4>
-                        <p className="text-xs text-slate-500 dark:text-slate-400 font-mono mt-0.5">
-                          Inv: {b.invoiceNo || 'N/A'} • Tax: ₹{tax.toFixed(2)}
-                        </p>
-                      </div>
-
-                      {/* Red Flag vs Green Flag indicator */}
-                      <div className="pt-0.5">
-                        {isRedFlag ? (
-                          <span className="inline-flex items-center gap-1.5 text-xs font-mono font-bold px-2.5 py-1 rounded-lg bg-rose-500/15 text-rose-700 dark:text-rose-300 border border-rose-500/30">
-                            <span className="w-2 h-2 rounded-full bg-rose-500 animate-pulse" />
-                            Red Flag: {fee > 0 ? `₹${fee.toFixed(0)} Surcharge` : 'Illegal Tax'}
-                          </span>
-                        ) : (
-                          <span className="inline-flex items-center gap-1.5 text-xs font-mono font-bold px-2.5 py-1 rounded-lg bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 border border-emerald-500/30">
-                            <ShieldCheck size={14} className="text-emerald-600 dark:text-emerald-400" />
-                            Green Flag: 100% Compliant
-                          </span>
+                  return (
+                    <div
+                      key={b.id}
+                      onClick={() => navigate(`/analysis/${b.id}`)}
+                      className="p-4 sm:p-5 rounded-2xl sm:rounded-3xl border border-slate-200 dark:border-white/10 hover:border-sky-500/60 dark:hover:border-[#D4AF37]/60 bg-slate-50/70 hover:bg-slate-100/90 dark:bg-white/[0.02] dark:hover:bg-white/[0.06] transition-all cursor-pointer flex flex-col justify-between space-y-3.5 group shadow-md"
+                    >
+                      <div className="space-y-2.5">
+                        {imgUrl && (
+                          <div className="w-full h-36 sm:h-28 rounded-xl sm:rounded-2xl overflow-hidden bg-slate-100 dark:bg-black/30 border border-slate-200 dark:border-white/10 relative mb-1">
+                            <img
+                              src={imgUrl}
+                              alt={name}
+                              className="w-full h-full object-cover object-top group-hover:scale-105 transition-transform duration-300"
+                              onError={(e) => { e.currentTarget.parentElement.style.display = 'none' }}
+                            />
+                          </div>
                         )}
-                      </div>
-                    </div>
 
-                    <div className="pt-3 border-t border-slate-200 dark:border-white/10 flex items-center justify-between">
-                      <div>
-                        <span className="text-[10px] sm:text-xs text-slate-500 dark:text-slate-400 uppercase font-bold tracking-wider block">Total Billed</span>
-                        <span className="text-base sm:text-lg font-bold font-mono text-emerald-600 dark:text-[#10B981]">
-                          ₹{total.toFixed(2)}
+                        <div className="flex items-center justify-between gap-2">
+                          <span className="text-xs font-bold px-2.5 py-0.5 rounded-lg border flex items-center gap-1.5 shrink-0"
+                                style={{ backgroundColor: `${catConfig.themeColor}20`, color: catConfig.themeColor, borderColor: `${catConfig.themeColor}40` }}>
+                            <span>{catConfig.emoji}</span> {catConfig.shortLabel}
+                          </span>
+                          <span className="text-xs font-mono text-slate-500 dark:text-slate-400 shrink-0">
+                            {b.date || 'Recent'}
+                          </span>
+                        </div>
+
+                        <div>
+                          <h4 className="font-bold text-sm sm:text-base text-slate-900 dark:text-white group-hover:text-sky-600 dark:group-hover:text-[#FDE68A] transition-colors">
+                            {name}
+                          </h4>
+                          <p className="text-xs text-slate-500 dark:text-slate-400 font-mono mt-0.5">
+                            Inv: {b.invoiceNo || 'N/A'} • Tax: ₹{tax.toFixed(2)}
+                          </p>
+                        </div>
+
+                        {/* Red Flag vs Green Flag indicator */}
+                        <div className="pt-0.5">
+                          {isRedFlag ? (
+                            <span className="inline-flex items-center gap-1.5 text-xs font-mono font-bold px-2.5 py-1 rounded-lg bg-rose-500/15 text-rose-700 dark:text-rose-300 border border-rose-500/30">
+                              <span className="w-2 h-2 rounded-full bg-rose-500 animate-pulse" />
+                              Red Flag: {fee > 0 ? `₹${fee.toFixed(0)} Surcharge` : 'Illegal Tax'}
+                            </span>
+                          ) : (
+                            <span className="inline-flex items-center gap-1.5 text-xs font-mono font-bold px-2.5 py-1 rounded-lg bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 border border-emerald-500/30">
+                              <ShieldCheck size={14} className="text-emerald-600 dark:text-emerald-400" />
+                              Green Flag: 100% Compliant
+                            </span>
+                          )}
+                        </div>
+                      </div>
+
+                      <div className="pt-3 border-t border-slate-200 dark:border-white/10 flex items-center justify-between">
+                        <div>
+                          <span className="text-[10px] sm:text-xs text-slate-500 dark:text-slate-400 uppercase font-bold tracking-wider block">Total Billed</span>
+                          <span className="text-base sm:text-lg font-bold font-mono text-emerald-600 dark:text-[#10B981]">
+                            ₹{total.toFixed(2)}
+                          </span>
+                        </div>
+                        <span className="text-xs sm:text-sm text-sky-600 dark:text-[#D4AF37] font-semibold flex items-center gap-1 group-hover:translate-x-0.5 transition-transform">
+                          Audit Verdict <ArrowUpRight size={14} />
                         </span>
                       </div>
-                      <span className="text-xs sm:text-sm text-sky-600 dark:text-[#D4AF37] font-semibold flex items-center gap-1 group-hover:translate-x-0.5 transition-transform">
-                        Audit Verdict <ArrowUpRight size={14} />
-                      </span>
                     </div>
-                  </div>
-                )
-              })}
-            </div>
+                  )
+                })}
+              </div>
+            )}
           </div>
 
         </Container>

@@ -22,17 +22,19 @@ export async function checkOllamaStatus() {
       const data = await response.json().catch(() => ({}));
       const models = (data.models || []).map((m) => m.name);
       const isTaxShieldAvailable = models.some((m) => m.includes('taxshield-ai') || m.includes('taxshield-1b'));
+      const active = isTaxShieldAvailable ? 'taxshield-ai' : (models[0] || DEFAULT_MODEL);
       return {
         online: true,
         host: OLLAMA_HOST,
         models,
-        activeModel: isTaxShieldAvailable ? 'taxshield-ai' : (models[0] || DEFAULT_MODEL),
+        model: active,
+        activeModel: active,
         taxShieldOptimized: isTaxShieldAvailable,
       };
     }
-    return { online: false, host: OLLAMA_HOST, models: [] };
+    return { online: false, host: OLLAMA_HOST, models: [], model: DEFAULT_MODEL };
   } catch (err) {
-    return { online: false, host: OLLAMA_HOST, error: err.message, models: [] };
+    return { online: false, host: OLLAMA_HOST, error: err.message, models: [], model: DEFAULT_MODEL };
   }
 }
 

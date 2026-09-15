@@ -184,6 +184,59 @@ export default function BillUploader({ onStartScan }) {
     }
   }
 
+  // Direct scan when user captures a photo via camera on mobile or PC
+  const handleCaptureAndScan = async (capturedFile) => {
+    if (!capturedFile) return
+    setUploadError('')
+    setShowCameraModal(false)
+
+    const item = {
+      file: capturedFile,
+      previewUrl: typeof capturedFile === 'string' ? capturedFile : URL.createObjectURL(capturedFile),
+      name: capturedFile.name || `Camera_Receipt_${Date.now()}.jpg`,
+      rotation: 0,
+    }
+
+    setFileList([item])
+    setSelectedIndex(0)
+
+    try {
+      setIsUploading(true)
+      const scanOpts = {
+        selectedBillType: selectedCategory !== 'AUTO' ? selectedCategory : undefined,
+        fileName: item.name,
+        file: item.file,
+      }
+
+      let imageUrl = item.previewUrl
+      try {
+        if (capturedFile && typeof capturedFile !== 'string' && capturedFile.type) {
+          imageUrl = await uploadImage(capturedFile)
+          await api.createBill({
+            userId: auth.currentUser?.uid || 'guest',
+            billImageUrl: imageUrl,
+            imageUrl,
+            billType: selectedCategory !== 'AUTO' ? selectedCategory : 'RESTAURANT',
+            restaurantName: item.name.replace(/\.[^/.]+$/, ''),
+            verificationStatus: 'Uploaded',
+            status: 'Uploaded',
+          }).catch((err) => console.warn('MongoDB note:', err.message))
+        }
+      } catch (err) {
+        console.warn('Cloudinary upload fallback to preview URL:', err.message)
+      }
+
+      if (onStartScan) {
+        onStartScan(imageUrl, scanOpts)
+      }
+    } catch (error) {
+      console.error('Camera direct scan error:', error)
+      setUploadError('Failed to analyze captured photo. Please try again.')
+    } finally {
+      setIsUploading(false)
+    }
+  }
+
   const activeItem = fileList[selectedIndex] || fileList[0]
 
   return (
@@ -240,7 +293,7 @@ export default function BillUploader({ onStartScan }) {
         ref={nativeCameraInputRef}
         onChange={(e) => {
           if (e.target.files && e.target.files.length > 0) {
-            processFiles(e.target.files)
+            handleCaptureAndScan(e.target.files[0])
           }
           e.target.value = ''
         }}
@@ -311,12 +364,29 @@ export default function BillUploader({ onStartScan }) {
               <Upload size={15} /> Select Bill File
             </button>
 
+            {/* Direct Camera Scanner Trigger: Opens native high-res camera on mobile or Live Viewfinder on PC */}
+            <button
+              type="button"
+              onClick={() => {
+                const isMobile = typeof navigator !== 'undefined' && /Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent)
+                if (isMobile && nativeCameraInputRef.current) {
+                  nativeCameraInputRef.current.click()
+                } else {
+                  setShowCameraModal(true)
+                }
+              }}
+              className="px-5 py-2.5 rounded-xl bg-sky-600 hover:bg-sky-500 text-white font-semibold text-xs transition-colors cursor-pointer flex items-center gap-2 shadow-sm"
+            >
+              <Camera size={15} /> Scan with Camera
+            </button>
+
+            {/* Live Web Viewfinder button for desktop/tablets */}
             <button
               type="button"
               onClick={() => setShowCameraModal(true)}
-              className="px-5 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 border border-slate-200 dark:border-slate-700 font-medium text-xs transition-colors cursor-pointer flex items-center gap-2"
+              className="hidden sm:inline-flex px-4 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 border border-slate-200 dark:border-slate-700 font-medium text-xs transition-colors cursor-pointer items-center gap-1.5"
             >
-              <Camera size={15} className="text-sky-600 dark:text-sky-400" /> Use Camera
+              <Camera size={14} className="text-sky-600 dark:text-sky-400" /> Live Viewfinder
             </button>
           </div>
         </div>
@@ -495,8 +565,7 @@ export default function BillUploader({ onStartScan }) {
         isOpen={showCameraModal}
         onClose={() => setShowCameraModal(false)}
         onCapture={(capturedFile) => {
-          processFiles([capturedFile])
-          setShowCameraModal(false)
+          handleCaptureAndScan(capturedFile)
         }}
       />
     </div>

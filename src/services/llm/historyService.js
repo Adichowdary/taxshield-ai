@@ -59,13 +59,6 @@ export function saveBillToHistory(billAnalysis) {
 export function getBillHistory() {
   try {
     if (typeof localStorage !== 'undefined') {
-      const raw = localStorage.getItem(STORAGE_KEY);
-      if (raw) {
-        const parsed = JSON.parse(raw);
-        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
-      }
-      // FIX: MOCK_BILLS uses "platform" directly; fall back to a merchant-name
-      // heuristic if it's missing — the old b.category === "Cafe" check was dead.
       const assignPlatform = (b) => {
         if (b.platform) return b.platform;
         const name = (b.merchant || "").toLowerCase();
@@ -74,6 +67,30 @@ export function getBillHistory() {
         if (b.serviceCharge > 0) return "Direct";
         return "Zomato";
       };
+
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if (raw) {
+        const parsed = JSON.parse(raw);
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          // Ensure base category bills from MOCK_BILLS (Groceries, Fashion, Electronics, Pharmacy)
+          // exist in bill history so multi-category filtering works seamlessly
+          const existingIds = new Set(parsed.map(b => b.id || b._id));
+          const missing = MOCK_BILLS.filter(mb => !existingIds.has(mb.id)).map(mb => ({
+            ...mb,
+            platform: assignPlatform(mb),
+            restaurantName: mb.merchant || mb.restaurantName,
+            total: mb.totalAmount || mb.total,
+            gst: mb.taxes || mb.gst,
+          }));
+          if (missing.length > 0) {
+            const merged = [...parsed, ...missing];
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(merged));
+            return merged;
+          }
+          return parsed;
+        }
+      }
+
       const initialBills = MOCK_BILLS.map(b => ({
         ...b,
         platform: assignPlatform(b),

@@ -1,5 +1,7 @@
 import jwt from 'jsonwebtoken';
+import mongoose from 'mongoose';
 import User from '../models/User.js';
+import memoryStore from '../services/memoryStore.js';
 
 const JWT_SECRET = process.env.JWT_SECRET || 'taxshield-jwt-secret-key-2026';
 
@@ -35,20 +37,34 @@ export const protect = async (req, res, next) => {
   try {
     // Verify JWT
     const decoded = jwt.verify(token, JWT_SECRET);
-    const user = await User.findById(decoded.id).select('-passwordHash');
 
-    if (user) {
-      req.user = user;
+    if (mongoose.connection.readyState === 1 && mongoose.Types.ObjectId.isValid(decoded.id)) {
+      try {
+        const user = await User.findById(decoded.id).select('-passwordHash');
+        if (user) {
+          req.user = user;
+          return next();
+        }
+      } catch {
+        // Fall through to memory store or decoded payload
+      }
+    }
+
+    // Fallback to memory store if present
+    const memUser = memoryStore.findUserById(decoded.id) || memoryStore.findUserByEmail(decoded.email);
+    if (memUser) {
+      const { passwordHash, ...safeUser } = memUser;
+      req.user = safeUser;
     } else {
-      req.user = { id: decoded.id, email: decoded.email, name: decoded.name };
+      req.user = {
+        id: decoded.id,
+        _id: decoded.id,
+        email: decoded.email,
+        name: decoded.name,
+      };
     }
     next();
   } catch (err) {
-    // If it's a raw Firebase UID passed as bearer token
-    if (token && token.length > 5 && !token.includes('.')) {
-      req.user = { id: token, uid: token };
-      return next();
-    }
     return res.status(401).json({
       success: false,
       message: 'Not authorized, token validation failed',
@@ -79,14 +95,30 @@ export const optionalAuth = async (req, res, next) => {
   }
 
   if (!token) {
-    req.user = { id: 'guest', name: 'Guest' };
+    req.user = { id: 'guest', _id: 'guest', name: 'Guest' };
     return next();
   }
 
   try {
     const decoded = jwt.verify(token, JWT_SECRET);
-    const user = await User.findById(decoded.id).select('-passwordHash');
-    req.user = user || { id: decoded.id, email: decoded.email, name: decoded.name };
+    if (mongoose.connection.readyState === 1 && mongoose.Types.ObjectId.isValid(decoded.id)) {
+      try {
+        const user = await User.findById(decoded.id).select('-passwordHash');
+        if (user) {
+          req.user = user;
+          return next();
+        }
+      } catch {
+        // Fallback
+      }
+    }
+    const memUser = memoryStore.findUserById(decoded.id) || memoryStore.findUserByEmail(decoded.email);
+    if (memUser) {
+      const { passwordHash, ...safeUser } = memUser;
+      req.user = safeUser;
+    } else {
+      req.user = { id: decoded.id, _id: decoded.id, email: decoded.email, name: decoded.name };
+    }
   } catch {
     req.user = { id: token, uid: token, name: 'Guest' };
   }
