@@ -143,7 +143,7 @@ export default function Realistic3DBillPlinth({ onSelectBill, activeBillId, onTr
       powerPreference: 'high-performance',
     })
     renderer.setSize(width, height)
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 1.5))
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 1.25))
     renderer.shadowMap.enabled = true
     renderer.shadowMap.type = THREE.PCFSoftShadowMap
     renderer.outputColorSpace = THREE.SRGBColorSpace
@@ -268,14 +268,22 @@ export default function Realistic3DBillPlinth({ onSelectBill, activeBillId, onTr
     plinthGroup.add(laserFan)
     laserFanRef.current = laserFan
 
-    // 7. Interactive Physics & Inertia-based Cursor Tracking
+    // 7. Interactive Physics & Inertia-based Cursor Tracking (Optimized with cached rect)
     let targetRotationX = 0
     let targetRotationY = 0
+    let cachedRect = null
+
+    const updateRect = () => {
+      if (mount) {
+        cachedRect = mount.getBoundingClientRect()
+      }
+    }
 
     const handleMouseMove = (e) => {
-      const rect = mount.getBoundingClientRect()
-      const x = ((e.clientX - rect.left) / rect.width) * 2 - 1
-      const y = -(((e.clientY - rect.top) / rect.height) * 2 - 1)
+      if (!cachedRect) updateRect()
+      if (!cachedRect || cachedRect.width === 0) return
+      const x = ((e.clientX - cachedRect.left) / cachedRect.width) * 2 - 1
+      const y = -(((e.clientY - cachedRect.top) / cachedRect.height) * 2 - 1)
       targetRotationY = x * 0.28
       targetRotationX = -y * 0.22
     }
@@ -287,19 +295,28 @@ export default function Realistic3DBillPlinth({ onSelectBill, activeBillId, onTr
     }
 
     const handleMouseEnter = () => {
+      updateRect()
       setIsHovered(true)
     }
 
-    mount.addEventListener('mousemove', handleMouseMove)
-    mount.addEventListener('mouseleave', handleMouseLeave)
-    mount.addEventListener('mouseenter', handleMouseEnter)
+    mount.addEventListener('mousemove', handleMouseMove, { passive: true })
+    mount.addEventListener('mouseleave', handleMouseLeave, { passive: true })
+    mount.addEventListener('mouseenter', handleMouseEnter, { passive: true })
 
-    // 8. 60fps Render Loop
+    // 8. 60fps Render Loop with Viewport Visibility Observer
     let animId
+    let isIntersecting = true
     const clock = new THREE.Clock()
+
+    const observer = new IntersectionObserver(([entry]) => {
+      isIntersecting = entry.isIntersecting
+    }, { threshold: 0.05 })
+    observer.observe(mount)
 
     const animate = () => {
       animId = requestAnimationFrame(animate)
+      if (!isIntersecting) return // Pause GPU rendering completely when scrolled out of view
+
       const elapsed = clock.getElapsedTime()
 
       // Smooth inertia tilt interpolation
@@ -324,6 +341,7 @@ export default function Realistic3DBillPlinth({ onSelectBill, activeBillId, onTr
     // 9. Resize Handling
     const handleResize = () => {
       if (!mount) return
+      cachedRect = null
       const w = mount.clientWidth
       const h = mount.clientHeight
       camera.aspect = w / h
@@ -334,6 +352,7 @@ export default function Realistic3DBillPlinth({ onSelectBill, activeBillId, onTr
 
     return () => {
       cancelAnimationFrame(animId)
+      observer.disconnect()
       window.removeEventListener('resize', handleResize)
       if (mount) {
         mount.removeEventListener('mousemove', handleMouseMove)

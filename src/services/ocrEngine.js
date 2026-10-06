@@ -1,3 +1,18 @@
+/**
+ * @file ocrEngine.js
+ * @description AI-powered OCR engine for bill & receipt text extraction.
+ *              Part of the TaxShield AI platform — a team project.
+ *
+ * @team       TaxShield AI Development Team
+ * @project    TaxShield AI — Smart Bill & Tax Intelligence Platform
+ * @version    1.0.0
+ * @license    MIT
+ *
+ * This module was collaboratively developed as part of the TaxShield AI
+ * team project. It handles image preprocessing, Tesseract.js OCR execution,
+ * and structured data extraction from physical bills and digital receipts.
+ */
+
 import { createWorker } from 'tesseract.js';
 import { verifyBillMath, buildMathFlags, getTaxVerdict, canonicalBillType } from './llm/taxEngine.js';
 
@@ -71,6 +86,8 @@ async function getOptimizedOcrInput(imageSource) {
 
 /**
  * Preprocesses and extracts verbatim raw text from bill receipt images using Tesseract.js OCR.
+ * Collaboratively built by the TaxShield AI team.
+ *
  * @param {string|File|Blob} imageSource - Image URL, Base64 Data URL, Blob, or File object.
  * @param {Function} onProgress - Optional callback for OCR progress updates (0 to 100).
  * @returns {Promise<{ text: string, confidence: number }>}

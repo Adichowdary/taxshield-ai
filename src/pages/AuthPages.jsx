@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import { Shield, ArrowRight, CheckCircle2, AlertCircle, Mail, Lock, User as UserIcon, Sparkles, ScanLine, TrendingDown } from 'lucide-react'
+import { Shield, ArrowRight, CheckCircle2, AlertCircle, Mail, Lock, User as UserIcon, Sparkles, ScanLine, TrendingDown, Zap } from 'lucide-react'
 import { useAuth } from '../context/AuthContext'
 import LoginSuccessSplash from '../components/LoginSuccessSplash'
 import AmbientBackground from '../components/shared/AmbientBackground'
@@ -156,12 +156,16 @@ export function LoginPage() {
   const { login, loginAsDemo, loginWithGoogle, loginWithGoogleRedirect, resetPassword, sendVerification, currentUser } = useAuth()
   const navigate = useNavigate()
 
-  const handleDemoSignIn = async () => {
+  const handleDemoSignIn = async (withSplash = false) => {
     setError('')
     setLoading(true)
     try {
       await loginAsDemo()
-      setShowSplash(true)
+      if (withSplash) {
+        setShowSplash(true)
+      } else {
+        navigate('/dashboard')
+      }
     } catch (err) {
       setError('Demo sign-in note: ' + err.message)
     } finally {
@@ -297,6 +301,54 @@ export function LoginPage() {
 
         {!showForgot ? (
           <>
+            {/* Prominent Demo Login & Quick Auth Bypass */}
+            <div className="p-4 rounded-2xl bg-gradient-to-br from-amber-500/15 via-[#D4AF37]/10 to-sky-500/10 border-2 border-[#D4AF37]/50 shadow-[0_4px_25px_rgba(212,175,55,0.18)] space-y-3">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <div className="w-7 h-7 rounded-lg bg-gradient-to-tr from-[#D4AF37] to-[#FDE68A] flex items-center justify-center text-slate-950 font-bold shadow-sm">
+                    <Zap size={15} className="fill-slate-950 text-slate-950" />
+                  </div>
+                  <div>
+                    <h2 className="text-xs font-poppins font-bold text-slate-900 dark:text-white flex items-center gap-1.5">
+                      Demo Login <span className="text-[10px] py-0.5 px-2 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 font-medium">Bypass Auth</span>
+                    </h2>
+                  </div>
+                </div>
+                <span className="text-[11px] font-mono text-[#D4AF37] font-semibold">1-Click Access</span>
+              </div>
+
+              <p className="text-[11px] leading-relaxed text-slate-600 dark:text-slate-300">
+                Bypass login instantly with a pre-configured executive account (<strong className="text-[#D4AF37]">TaxShield</strong>) to explore all features without entering credentials.
+              </p>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 pt-0.5">
+                <button
+                  type="button"
+                  onClick={() => handleDemoSignIn(false)}
+                  disabled={loading}
+                  className="w-full py-2.5 px-3 rounded-xl bg-gradient-to-r from-[#D4AF37] to-[#FDE68A] hover:brightness-110 active:scale-[0.98] text-slate-950 font-poppins text-xs font-bold flex items-center justify-center gap-1.5 shadow-md shadow-amber-500/20 transition-all cursor-pointer disabled:opacity-60"
+                  title="Bypass login and open dashboard immediately"
+                >
+                  <Zap size={14} className="fill-slate-950 text-slate-950" />
+                  <span>Instant Bypass</span>
+                  <ArrowRight size={13} />
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => handleDemoSignIn(true)}
+                  disabled={loading}
+                  className="w-full py-2.5 px-3 rounded-xl border border-[#D4AF37]/50 bg-black/25 hover:bg-black/40 text-amber-300 hover:text-white font-poppins text-xs font-semibold flex items-center justify-center gap-1.5 transition-all active:scale-[0.98] cursor-pointer disabled:opacity-60"
+                  title="Login with demo account and play introduction video"
+                >
+                  <Sparkles size={13} className="text-[#D4AF37]" />
+                  <span>Demo + Video Intro</span>
+                </button>
+              </div>
+            </div>
+
+            <Divider label="Or sign in with credentials" />
+
             <GoogleButton onClick={handleGoogleSignIn} loading={loading} label="Continue with Google" />
             <Divider label="Or sign in with email" />
 
@@ -348,11 +400,11 @@ export function LoginPage() {
 
               <button
                 type="button"
-                onClick={handleDemoSignIn}
+                onClick={() => handleDemoSignIn(false)}
                 disabled={loading}
                 className="w-full py-2.5 px-4 rounded-xl border border-slate-300/80 dark:border-white/20 bg-slate-100/80 dark:bg-white/5 hover:bg-slate-200/80 dark:hover:bg-white/10 text-slate-800 dark:text-slate-200 font-semibold text-xs transition-colors cursor-pointer flex items-center justify-center gap-2 shadow-sm"
               >
-                <Sparkles size={14} className="text-amber-500" /> Instant Demo Sign-in
+                <Zap size={14} className="text-amber-500 fill-amber-500" /> Quick Demo Login (Instant Bypass)
               </button>
             </form>
           </>
@@ -411,8 +463,21 @@ export function RegisterPage() {
   const [registeredSuccess, setRegisteredSuccess] = useState(false)
   const [showSplash, setShowSplash] = useState(false)
 
-  const { register, loginWithGoogle, loginWithGoogleRedirect } = useAuth()
+  const { register, loginAsDemo, loginWithGoogle, loginWithGoogleRedirect } = useAuth()
   const navigate = useNavigate()
+
+  const handleDemoBypass = async () => {
+    setError('')
+    setLoading(true)
+    try {
+      await loginAsDemo()
+      navigate('/dashboard')
+    } catch (err) {
+      setError('Demo sign-in error: ' + err.message)
+    } finally {
+      setLoading(false)
+    }
+  }
 
   const handleSubmit = async (e) => {
     e.preventDefault()
@@ -498,6 +563,25 @@ export function RegisterPage() {
             <p className="text-[11px] font-sans">Verification email sent to <strong>{email}</strong>. Redirecting to dashboard…</p>
           </AlertBanner>
         )}
+
+        {/* Quick Demo Bypass Option */}
+        <div className="p-3.5 rounded-2xl bg-gradient-to-r from-amber-500/15 via-[#D4AF37]/10 to-transparent border border-[#D4AF37]/40 flex items-center justify-between gap-3 shadow-sm">
+          <div className="text-xs space-y-0.5">
+            <p className="font-semibold text-slate-900 dark:text-white flex items-center gap-1.5">
+              <Zap size={14} className="text-[#D4AF37] fill-[#D4AF37]" /> Testing without an account?
+            </p>
+            <p className="text-[11px] text-slate-500 dark:text-slate-400">Use one-click demo login to bypass authentication.</p>
+          </div>
+          <button
+            type="button"
+            onClick={handleDemoBypass}
+            disabled={loading}
+            className="shrink-0 py-2 px-3 rounded-xl bg-gradient-to-r from-[#D4AF37] to-[#FDE68A] text-slate-950 font-poppins text-xs font-bold flex items-center gap-1 hover:brightness-105 active:scale-95 cursor-pointer shadow-sm disabled:opacity-60"
+          >
+            <span>Demo Login</span>
+            <ArrowRight size={12} />
+          </button>
+        </div>
 
         <GoogleButton onClick={handleGoogleSignUp} loading={loading} label="Sign up with Google" />
         <Divider label="Or register with email" />

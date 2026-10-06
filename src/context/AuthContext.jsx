@@ -159,15 +159,15 @@ export function AuthProvider({ children }) {
   const loginAsDemo = async () => {
     const demoUser = {
       uid: 'demo-executive-user-001',
-      email: 'alex.morgan@taxshield.ai',
-      displayName: 'Alex Morgan',
+      email: 'taxshield@taxshield.ai',
+      displayName: 'TaxShield',
       photoURL: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=120&auto=format&fit=crop',
       emailVerified: true,
       isDemo: true
     }
     if (typeof localStorage !== 'undefined') {
       localStorage.setItem('taxshield_demo_session', JSON.stringify(demoUser))
-      localStorage.setItem('taxshield_user_name', 'Alex Morgan')
+      localStorage.setItem('taxshield_user_name', 'TaxShield')
     }
     setCurrentUser(demoUser)
     return demoUser

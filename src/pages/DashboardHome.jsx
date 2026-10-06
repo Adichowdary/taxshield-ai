@@ -7,13 +7,31 @@ import { MOCK_BILLS } from '../data/mockData'
 import { Link } from 'react-router-dom'
 import { FileText, ShieldCheck, AlertTriangle, TrendingUp, Calendar, Camera, CheckCircle2 } from 'lucide-react'
 import { useAuth } from '../context/AuthContext'
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef, lazy, Suspense } from 'react'
 import { subscribeToBillHistory } from '../services/llm/historyService'
 import { useReveal } from '../hooks/useReveal'
 import { useCountUp } from '../hooks/useCountUp'
 import TiltCard from '../components/shared/TiltCard'
 import AmbientBackground from '../components/shared/AmbientBackground'
-import Realistic3DBillPlinth from '../components/Realistic3DBillPlinth'
+
+// Lazy-load the heavy 3D scanner component (~52KB) — deferred until after initial paint
+const Realistic3DBillPlinth = lazy(() => import('../components/Realistic3DBillPlinth'))
+
+// Skeleton shown while the 3D scanner chunk is loading
+function BillPlinthSkeleton() {
+  return (
+    <div className="w-full rounded-3xl vault-glass border border-slate-200/30 dark:border-white/10 overflow-hidden animate-pulse" style={{ minHeight: 420 }}>
+      <div className="h-full w-full bg-gradient-to-br from-slate-100/50 to-slate-200/30 dark:from-white/5 dark:to-white/[0.02] flex items-center justify-center">
+        <div className="text-center space-y-3">
+          <div className="w-16 h-16 rounded-2xl bg-sky-500/10 dark:bg-[#D4AF37]/10 border border-sky-500/20 dark:border-[#D4AF37]/20 mx-auto" />
+          <div className="h-3 w-32 bg-slate-200 dark:bg-white/10 rounded-full mx-auto" />
+          <div className="h-2 w-20 bg-slate-100 dark:bg-white/5 rounded-full mx-auto" />
+        </div>
+      </div>
+    </div>
+  )
+}
+
 
 export default function DashboardHome() {
   const { currentUser } = useAuth()
@@ -106,7 +124,9 @@ export default function DashboardHome() {
 
           {/* Top 3D Photorealistic Bill Scanner Master-Detail Section */}
           <div ref={scannerRef} id="scanner-section" className="reveal-group is-visible">
-            <Realistic3DBillPlinth />
+            <Suspense fallback={<BillPlinthSkeleton />}>
+              <Realistic3DBillPlinth />
+            </Suspense>
           </div>
 
           {/* Metric Cards - 2-col on mobile, 4-col on desktop */}

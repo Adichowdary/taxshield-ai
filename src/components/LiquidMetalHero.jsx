@@ -52,7 +52,8 @@ function metalColors(themeMode, activeTheme) {
   }
 }
 
-const isMobile = typeof window !== 'undefined' && window.innerWidth < 768
+// Detect mobile once at module level — safe because viewport doesn't change
+const IS_MOBILE = typeof window !== 'undefined' && window.innerWidth < 768
 
 export default function LiquidMetalHero({
   badge, title, subtitle,
@@ -76,7 +77,7 @@ export default function LiquidMetalHero({
   }, [])
 
   const colors = metalColors(themeMode, activeTheme)
-  const shaderScale = isMobile ? 0.85 : 1
+  const shaderScale = IS_MOBILE ? 0.85 : 1
 
   return (
     <section
@@ -89,27 +90,39 @@ export default function LiquidMetalHero({
           WebGL Liquid Metal Background
           ======================== */}
       <div className="absolute inset-0 z-0">
-        <Suspense fallback={null}>
-          {shaderReady && (
-            <LiquidMetal
-              shape="metaballs"
-              colorTint={colors.tint}
-              colorBack={colors.back}
-              speed={0.75}
-              repetition={colors.repetition}
-              softness={colors.softness}
-              distortion={colors.distortion}
-              contour={colors.contour}
-              shiftRed={colors.shiftRed}
-              shiftBlue={colors.shiftBlue}
-              angle={colors.angle}
-              scale={shaderScale}
-              fit="cover"
-              className="h-full w-full"
-              aria-hidden="true"
-            />
-          )}
-        </Suspense>
+        {/* On mobile, skip the heavy WebGL shader — use a fast CSS gradient instead */}
+        {IS_MOBILE ? (
+          <div
+            className="absolute inset-0"
+            style={{
+              background: activeTheme === 'dark'
+                ? 'radial-gradient(ellipse 100% 80% at 50% 20%, rgba(212,175,55,0.18) 0%, rgba(56,189,248,0.08) 40%, transparent 80%)'
+                : 'radial-gradient(ellipse 100% 80% at 50% 20%, rgba(2,132,199,0.18) 0%, rgba(56,189,248,0.1) 40%, transparent 80%)',
+            }}
+          />
+        ) : (
+          <Suspense fallback={null}>
+            {shaderReady && (
+              <LiquidMetal
+                shape="metaballs"
+                colorTint={colors.tint}
+                colorBack={colors.back}
+                speed={0.75}
+                repetition={colors.repetition}
+                softness={colors.softness}
+                distortion={colors.distortion}
+                contour={colors.contour}
+                shiftRed={colors.shiftRed}
+                shiftBlue={colors.shiftBlue}
+                angle={colors.angle}
+                scale={shaderScale}
+                fit="cover"
+                className="h-full w-full"
+                aria-hidden="true"
+              />
+            )}
+          </Suspense>
+        )}
 
         {/* Paper-grain texture overlay in dark mode */}
         {activeTheme === 'dark' && (

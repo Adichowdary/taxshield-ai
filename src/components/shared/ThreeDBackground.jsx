@@ -1,15 +1,33 @@
 import { useEffect, useRef } from 'react'
+import { useLocation } from 'react-router-dom'
 import * as THREE from 'three'
 import { useTheme } from '../../context/ThemeContext'
+
+// Performance constants
+const isMobileDevice = typeof window !== 'undefined' && window.innerWidth < 768
+const FPS_CAP = isMobileDevice ? 30 : 60
+const FRAME_INTERVAL = 1000 / FPS_CAP
 
 export default function ThreeDBackground() {
   const containerRef = useRef(null)
   const { activeTheme } = useTheme()
   const isDark = activeTheme === 'dark'
+  const location = useLocation()
+
+  // Skip on landing page — LiquidMetal shader already provides the hero background.
+  // Running two WebGL contexts simultaneously causes GPU contention and jank.
+  // NOTE: This check is placed BEFORE useEffect intentionally — the component returns null
+  // (no canvas is mounted) so there's nothing for the effect to attach to. The useEffect
+  // is inside this same component scope and is safe because we return null from JSX only.
+  const isLanding = location.pathname === '/'
 
   useEffect(() => {
+    // If on landing page, don't start Three.js — return immediately
+    if (isLanding) return
+
     const container = containerRef.current
     if (!container) return
+
 
     // 1. Three.js Scene & Fog for infinite horizon depth
     const scene = new THREE.Scene()
@@ -31,7 +49,7 @@ export default function ThreeDBackground() {
       powerPreference: 'high-performance',
     })
     renderer.setSize(window.innerWidth, window.innerHeight)
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 1.25))
     renderer.setClearColor(0x000000, 0)
     container.appendChild(renderer.domElement)
 
@@ -63,9 +81,10 @@ export default function ThreeDBackground() {
     const particleTexture = new THREE.CanvasTexture(canvas)
 
     // -------------------------------------------------------------------
-    // 3. Floating Gold Stardust & Deep Sapphire Particles
+    // 3. Floating Gold Stardust & Deep Sapphire Particles (Optimized)
+    // Mobile gets fewer particles to save GPU budget
     // -------------------------------------------------------------------
-    const particleCount = isDark ? 720 : 520
+    const particleCount = isMobileDevice ? (isDark ? 100 : 80) : (isDark ? 240 : 180)
     const particlePositions = new Float32Array(particleCount * 3)
     const particleColors = new Float32Array(particleCount * 3)
 
@@ -108,11 +127,12 @@ export default function ThreeDBackground() {
     scene.add(particles)
 
     // -------------------------------------------------------------------
-    // 4. Undulating 3D Quantum Geometric Ground Mesh
+    // 4. Undulating 3D Quantum Geometric Ground Mesh (Optimized)
+    // Mobile uses a smaller 16x16 grid (256 vs 576 points) for 60% CPU saving
     // -------------------------------------------------------------------
-    const gridCols = 54
-    const gridRows = 54
-    const spacing = 36
+    const gridCols = isMobileDevice ? 16 : 24
+    const gridRows = isMobileDevice ? 16 : 24
+    const spacing = isMobileDevice ? 100 : 82
     const totalGridPoints = gridCols * gridRows
 
     const gridPositions = new Float32Array(totalGridPoints * 3)
@@ -206,7 +226,7 @@ export default function ThreeDBackground() {
       camera.aspect = width / height
       camera.updateProjectionMatrix()
       renderer.setSize(width, height)
-      renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
+      renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 1.25))
     }
 
     window.addEventListener('resize', handleResize)
@@ -217,6 +237,8 @@ export default function ThreeDBackground() {
     let animationFrameId
     const clock = new THREE.Clock()
     let isTabVisible = true
+    let frameCount = 0
+    let lastTime = performance.now()
 
     const handleVisibilityChange = () => {
       isTabVisible = !document.hidden
@@ -237,7 +259,14 @@ export default function ThreeDBackground() {
       if (!isTabVisible || prefersReducedMotion) return
       animationFrameId = requestAnimationFrame(animate)
 
+      // FPS throttle: skip render if frame arrived too early (saves GPU on mobile)
+      const now = performance.now()
+      const delta = now - lastTime
+      if (delta < FRAME_INTERVAL) return
+      lastTime = now - (delta % FRAME_INTERVAL)
+
       const elapsed = clock.getElapsedTime()
+      frameCount++
 
       // Smooth camera interpolation
       camera.position.x += (targetCameraX - camera.position.x) * 0.04
@@ -245,26 +274,30 @@ export default function ThreeDBackground() {
       camera.lookAt(0, 0, 0)
 
       // Fluid ground mesh displacement
-      const posAttr = gridGeometry.attributes.position
-      const posArr = posAttr.array
+      // Mobile: every 3 frames; Desktop: every 2 frames (saves ~33% CPU on mobile)
+      const meshUpdateInterval = isMobileDevice ? 3 : 2
+      if (frameCount % meshUpdateInterval === 0) {
+        const posAttr = gridGeometry.attributes.position
+        const posArr = posAttr.array
 
-      for (let i = 0; i < totalGridPoints; i++) {
-        const ox = gridOrigPositions[i * 3]
-        const oz = gridOrigPositions[i * 3 + 2]
+        for (let i = 0; i < totalGridPoints; i++) {
+          const ox = gridOrigPositions[i * 3]
+          const oz = gridOrigPositions[i * 3 + 2]
 
-        // Harmonic spatial wave
-        const wave1 = Math.sin(ox * 0.006 + elapsed * 1.1) * 20
-        const wave2 = Math.cos(oz * 0.006 + elapsed * 0.9) * 16
+          // Harmonic spatial wave
+          const wave1 = Math.sin(ox * 0.006 + elapsed * 1.1) * 20
+          const wave2 = Math.cos(oz * 0.006 + elapsed * 0.9) * 16
 
-        // Cursor impulse
-        const dx = ox - mouseWorldX
-        const dz = oz - mouseWorldZ
-        const distSq = dx * dx + dz * dz
-        const cursorElevation = Math.exp(-distSq * 0.0001) * 24
+          // Fast quadratic cursor impulse (eliminates expensive Math.exp)
+          const dx = ox - mouseWorldX
+          const dz = oz - mouseWorldZ
+          const distSq = dx * dx + dz * dz
+          const cursorElevation = distSq < 90000 ? (1 - distSq / 90000) * 24 : 0
 
-        posArr[i * 3 + 1] = -140 + wave1 + wave2 + cursorElevation
+          posArr[i * 3 + 1] = -140 + wave1 + wave2 + cursorElevation
+        }
+        posAttr.needsUpdate = true
       }
-      posAttr.needsUpdate = true
 
       // Slow orbital ambient drift of stars
       particles.rotation.y = elapsed * 0.015
@@ -296,6 +329,10 @@ export default function ThreeDBackground() {
       }
     }
   }, [isDark])
+
+  // Don't render the Three.js background on the landing page
+  // (LiquidMetal shader is already active there — no dual WebGL needed)
+  if (isLanding) return null
 
   return (
     <div
